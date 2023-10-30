@@ -1,0 +1,40 @@
+{
+  "name": "antelope-token-api",
+  "description": "Token prices from the Antelope blockchains",
+  "version": "0.1.0",
+  "homepage": "https://github.com/pinax-network/antelope-token-api",
+  "license": "MIT",
+  "type": "module",
+  "authors": [
+    {
+      "name": "Etienne Donneger",
+      "email": "etienne@pinax.network",
+      "url": "https://github.com/Krow10"
+    },
+    {
+      "name": "Denis Carriere",
+      "email": "denis@pinax.network",
+      "url": "https://github.com/DenisCarriere/"
+    }
+  ],
+  "scripts": {
+    "start": "bun index.ts",
+    "dev": "bun --watch index.ts",
+    "lint": "bunx tsc --noEmit --skipLibCheck --pretty",
+    "test": "bun test --coverage",
+    "build": "bun build --compile ./index.ts --outfile antelope-token-api"
+  },
+  "dependencies": {
+    "@clickhouse/client-web": "latest",
+    "commander": "latest",
+    "dotenv": "latest",
+    "openapi3-ts": "latest",
+    "prom-client": "latest",
+    "tslog": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "latest"
+  }
+}

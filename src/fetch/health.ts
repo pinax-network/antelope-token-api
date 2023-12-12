@@ -1,4 +1,3 @@
-// from: https://github.com/pinax-network/substreams-clock-api/blob/main/src/fetch/health.ts
 import client from "../clickhouse/createClient.js";
 import { logger } from "../logger.js";
 import * as prometheus from "../prometheus.js";

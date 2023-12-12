@@ -1,5 +1,3 @@
-// from: https://github.com/pinax-network/substreams-clock-api/blob/main/src/queries.spec.ts
-
 import { expect, test } from "bun:test";
 import {
     getChain,

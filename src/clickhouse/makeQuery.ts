@@ -1,4 +1,3 @@
-// from: https://github.com/pinax-network/substreams-clock-api/blob/main/src/clickhouse/makeQuery.ts
 import { logger } from "../logger.js";
 import * as prometheus from "../prometheus.js";
 import client from "./createClient.js";

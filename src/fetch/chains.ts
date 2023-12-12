@@ -1,4 +1,3 @@
-// from: https://github.com/pinax-network/substreams-clock-api/blob/main/src/fetch/chains.ts
 import { makeQuery } from "../clickhouse/makeQuery.js";
 import { logger } from "../logger.js";
 import * as prometheus from "../prometheus.js";

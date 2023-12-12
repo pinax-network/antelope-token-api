@@ -1,4 +1,3 @@
-// from: https://github.com/pinax-network/substreams-clock-api/blob/main/src/fetch/openapi.ts
 import pkg from "../../package.json" assert { type: "json" };
 
 import { OpenApiBuilder, SchemaObject, ExampleObject, ParameterObject } from "openapi3-ts/oas31";
@@ -99,7 +98,6 @@ const amountFilter = amountExamplesArrayFilter.map(name => {
     schema: { type: "number" },
   } as ParameterObject
 })
-
 
 export default new OpenApiBuilder()
   .addInfo({

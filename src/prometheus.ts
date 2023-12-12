@@ -37,4 +37,3 @@ export const query = registerCounter('query', 'Clickhouse DB queries made');
 export const bytes_read = registerCounter('bytes_read', 'Clickhouse DB Statistics bytes read');
 export const rows_read = registerCounter('rows_read', 'Clickhouse DB Statistics rows read');
 export const elapsed = registerCounter('elapsed', 'Clickhouse DB Statistics query elapsed time');
-

@@ -1,3 +1,4 @@
+// from: https://github.com/pinax-network/substreams-clock-api/blob/main/src/clickhouse/createClient.ts
 import { createClient } from "@clickhouse/client-web";
 import { ping } from "./ping.js";
 import { APP_NAME, config } from "../config.js";

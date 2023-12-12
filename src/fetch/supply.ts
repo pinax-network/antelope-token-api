@@ -1,18 +1,20 @@
+// from: https://github.com/pinax-network/substreams-clock-api/blob/main/src/fetch/block.ts
 import { makeQuery } from "../clickhouse/makeQuery.js";
 import { logger } from "../logger.js";
-import { Block, getBlock } from "../queries.js";
+import { getTotalSupply } from "../queries.js";
 import * as prometheus from "../prometheus.js";
+import { toJSON } from "./utils.js";
 
 export default async function (req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     logger.info({searchParams: Object.fromEntries(Array.from(searchParams))});
-    const query = await getBlock(searchParams);
-    const response = await makeQuery<Block>(query)
-    return new Response(JSON.stringify(response.data), { headers: { "Content-Type": "application/json" } });
+    const query = getTotalSupply(searchParams);
+    const response = await makeQuery(query)
+    return toJSON(response.data);
   } catch (e: any) {
     logger.error(e);
-    prometheus.request_error.inc({pathname: "/block", status: 400});
+    prometheus.request_error.inc({pathname: "/supply", status: 400});
     return new Response(e.message, { status: 400 });
   }
 }

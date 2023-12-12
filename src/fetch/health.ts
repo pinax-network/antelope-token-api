@@ -1,8 +1,9 @@
+// from: https://github.com/pinax-network/substreams-clock-api/blob/main/src/fetch/health.ts
 import client from "../clickhouse/createClient.js";
 import { logger } from "../logger.js";
 import * as prometheus from "../prometheus.js";
 
-export default async function (req: Request) {
+export default async function (_req: Request) {
   try {
     const response = await client.ping();
     if (response.success === false) throw new Error(response.error.message);

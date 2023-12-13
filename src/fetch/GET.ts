@@ -13,6 +13,7 @@ import transfers from "./transfers.js";
 export default async function (req: Request) {
     const { pathname } = new URL(req.url);
     prometheus.request.inc({ pathname });
+    
     if (pathname === "/") return new Response(Bun.file(swaggerHtml));
     if (pathname === "/favicon.png") return new Response(Bun.file(swaggerFavicon));
     if (pathname === "/health") return health(req);
@@ -22,7 +23,9 @@ export default async function (req: Request) {
     if (pathname === "/supply") return supply(req);
     if (pathname === "/balance") return balance(req);
     if (pathname === "/transfers") return transfers(req);
+    
     logger.warn(`Not found: ${pathname}`);
     prometheus.request_error.inc({ pathname, status: 404 });
+    
     return new Response("Not found", { status: 404 });
 }

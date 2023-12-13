@@ -131,8 +131,8 @@ export default new OpenApiBuilder()
       summary: "Antelope Tokens total supply",
       parameters: [
         parameterChain,
-        parameterString("address"),
-        parameterString("name"),
+        parameterString("contract"),
+        parameterString("issuer"),
         parameterString("symbol"),
         ...timestampFilter,
         ...blockFilter,
@@ -151,7 +151,7 @@ export default new OpenApiBuilder()
       summary: "Antelope Tokens balance changes",
       parameters: [
         parameterChain,
-        parameterString("owner"),
+        parameterString("account"),
         parameterString("contract"),
         ...timestampFilter,
         ...blockFilter,

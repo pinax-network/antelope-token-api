@@ -1,26 +1,5 @@
 import { config } from "./config.js";
 
-export function getAddress(searchParams: URLSearchParams, key: string, required: boolean = false) {
-    const address = formatAddress(searchParams.get(key));
-    if (required && !address) throw new Error(`Missing [${key}] parameter`);
-    if (address) checkValidAddress(address);
-    return address;
-}
-
-export function formatAddress(address: string | null) {
-    if (!address) return undefined;
-    if (address.startsWith("0x")) {
-        // Remove the "0x" prefix and return the address
-        return address.slice(2);
-    }
-    // If it doesn't start with "0x", return the address as is
-    return address;
-}
-
-export function checkValidAddress(address?: string) {
-    // todo
-}
-
 export function parseLimit(limit?: string | null | number, defaultLimit?: number) {
     let value = 1 // default 1
     if (defaultLimit)

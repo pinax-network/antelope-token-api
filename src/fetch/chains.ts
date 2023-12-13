@@ -11,11 +11,11 @@ export async function supportedChainsQuery() {
 
 export default async function (_req: Request) {
   try {
-    const chains = await supportedChainsQuery();
-    return toJSON(chains);
+    return toJSON(await supportedChainsQuery());
   } catch (e: any) {
     logger.error(e);
     prometheus.request_error.inc({ pathname: "/chains", status: 400 });
+    
     return new Response(e.message, { status: 400 });
   }
 }

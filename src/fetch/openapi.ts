@@ -166,7 +166,7 @@ export default new OpenApiBuilder()
   }).addPath("/transfers", {
     get: {
       tags: [TAGS.USAGE],
-      summary: "Antelope Tokens Transfers",
+      summary: "Antelope Tokens transfers",
       parameters: [
         parameterChain,
         parameterString("contract"),

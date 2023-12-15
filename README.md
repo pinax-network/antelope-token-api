@@ -2,13 +2,16 @@
 
 [![.github/workflows/bun-test.yml](https://github.com/pinax-network/antelope-token-api/actions/workflows/bun-test.yml/badge.svg)](https://github.com/pinax-network/antelope-token-api/actions/workflows/bun-test.yml)
 
-> Token prices from the Antelope blockchains
+> Token balances, supply and transfers from the Antelope blockchains
 
 ## REST API
 
 | Pathname                                  | Description           |
 |-------------------------------------------|-----------------------|
 | GET `/chains`                             | Available `chains`
+| GET `/supply`                             | Antelope Tokens total supply
+| GET `/balance`                            | Antelope Tokens balance changes
+| GET `/transfers`                          | Antelope Tokens transfers
 | GET `/health`                             | Health check
 | GET `/metrics`                            | Prometheus metrics
 | GET `/openapi`                            | [OpenAPI v3 JSON](https://spec.openapis.org/oas/v3.0.0)
@@ -25,7 +28,16 @@ $ bun install
 $ bun dev
 ```
 
+**Tests**
+```console
+$ bun lint
+$ bun test
+```
+
 ## [`Bun` Binary Releases](https://github.com/pinax-network/substreams-sink-websockets/releases)
+
+> [!NOTE]  
+> Currently not available
 
 > Linux Only
 
@@ -53,13 +65,10 @@ MAX_LIMIT=500
 VERBOSE=true
 ```
 
-## Help
-
-```console
-
-```
-
 ## Docker environment
+
+> [!NOTE]  
+> Currently not available
 
 Pull from GitHub Container registry
 ```bash

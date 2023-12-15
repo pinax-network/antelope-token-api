@@ -7,11 +7,11 @@ import { toJSON } from "./utils.js";
 
 function verifyParams(searchParams: URLSearchParams) {
   const chain = searchParams.get("chain");
-  const owner = searchParams.get("owner");
+  const account = searchParams.get("account");
   const contract = searchParams.get("contract");
 
   if (!chain) throw new Error("chain is required");
-  if (!owner && !contract) throw new Error("owner or contract is required");
+  if (!account && !contract) throw new Error("account or contract is required");
 }
 
 export default async function (req: Request) {

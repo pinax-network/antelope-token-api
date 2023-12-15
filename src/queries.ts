@@ -7,7 +7,7 @@ export function addTimestampBlockFilter(searchParams: URLSearchParams, where: an
         ["greater", ">"],
         ["less_or_equals", "<="],
         ["less", "<"],
-    ];
+        ];
 
     for (const [key, operator] of operators) {
         const block_number = searchParams.get(`${key}_by_block`);
@@ -24,7 +24,7 @@ export function addAmountFilter(searchParams: URLSearchParams, where: any[]) {
         ["greater", ">"],
         ["less_or_equals", "<="],
         ["less", "<"],
-    ];
+        ];
 
     for (const [key, operator] of operators) {
         const amount = searchParams.get(`amount_${key}`);
@@ -96,8 +96,8 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
         if (where.length) query += ` WHERE(${where.join(' AND ')})`;
 
         if (contract && account) query += ` ORDER BY timestamp DESC`;
-        if (!contract && account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
-        if (contract && !account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
+        //if (!contract && account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
+        //if (contract && !account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
     }
 
     const limit = parseLimit(searchParams.get("limit"));
@@ -123,14 +123,14 @@ export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
     let mvContractTable = "mv_transfers_contract";
 
     let query = `SELECT
-        from,
-        to,
-        value as amount,
-        symcode,
-        trx_id as transaction_id,
-        block_number,
-        timestamp,
-        chain`;
+    from,
+    to,
+    value as amount,
+    symcode,
+    trx_id as transaction_id,
+    block_number,
+    timestamp,
+    chain`;
 
     /*if (contract) query += ` FROM ${mvContractTable}`
     else if (!contract && from && !to) query += ` FROM ${mvFromTable}`

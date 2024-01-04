@@ -122,15 +122,7 @@ export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
     let mvToTable = "mv_transfers_to";
     let mvContractTable = "mv_transfers_contract";
 
-    let query = `SELECT
-    from,
-    to,
-    value as amount,
-    symcode,
-    trx_id as transaction_id,
-    block_number,
-    timestamp,
-    chain`;
+    let query = "SELECT *";
 
     /*if (contract) query += ` FROM ${mvContractTable}`
     else if (!contract && from && !to) query += ` FROM ${mvFromTable}`

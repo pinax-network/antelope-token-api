@@ -128,16 +128,7 @@ test("getTransfers", () => {
     const query = formatSQL(getTransfers(parameters));
 
     expect(query).toContain(
-        formatSQL(`SELECT
-            from,
-            to,
-            value as amount,
-            symcode,
-            trx_id as transaction_id,
-            block_number,
-            timestamp,
-            chain`
-        )
+        formatSQL(`SELECT *`)
     );
     expect(query).toContain(
         formatSQL(

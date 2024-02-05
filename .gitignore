@@ -138,3 +138,5 @@ cursor.lock
 
 # CLI
 substreams-clock-api
+
+*.db

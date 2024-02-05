@@ -137,6 +137,6 @@ dist
 cursor.lock
 
 # CLI
-substreams-clock-api
+antelope-token-api
 
 *.db

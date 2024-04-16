@@ -1,6 +1,5 @@
 import { expect, test } from "bun:test";
 import {
-    getChain,
     getTotalSupply,
     getBalanceChanges,
     addTimestampBlockFilter,
@@ -8,7 +7,6 @@ import {
     addAmountFilter,
 } from "./queries.js";
 
-const chain = "eos";
 const contract = "eosio.token";
 const account = "push.sx";
 const limit = "1";
@@ -56,13 +54,13 @@ test("addAmountFilter", () => {
 });
 
 test("getTotalSupply", () => {
-    const parameters = new URLSearchParams({ chain, contract });
+    const parameters = new URLSearchParams({ contract });
     const query = formatSQL(getTotalSupply(parameters));
 
-    expect(query).toContain(formatSQL('SELECT * FROM stats'));
+    expect(query).toContain(formatSQL('SELECT *, updated_at_block_num AS block_number, updated_at_timestamp AS timestamp FROM token_supplies'));
     expect(query).toContain(
         formatSQL(
-            `WHERE(chain == '${chain}' AND contract == '${contract}')`
+            `WHERE(contract == '${contract}')`
         )
     );
     expect(query).toContain(formatSQL(`ORDER BY block_number DESC`));
@@ -71,7 +69,6 @@ test("getTotalSupply", () => {
 
 test("getTotalSupply with options", () => {
     const parameters = new URLSearchParams({
-        chain,
         contract,
         symbol,
         greater_or_equals_by_timestamp,
@@ -82,7 +79,7 @@ test("getTotalSupply with options", () => {
 
     expect(formatSQL(getTotalSupply(parameters))).toContain(
         formatSQL(
-            `WHERE(chain == '${chain}' AND contract == '${contract}' 
+            `WHERE(contract == '${contract}' 
             AND symcode == '${symbol}' AND issuer == '${issuer}'
             AND toUnixTimestamp(timestamp) >= ${greater_or_equals_by_timestamp} 
             AND toUnixTimestamp(timestamp) <= ${less_or_equals_by_timestamp})`
@@ -91,13 +88,13 @@ test("getTotalSupply with options", () => {
 });
 
 test("getBalanceChange", () => {
-    const parameters = new URLSearchParams({ chain, account, contract });
+    const parameters = new URLSearchParams({ account, contract });
     const query = formatSQL(getBalanceChanges(parameters));
 
-    expect(query).toContain(formatSQL(`SELECT * FROM accounts`));
+    expect(query).toContain(formatSQL(`SELECT *, updated_at_block_num AS block_number, updated_at_timestamp AS timestamp FROM account_balances`));
     expect(query).toContain(
         formatSQL(
-            `WHERE(chain == '${chain}' AND account == '${account}' AND contract == '${contract}')`
+            `WHERE(account == '${account}' AND contract == '${contract}')`
         )
     );
     expect(query).toContain(formatSQL(`ORDER BY timestamp DESC`));
@@ -106,7 +103,6 @@ test("getBalanceChange", () => {
 
 test("getBalanceChanges with options", () => {
     const parameters = new URLSearchParams({
-        chain,
         account,
         transaction_id,
         greater_or_equals_by_timestamp,
@@ -116,7 +112,7 @@ test("getBalanceChanges with options", () => {
 
     expect(formatSQL(getBalanceChanges(parameters))).toContain(
         formatSQL(
-            `WHERE(chain == '${chain}' AND account == '${account}' 
+            `WHERE(account == '${account}' 
             AND toUnixTimestamp(timestamp) >= ${greater_or_equals_by_timestamp} 
             AND toUnixTimestamp(timestamp) <= ${less_or_equals_by_timestamp})`
         )
@@ -124,7 +120,7 @@ test("getBalanceChanges with options", () => {
 });
 
 test("getTransfers", () => {
-    const parameters = new URLSearchParams({ chain, contract, from: account, to: account, transaction_id });
+    const parameters = new URLSearchParams({ contract, from: account, to: account, transaction_id });
     const query = formatSQL(getTransfers(parameters));
 
     expect(query).toContain(
@@ -132,14 +128,10 @@ test("getTransfers", () => {
     );
     expect(query).toContain(
         formatSQL(
-            `WHERE(chain == '${chain}' AND contract == '${contract}' 
+            `WHERE(contract == '${contract}' 
             AND from == '${account}' AND to == '${account}' AND transaction == '${transaction_id}')`
         )
     );
     expect(query).toContain(formatSQL(`ORDER BY timestamp DESC`));
     expect(query).toContain(formatSQL(`LIMIT 100`));
-});
-
-test("getChain", () => {
-    expect(getChain()).toBe(`SELECT DISTINCT chain FROM module_hashes`);
 });

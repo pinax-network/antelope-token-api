@@ -6,22 +6,24 @@
 
 ## REST API
 
-| Pathname                                  | Description           |
-|-------------------------------------------|-----------------------|
-| GET `/chains`                             | Available `chains`
-| GET `/supply`                             | Antelope Tokens total supply
-| GET `/balance`                            | Antelope Tokens balance changes
-| GET `/transfers`                          | Antelope Tokens transfers
-| GET `/health`                             | Health check
-| GET `/metrics`                            | Prometheus metrics
-| GET `/openapi`                            | [OpenAPI v3 JSON](https://spec.openapis.org/oas/v3.0.0)
+| Method | Path | Description |
+| :---: | --- | --- |
+| GET <br>`text/html` | `/` | Swagger API playground |
+| GET <br>`application/json` | `/supply` | Antelope Tokens total supply |
+| GET <br>`application/json` | `/balance` | Antelope Tokens balance changes |
+| GET <br>`application/json` | `/transfers` | Antelope Tokens transfers |
+| GET <br>`text/plain` | `/health` | Performs health checks and checks if the database is accessible |
+| GET <br>`text/plain` | `/metrics` | Prometheus metrics |
+| GET <br>`application/json` | `/openapi` | OpenAPI specification |
 
 ## Requirements
 
 - [ClickHouse](clickhouse.com/)
 - [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/)
 
-## Quickstart
+## Quick start
+
+Install [Bun](https://bun.sh/)
 
 ```console
 $ bun install
@@ -34,16 +36,29 @@ $ bun lint
 $ bun test
 ```
 
-## [`Bun` Binary Releases](https://github.com/pinax-network/substreams-sink-websockets/releases)
+## [`Bun` Binary Releases](https://github.com/pinax-network/antelope-token-api/releases)
 
-> [!NOTE]  
-> Currently not available
-
-> Linux Only
+> For Linux x86
 
 ```console
-$ wget https://github.com/pinax-network/antelope-token-api/releases/download/v0.1.0/antelope-token-api
+$ wget https://github.com/pinax-network/antelope-token-api/releases/download/v2.0.0/antelope-token-api
 $ chmod +x ./antelope-token-api
+$ ./antelope-token-api --help                                                                                                       
+Usage: antelope-token-api [options]
+
+Token balances, supply and transfers from the Antelope blockchains
+
+Options:
+  -V, --version            output the version number
+  -p, --port <number>      HTTP port on which to attach the API (default: "8080", env: PORT)
+  --hostname <string>      Server listen on HTTP hostname (default: "localhost", env: HOSTNAME)
+  --host <string>          Database HTTP hostname (default: "http://localhost:8123", env: HOST)
+  --database <string>      The database to use inside ClickHouse (default: "default", env: DATABASE)
+  --username <string>      Database user (default: "default", env: USERNAME)
+  --password <string>      Password associated with the specified username (default: "", env: PASSWORD)
+  --max-limit <number>     Maximum LIMIT queries (default: 10000, env: MAX_LIMIT)
+  -v, --verbose <boolean>  Enable verbose logging (choices: "true", "false", default: false, env: VERBOSE)
+  -h, --help               display help for command
 ```
 
 ## `.env` Environment variables
@@ -66,9 +81,6 @@ VERBOSE=true
 ```
 
 ## Docker environment
-
-> [!NOTE]  
-> Currently not available
 
 Pull from GitHub Container registry
 ```bash

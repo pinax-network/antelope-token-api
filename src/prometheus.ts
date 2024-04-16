@@ -9,7 +9,7 @@ export function registerCounter(name: string, help = "help", labelNames: string[
         registry.registerMetric(new Counter({ name, help, labelNames, ...config }));
         return registry.getSingleMetric(name) as Counter;
     } catch (e) {
-        console.error({name, e});
+        console.error({ name, e });
         throw new Error(`${e}`);
     }
 }
@@ -19,7 +19,7 @@ export function registerGauge(name: string, help = "help", labelNames: string[] 
         registry.registerMetric(new Gauge({ name, help, labelNames, ...config }));
         return registry.getSingleMetric(name) as Gauge;
     } catch (e) {
-        console.error({name, e});
+        console.error({ name, e });
         throw new Error(`${e}`);
     }
 }

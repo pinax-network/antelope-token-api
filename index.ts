@@ -10,7 +10,7 @@ const app = Bun.serve({
     port: config.port,
     fetch(req: Request) {
         if (req.method === "GET") return GET(req);
-        prometheus.request_error.inc({pathname: new URL(req.url).pathname, status: 400});
+        prometheus.request_error.inc({ pathname: new URL(req.url).pathname, status: 400 });
         return new Response("Invalid request", { status: 400 });
     }
 });

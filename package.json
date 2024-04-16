@@ -1,7 +1,7 @@
 {
   "name": "antelope-token-api",
-  "description": "Transfers and account balances from the Antelope blockchains",
-  "version": "0.1.0",
+  "description": "Token balances, supply and transfers from the Antelope blockchains",
+  "version": "2.0.0",
   "homepage": "https://github.com/pinax-network/antelope-token-api",
   "license": "MIT",
   "type": "module",
@@ -9,7 +9,7 @@
     {
       "name": "Etienne Donneger",
       "email": "etienne@pinax.network",
-      "url": "https://github.com/Krow10"
+      "url": "https://github.com/0237h"
     },
     {
       "name": "Denis Carriere",

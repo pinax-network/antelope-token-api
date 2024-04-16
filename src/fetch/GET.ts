@@ -1,7 +1,6 @@
 import { registry } from "../prometheus.js";
 import openapi from "./openapi.js";
 import health from "./health.js";
-import chains from "./chains.js";
 import balance from "./balance.js";
 import supply from "./supply.js";
 import * as prometheus from "../prometheus.js";
@@ -19,7 +18,6 @@ export default async function (req: Request) {
     if (pathname === "/health") return health(req);
     if (pathname === "/metrics") return new Response(await registry.metrics(), { headers: { "Content-Type": registry.contentType } });
     if (pathname === "/openapi") return new Response(openapi, { headers: { "Content-Type": "application/json" } });
-    if (pathname === "/chains") return chains(req);
     if (pathname === "/supply") return supply(req);
     if (pathname === "/balance") return balance(req);
     if (pathname === "/transfers") return transfers(req);

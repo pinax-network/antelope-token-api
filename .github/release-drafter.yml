@@ -46,6 +46,8 @@ autolabeler:
     branch:
       - '/feature\/.+/'
   - label: 'ops'
+    branch:
+      - '/ops\/.+/'
     files:
       - '.github/*.yml'
       - '.github/workflows/*.yml'

@@ -8,18 +8,18 @@
 
 | Method | Path | Description |
 | :---: | --- | --- |
-| GET <br>`text/html` | `/` | Swagger API playground |
+| GET <br>`text/html` | `/` | [Swagger](https://swagger.io/) API playground |
 | GET <br>`application/json` | `/supply` | Antelope Tokens total supply |
 | GET <br>`application/json` | `/balance` | Antelope Tokens balance changes |
 | GET <br>`application/json` | `/transfers` | Antelope Tokens transfers |
 | GET <br>`text/plain` | `/health` | Performs health checks and checks if the database is accessible |
-| GET <br>`text/plain` | `/metrics` | Prometheus metrics |
-| GET <br>`application/json` | `/openapi` | OpenAPI specification |
+| GET <br>`text/plain` | `/metrics` | [Prometheus](https://prometheus.io/) metrics |
+| GET <br>`application/json` | `/openapi` | [OpenAPI](https://www.openapis.org/) specification |
 
 ## Requirements
 
 - [ClickHouse](clickhouse.com/)
-- [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/)
+- (Optional) A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/streamingfast/substreams-sink-sql).
 
 ## Quick start
 
@@ -82,17 +82,27 @@ VERBOSE=true
 
 ## Docker environment
 
-Pull from GitHub Container registry
+- Pull from GitHub Container registry
+
+**For latest release**
 ```bash
 docker pull ghcr.io/pinax-network/antelope-token-api:latest
 ```
+**For head of `develop` branch**
+```bash
+docker pull ghcr.io/pinax-network/antelope-token-api:develop
+```
 
-Build from source
+- Build from source
 ```bash
 docker build -t antelope-token-api .
 ```
 
-Run with `.env` file
+- Run with `.env` file
 ```bash
 docker run -it --rm --env-file .env ghcr.io/pinax-network/antelope-token-api
 ```
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).

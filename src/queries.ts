@@ -4,6 +4,26 @@ import { parseLimit, parseTimestamp } from "./utils.js";
 // For reference on Clickhouse Database tables:
 // https://raw.githubusercontent.com/pinax-network/substreams-antelope-tokens/main/schema.sql
 
+// Query for count of unique token holders grouped by token (contract, symcode) pairs 
+/*
+SELECT 
+  Count(*), 
+  contract, 
+  symcode 
+FROM 
+  (
+    SELECT 
+      DISTINCT account, 
+      contract, 
+      symcode 
+    FROM 
+      eos_tokens_v1.account_balances FINAL
+  ) 
+GROUP BY 
+  (contract, symcode) 
+order BY 
+  (contract, symcode) ASC
+*/
 export function addTimestampBlockFilter(searchParams: URLSearchParams, where: any[]) {
     const operators = [
         ["greater_or_equals", ">="],

@@ -2,6 +2,7 @@ import { createClient } from "@clickhouse/client-web";
 import { ping } from "./ping.js";
 import { APP_NAME, config } from "../config.js";
 
+// TODO: Make client connect to all DB instances
 const client = createClient({
     ...config,
     clickhouse_settings: {

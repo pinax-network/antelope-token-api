@@ -13,11 +13,16 @@ export default async function (req: Request) {
     const { pathname } = new URL(req.url);
     prometheus.request.inc({ pathname });
     
+    // Landing page
     if (pathname === "/") return new Response(Bun.file(swaggerHtml));
     if (pathname === "/favicon.png") return new Response(Bun.file(swaggerFavicon));
+    
+    // Utils
     if (pathname === "/health") return health(req);
     if (pathname === "/metrics") return new Response(await registry.metrics(), { headers: { "Content-Type": registry.contentType } });
     if (pathname === "/openapi") return new Response(openapi, { headers: { "Content-Type": "application/json" } });
+    
+    // Token endpoints
     if (pathname === "/supply") return supply(req);
     if (pathname === "/balance") return balance(req);
     if (pathname === "/transfers") return transfers(req);

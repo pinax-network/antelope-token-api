@@ -30,7 +30,7 @@ export async function makeQuery<T = unknown>(query: string) {
         
         return data;
     } catch (e: any) {
-        console.error(e.message)
+        logger.error(e.message)
 
         return { data: [] }
     }

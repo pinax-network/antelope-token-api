@@ -13,6 +13,7 @@ export function parseLimit(limit?: string | null | number, defaultLimit?: number
         if (typeof limit === "number") value = limit;
     }
     // limit must be between 1 and maxLimit
+    if (value <= 0) value = 1;
     if (value > config.maxLimit) value = config.maxLimit;
     return value;
 }

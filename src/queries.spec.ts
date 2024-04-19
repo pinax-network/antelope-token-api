@@ -6,6 +6,7 @@ import {
     getTransfers,
     addAmountFilter,
 } from "./queries.js";
+import { config } from "./config.js";
 
 const contract = "eosio.token";
 const account = "push.sx";
@@ -64,7 +65,7 @@ test("getTotalSupply", () => {
         )
     );
     expect(query).toContain(formatSQL(`ORDER BY block_number DESC`));
-    expect(query).toContain(formatSQL(`LIMIT 1`));
+    expect(query).toContain(formatSQL(`LIMIT ${config.maxLimit}`));
 });
 
 test("getTotalSupply with options", () => {
@@ -98,7 +99,7 @@ test("getBalanceChange", () => {
         )
     );
     expect(query).toContain(formatSQL(`ORDER BY timestamp DESC`));
-    expect(query).toContain(formatSQL(`LIMIT 1`));
+    expect(query).toContain(formatSQL(`LIMIT ${config.maxLimit}`));
 });
 
 test("getBalanceChanges with options", () => {
@@ -133,5 +134,5 @@ test("getTransfers", () => {
         )
     );
     expect(query).toContain(formatSQL(`ORDER BY timestamp DESC`));
-    expect(query).toContain(formatSQL(`LIMIT 100`));
+    expect(query).toContain(formatSQL(`LIMIT ${config.maxLimit}`));
 });

@@ -5,15 +5,15 @@ export function parseBlockId(block_id?: string | null) {
 }
 
 export function parseLimit(limit?: string | null | number, defaultLimit?: number) {
-    let value = 1 // default 1
+    let value = 0; // default 0 (no limit)
     if (defaultLimit)
         value = defaultLimit;
     if (limit) {
         if (typeof limit === "string") value = parseInt(limit);
         if (typeof limit === "number") value = limit;
     }
-    // limit must be between 1 and maxLimit
-    if (value <= 0) value = 1;
+    // limit must be between 0 (no limit) and maxLimit
+    if (value < 0) value = 0;
     if (value > config.maxLimit) value = config.maxLimit;
     return value;
 }

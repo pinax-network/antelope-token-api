@@ -1,4 +1,4 @@
-import { DEFAULT_SORT_BY } from "./config.js";
+import { DEFAULT_SORT_BY, config } from "./config.js";
 import { parseLimit, parsePage, parseTimestamp } from "./utils.js";
 
 // For reference on Clickhouse Database tables:
@@ -82,9 +82,9 @@ export function getTotalSupply(searchParams: URLSearchParams, example?: boolean)
         query += ` ORDER BY block_number ${sort_by ?? DEFAULT_SORT_BY} `;
     }
 
-    const limit = parseLimit(searchParams.get("limit"));
-    query += ` LIMIT ${limit} `;
-    
+    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    if (limit) query += ` LIMIT ${limit}`;
+
     const page = parsePage(searchParams.get("page"));
     if (page) query += ` OFFSET ${limit * (page - 1)} `;
     
@@ -115,8 +115,8 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
         //if (contract && !account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
     }
 
-    const limit = parseLimit(searchParams.get("limit"));
-    query += ` LIMIT ${limit} `;
+    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    if (limit) query += ` LIMIT ${limit}`;
 
     const page = parsePage(searchParams.get("page"));
     if (page) query += ` OFFSET ${limit * (page - 1)} `;
@@ -154,8 +154,8 @@ export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
         query += ` ORDER BY timestamp DESC`;
     }
 
-    const limit = parseLimit(searchParams.get("limit"), 100);
-    query += ` LIMIT ${limit}`;
+    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    if (limit) query += ` LIMIT ${limit}`;
 
     const page = parsePage(searchParams.get("page"));
     if (page) query += ` OFFSET ${limit * (page - 1)} `;

@@ -1,5 +1,5 @@
 import { DEFAULT_SORT_BY } from "./config.js";
-import { parseLimit, parseTimestamp } from "./utils.js";
+import { parseLimit, parsePage, parseTimestamp } from "./utils.js";
 
 // For reference on Clickhouse Database tables:
 // https://raw.githubusercontent.com/pinax-network/substreams-antelope-tokens/main/schema.sql
@@ -85,8 +85,8 @@ export function getTotalSupply(searchParams: URLSearchParams, example?: boolean)
     const limit = parseLimit(searchParams.get("limit"));
     query += ` LIMIT ${limit} `;
     
-    const offset = searchParams.get("offset");
-    if (offset) query += ` OFFSET ${offset} `;
+    const page = parsePage(searchParams.get("page"));
+    if (page) query += ` OFFSET ${limit * (page - 1)} `;
     
     return query;
 }
@@ -118,8 +118,8 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
     const limit = parseLimit(searchParams.get("limit"));
     query += ` LIMIT ${limit} `;
 
-    const offset = searchParams.get("offset");
-    if (offset) query += ` OFFSET ${offset} `;
+    const page = parsePage(searchParams.get("page"));
+    if (page) query += ` OFFSET ${limit * (page - 1)} `;
 
     return query;
 }
@@ -155,10 +155,10 @@ export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
     }
 
     const limit = parseLimit(searchParams.get("limit"), 100);
-    query += ` LIMIT ${limit} `;
+    query += ` LIMIT ${limit}`;
 
-    const offset = searchParams.get("offset");
-    if (offset) query += ` OFFSET ${offset} `;
+    const page = parsePage(searchParams.get("page"));
+    if (page) query += ` OFFSET ${limit * (page - 1)} `;
 
     return query;
 }

@@ -1,5 +1,9 @@
 import { config } from "./config.js";
 
+export function parseBlockId(block_id?: string | null) {
+    return block_id ? block_id.replace("0x", "") : undefined;
+}
+
 export function parseLimit(limit?: string | null | number, defaultLimit?: number) {
     let value = 1 // default 1
     if (defaultLimit)
@@ -13,8 +17,18 @@ export function parseLimit(limit?: string | null | number, defaultLimit?: number
     return value;
 }
 
-export function parseBlockId(block_id?: string | null) {
-    return block_id ? block_id.replace("0x", "") : undefined;
+export function parsePage(page?: string | null | number) {
+    let value = 1;
+
+    if (page) {
+        if (typeof page === "string") value = parseInt(page);
+        if (typeof page === "number") value = page;
+    }
+
+    if (value <= 0)
+        value = 1;
+
+    return value;
 }
 
 export function parseTimestamp(timestamp?: string | null | number) {

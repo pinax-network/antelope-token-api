@@ -2,7 +2,8 @@ import { makeQuery } from "../clickhouse/makeQuery.js";
 import { logger } from "../logger.js";
 import { getTransfers } from "../queries.js";
 import * as prometheus from "../prometheus.js";
-import { toJSON } from "./utils.js";
+import { addMetadata, toJSON } from "./utils.js";
+import { parseLimit, parsePage } from "../utils.js";
 
 export default async function (req: Request) {
     try {
@@ -12,7 +13,14 @@ export default async function (req: Request) {
         const query = getTransfers(searchParams);
         const response = await makeQuery(query)
         
-        return toJSON(response.data);
+        return toJSON(
+            addMetadata(
+                response.data,
+                response.rows_before_limit_at_least,
+                parseLimit(searchParams.get("limit")),
+                parsePage(searchParams.get("page"))
+            )
+        );
     } catch (e: any) {
         logger.error(e);
         prometheus.request_error.inc({ pathname: "/transfers", status: 400 });

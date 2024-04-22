@@ -98,9 +98,11 @@ Enhancement suggestions are tracked as [GitHub issues](https://github.com/pinax-
 
 You can follow the instructions from the `Quick Start` section of the [`README.md`](README.md/#quick-start) for setting up the environment.
 
-The repository contains two branches, `main` and `develop`. `main` represents the state of the latest stable release while `develop` is for active development of new features and bug fixes.
+The repository contains one `main` branch. Any changes to `main` must go through a pull request of a branch with a specific naming pattern (see below).
 
-PRs should be submitted from separate branches of the `develop` branch. Ideally, your PR should fall into one the following categories:
+Any push to `main` branch will be tagged with the commit hash and the latest commit will additionally be tagged with `develop` to enable pulling latest development image (this is done automatically). You can retrieve the latest stable version of the API by checking out the latest tagged version commit (following [*semver*](https://semver.org/)).
+
+PRs should be submitted from separate branches of the `main` branch. Ideally, your PR should fall into one the following categories:
 - **Feature**: `feature/xxx`
 - **Bug fix**: `fix/xxx`, try to make separate PRs for different bug fixes unless the change solves multiple bugs at once.
 - **Documentation**: `docs/xxx`, adding comments to files should be counted as documentation and changes made into a separate branch.

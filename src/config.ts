@@ -14,11 +14,12 @@ export const DEFAULT_MAX_LIMIT = 10000;
 export const DEFAULT_VERBOSE = false;
 export const DEFAULT_SORT_BY = "DESC";
 export const APP_NAME = pkg.name;
+export const APP_VERSION = `${pkg.version}+${process.env.APP_VERSION || "unknown"}`;
 
 // parse command line options
 const opts = program
     .name(pkg.name)
-    .version(pkg.version)
+    .version(APP_VERSION)
     .description(pkg.description)
     .showHelpAfterError()
     .addOption(new Option("-p, --port <number>", "HTTP port on which to attach the API").env("PORT").default(DEFAULT_PORT))

@@ -1,11 +1,11 @@
 import { Logger, type ILogObj } from "tslog";
-import { name } from "../package.json" assert { type: "json" };
+import { APP_NAME, APP_VERSION } from "./config.js";
 
 class TsLogger extends Logger<ILogObj> {
     constructor() {
         super();
         this.settings.minLevel = 5;
-        this.settings.name = name;
+        this.settings.name = `${APP_NAME}:${APP_VERSION}`;
     }
 
     public enable(type: "pretty" | "json" = "pretty") {

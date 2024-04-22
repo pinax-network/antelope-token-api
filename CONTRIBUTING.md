@@ -125,33 +125,33 @@ If you're using a standard IDE like [VSCode](https://code.visualstudio.com/), [S
 Here's a helpful commit message template adapted from [cbeams' article](https://cbea.ms/git-commit/): *How to Write a Git Commit Message*.
 
 ```
-Summarize changes in around 50 characters or less
-50 characters limit ##############################
-
-More detailed explanatory text, if necessary. Wrap it to about 72
-characters or so. In some contexts, the first line is treated as the
-subject of the commit and the rest of the text as the body. The
-blank line separating the summary from the body is critical (unless
-you omit the body entirely); various tools like `log`, `shortlog`
-and `rebase` can get confused if you run the two together.
-72 characters limit ####################################################
-
-Explain the problem that this commit is solving. Focus on why you
-are making this change as opposed to how (the code explains that).
-Are there side effects or other unintuitive consequences of this
-change? Here's the place to explain them.
-
-Further paragraphs come after blank lines.
-
- - Bullet points are okay, too
- - Typically a hyphen or asterisk is used for the bullet, preceded
-   by a single space, with blank lines in between, but conventions
-   vary here
-
-Put references to relevant issues at the bottom, like this:
-
-Resolves: #123
-See also: #456, #789
+# Summarize changes in about 50 characters or less
+# 50 characters limit ############################
+# 
+# More detailed explanatory text, if necessary. Wrap it to about 72
+# characters or so. In some contexts, the first line is treated as the
+# subject of the commit and the rest of the text as the body. The
+# blank line separating the summary from the body is critical (unless
+# you omit the body entirely); various tools like `log`, `shortlog`
+# and `rebase` can get confused if you run the two together.
+# 72 characters limit ##################################################
+# 
+# Explain the problem that this commit is solving. Focus on why you
+# are making this change as opposed to how (the code explains that).
+# Are there side effects or other unintuitive consequences of this
+# change? Here's the place to explain them.
+# 
+# Further paragraphs come after blank lines.
+# 
+#  - Bullet points are okay, too
+#  - Typically a hyphen or asterisk is used for the bullet, preceded
+#    by a single space, with blank lines in between, but conventions
+#    vary here
+# 
+# Put references to relevant issues at the bottom, like this:
+# 
+# Resolves: #123
+# See also: #456, #789
 ```
 
 To use it, simply save it as a `.gitmessage` file and use the following comment to make `git` use it:

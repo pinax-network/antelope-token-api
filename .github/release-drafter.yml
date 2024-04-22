@@ -31,7 +31,7 @@ template: |
   ## Changes
   $CHANGES
 
-  **Full Changelog**: https://github.com/pinax-network/substreams-clock-api/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+  **Full Changelog**: https://github.com/pinax-network/antelope-token-api/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
 autolabeler:
   - label: 'documentation'
@@ -46,6 +46,8 @@ autolabeler:
     branch:
       - '/feature\/.+/'
   - label: 'ops'
+    branch:
+      - '/ops\/.+/'
     files:
       - '.github/*.yml'
       - '.github/workflows/*.yml'

@@ -1,9 +1,29 @@
-import { DEFAULT_SORT_BY } from "./config.js";
-import { parseLimit, parseTimestamp } from "./utils.js";
+import { DEFAULT_SORT_BY, config } from "./config.js";
+import { parseLimit, parsePage, parseTimestamp } from "./utils.js";
 
 // For reference on Clickhouse Database tables:
 // https://raw.githubusercontent.com/pinax-network/substreams-antelope-tokens/main/schema.sql
 
+// Query for count of unique token holders grouped by token (contract, symcode) pairs 
+/*
+SELECT 
+  Count(*), 
+  contract, 
+  symcode 
+FROM 
+  (
+    SELECT 
+      DISTINCT account, 
+      contract, 
+      symcode 
+    FROM 
+      eos_tokens_v1.account_balances FINAL
+  ) 
+GROUP BY 
+  (contract, symcode) 
+order BY 
+  (contract, symcode) ASC
+*/
 export function addTimestampBlockFilter(searchParams: URLSearchParams, where: any[]) {
     const operators = [
         ["greater_or_equals", ">="],
@@ -62,11 +82,11 @@ export function getTotalSupply(searchParams: URLSearchParams, example?: boolean)
         query += ` ORDER BY block_number ${sort_by ?? DEFAULT_SORT_BY} `;
     }
 
-    const limit = parseLimit(searchParams.get("limit"));
-    query += ` LIMIT ${limit} `;
-    
-    const offset = searchParams.get("offset");
-    if (offset) query += ` OFFSET ${offset} `;
+    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    if (limit) query += ` LIMIT ${limit}`;
+
+    const page = parsePage(searchParams.get("page"));
+    if (page) query += ` OFFSET ${limit * (page - 1)} `;
     
     return query;
 }
@@ -95,11 +115,11 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
         //if (contract && !account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
     }
 
-    const limit = parseLimit(searchParams.get("limit"));
-    query += ` LIMIT ${limit} `;
+    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    if (limit) query += ` LIMIT ${limit}`;
 
-    const offset = searchParams.get("offset");
-    if (offset) query += ` OFFSET ${offset} `;
+    const page = parsePage(searchParams.get("page"));
+    if (page) query += ` OFFSET ${limit * (page - 1)} `;
 
     return query;
 }
@@ -134,11 +154,11 @@ export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
         query += ` ORDER BY timestamp DESC`;
     }
 
-    const limit = parseLimit(searchParams.get("limit"), 100);
-    query += ` LIMIT ${limit} `;
+    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    if (limit) query += ` LIMIT ${limit}`;
 
-    const offset = searchParams.get("offset");
-    if (offset) query += ` OFFSET ${offset} `;
+    const page = parsePage(searchParams.get("page"));
+    if (page) query += ` OFFSET ${limit * (page - 1)} `;
 
     return query;
 }

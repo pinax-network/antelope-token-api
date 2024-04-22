@@ -49,11 +49,10 @@ const parameterLimit: ParameterObject = {
     schema: { type: "number", maximum: config.maxLimit, minimum: 1 },
 }
 
-// TODO: Determine offset from `limit` and replace this with page numbers
 const parameterOffset: ParameterObject = {
-    name: "offset",
+    name: "page",
     in: "query",
-    description: "Index offset for results pagination.",
+    description: "Page index for results pagination.",
     required: false,
     schema: { type: "number", minimum: 1 },
 }

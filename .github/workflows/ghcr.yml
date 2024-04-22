@@ -35,7 +35,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=sha,prefix=
-            type=raw,enable=${{ github.ref == 'refs/heads/develop' }},value=develop
+            type=raw,enable=${{ !startsWith(github.ref, 'refs/tags/') }},value=develop
             type=semver,pattern={{raw}}
 
       - name: Build and push Docker image

@@ -18,11 +18,11 @@
     }
   ],
   "scripts": {
-    "start": "bun index.ts",
-    "dev": "bun --watch index.ts",
-    "lint": "bunx tsc --noEmit --skipLibCheck --pretty",
-    "test": "bun test --coverage",
-    "build": "bun build --compile ./index.ts --outfile antelope-token-api"
+    "start": "export APP_VERSION=$(git rev-parse --short HEAD) && bun index.ts",
+    "dev": "export APP_VERSION=$(git rev-parse --short HEAD) && bun --watch index.ts",
+    "lint": "export APP_VERSION=$(git rev-parse --short HEAD) && bunx tsc --noEmit --skipLibCheck --pretty",
+    "test": "export APP_VERSION=$(git rev-parse --short HEAD) && bun test --coverage",
+    "build": "export APP_VERSION=$(git rev-parse --short HEAD) && bun build --compile ./index.ts --outfile antelope-token-api"
   },
   "dependencies": {
     "@clickhouse/client-web": "latest",

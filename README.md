@@ -15,6 +15,7 @@
 | GET <br>`text/plain` | `/health` | Performs health checks and checks if the database is accessible |
 | GET <br>`text/plain` | `/metrics` | [Prometheus](https://prometheus.io/) metrics |
 | GET <br>`application/json` | `/openapi` | [OpenAPI](https://www.openapis.org/) specification |
+| GET <br>`application/json` | `/version` | API version and commit hash |
 
 ## Requirements
 

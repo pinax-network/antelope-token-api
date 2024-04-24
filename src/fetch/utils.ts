@@ -1,16 +1,19 @@
+import { Query } from "../clickhouse/makeQuery.js";
+
 export function toJSON(data: any, status: number = 200) {
     return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
 }
 
-export function addMetadata(data: any[], total_before_limit: number, limit: number, page: number) {
+export function addMetadata(response: Query<any>, req_limit: number, req_page: number) {
     // TODO: Catch page number greater than total_pages and return error
     return {
-        data,
+        data: response.data,
         meta: {
-            "next_page": (page * limit >= total_before_limit) ? page : page + 1,
-            "previous_page": (page <= 1) ? page : page - 1,
-            "total_pages": Math.ceil(total_before_limit / limit),
-            "total_results": total_before_limit
+            statistics: response.statistics,
+            "next_page": (req_page * req_limit >= response.rows_before_limit_at_least) ? req_page : req_page + 1,
+            "previous_page": (req_page <= 1) ? req_page : req_page - 1,
+            "total_pages": Math.ceil( response.rows_before_limit_at_least / req_limit),
+            "total_results": response.rows_before_limit_at_least
         }
     }
 }

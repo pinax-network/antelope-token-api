@@ -23,8 +23,7 @@ export default async function (req: Request) {
 
         return toJSON(
             addMetadata(
-                response.data,
-                response.rows_before_limit_at_least,
+                response,
                 parseLimit(searchParams.get("limit")),
                 parsePage(searchParams.get("page"))
             )

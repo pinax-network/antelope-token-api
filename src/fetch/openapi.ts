@@ -174,7 +174,14 @@ export default new OpenApiBuilder()
         get: {
             tags: [TAGS.DOCS],
             summary: "OpenAPI JSON specification",
-            responses: { 200: { description: "OpenAPI JSON specification", content: { "application/json": { schema: { type: "string" } } } } },
+            responses: { 200: { description: "OpenAPI JSON specification", content: { "application/json": {} } } },
+        },
+    })
+    .addPath("/version", {
+        get: {
+            tags: [TAGS.DOCS],
+            summary: "API version",
+            responses: { 200: { description: "API version and commit hash", content: { "application/json": {} } } },
         },
     })
     .getSpecAsJson();

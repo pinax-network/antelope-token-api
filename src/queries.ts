@@ -82,7 +82,7 @@ export function getTotalSupply(searchParams: URLSearchParams, example?: boolean)
         query += ` ORDER BY block_number ${sort_by ?? DEFAULT_SORT_BY} `;
     }
 
-    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    const limit = parseLimit(searchParams.get("limit"));
     if (limit) query += ` LIMIT ${limit}`;
 
     const page = parsePage(searchParams.get("page"));
@@ -115,7 +115,7 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
         //if (contract && !account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
     }
 
-    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    const limit = parseLimit(searchParams.get("limit"));
     if (limit) query += ` LIMIT ${limit}`;
 
     const page = parsePage(searchParams.get("page"));
@@ -132,10 +132,9 @@ export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
 
     let query = "SELECT * FROM ";
 
-    if (searchParams.get("greater_or_equals_by_block") && searchParams.get("less_or_equals_by_block")) query += "transfers_block_num"
-    else if (from && !to) query += "transfers_from"
+    if (from && !to) query += "transfers_from"
     else if (!from && to) query += "transfers_to"
-    else query += "transfer_events"
+    else query += "transfers_block_num"
 
     if (!example) {
         // WHERE statements
@@ -151,10 +150,10 @@ export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
 
         if (where.length) query += ` WHERE(${where.join(' AND ')})`;
 
-        query += ` ORDER BY timestamp DESC`;
+        query += ` ORDER BY block_num DESC`;
     }
 
-    const limit = parseLimit(searchParams.get("limit"), config.maxLimit);
+    const limit = parseLimit(searchParams.get("limit"));
     if (limit) query += ` LIMIT ${limit}`;
 
     const page = parsePage(searchParams.get("page"));

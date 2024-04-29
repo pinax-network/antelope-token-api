@@ -8,7 +8,7 @@ test("parseBlockId", () => {
 
 test("parseLimit", () => {
     expect(parseLimit("1")).toBe(1);
-    expect(parseLimit("0")).toBe(0);
+    expect(parseLimit("0")).toBe(1);
     expect(parseLimit(10)).toBe(10);
     expect(parseLimit(config.maxLimit + 1)).toBe(config.maxLimit);
 });

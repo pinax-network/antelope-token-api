@@ -5,6 +5,7 @@ import { config } from "../config.js";
 import { registry } from "../prometheus.js";
 import { makeQuery } from "../clickhouse/makeQuery.js";
 import { getBalanceChanges, getTotalSupply, getTransfers } from "../queries.js";
+import { addMetadata } from "./utils.js";
 const TAGS = {
     MONITORING: "Monitoring",
     HEALTH: "Health",
@@ -16,9 +17,9 @@ const timestampExamplesArrayFilter = ["greater_or_equals_by_timestamp", "greater
 const blockExamplesArrayFilter = ["greater_or_equals_by_block", "greater_by_block", "less_or_equals_by_block", "less_by_block"];
 const amountExamplesArrayFilter = ["amount_greater_or_equals", "amount_greater", "amount_less_or_equals", "amount_less"];
 
-const supply_example = (await makeQuery(getTotalSupply(new URLSearchParams({ limit: "2" }), true))).data;
-const balance_example = (await makeQuery(getBalanceChanges(new URLSearchParams({ limit: "2" }), true))).data;
-const transfers_example = (await makeQuery(getTransfers(new URLSearchParams({ limit: "5" }), true))).data;
+const supply_example = await makeQuery(getTotalSupply(new URLSearchParams({ limit: "2" }), true)).then(res => addMetadata(res, 2, 1));
+const balance_example = await makeQuery(getBalanceChanges(new URLSearchParams({ limit: "2" }), true)).then(res => addMetadata(res, 2, 1));
+const transfers_example = await makeQuery(getTransfers(new URLSearchParams({ limit: "5" }), true)).then(res => addMetadata(res, 5, 1));
 
 const timestampSchema: SchemaObject = {
     anyOf: [

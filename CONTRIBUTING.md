@@ -61,14 +61,10 @@ A good bug report shouldn't leave others needing to chase you up for more inform
 
 We use GitHub issues to track bugs and errors. If you run into an issue with the project:
 
-- Open an [Issue](https://github.com/pinax-network/antelope-token-api/issues/new).
+- Open an [Issue](https://github.com/pinax-network/antelope-token-api/issues/new?assignees=0237h&labels=bug&projects=&template=bug_report.md&title=).
 - Explain the behavior you would expect and the actual behavior.
 - Please provide as much context as possible and describe the *reproduction steps* that someone else can follow to recreate the issue on their own. This usually includes your code. For good bug reports you should isolate the problem and create a reduced test case.
 - Provide the information you collected in the previous section.
-
-<!-- TODO: Issue template for bug reports
-  You might want to create an issue template for bugs and errors that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description.
--->
 
 ### Suggesting Enhancements
 
@@ -85,14 +81,11 @@ This section guides you through submitting an enhancement suggestion for Antelop
 
 Enhancement suggestions are tracked as [GitHub issues](https://github.com/pinax-network/antelope-token-api/issues).
 
+- Open an [Issue](https://github.com/pinax-network/antelope-token-api/issues/new?assignees=0237h&labels=feature&projects=&template=feature_request.md&title=).
 - Use a **clear and descriptive title** for the issue to identify the suggestion.
 - Provide a **step-by-step description of the suggested enhancement** in as many details as possible.
 - **Describe the current behavior** and **explain which behavior you expected to see instead** and why. At this point you can also tell which alternatives do not work for you.
 - **Explain why this enhancement would be useful** to most Antelope Token API users. You may also want to point out the other projects that solved it better and which could serve as inspiration.
-
-<!-- TODO: Issue template for suggestions
-  You might want to create an issue template for enhancement suggestions that can be used as a guide and that defines the structure of the information to be included. If you do so, reference it here in the description.
--->
 
 ### Submitting PRs
 

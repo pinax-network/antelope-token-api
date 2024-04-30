@@ -1,6 +1,7 @@
 import { registry } from "../prometheus.js";
 import openapi from "./openapi.js";
 import health from "./health.js";
+import head from "./head.js";
 import balance from "./balance.js";
 import supply from "./supply.js";
 import * as prometheus from "../prometheus.js";
@@ -26,6 +27,7 @@ export default async function (req: Request) {
     if (pathname === "/version") return toJSON({ version: APP_VERSION.split('+')[0], commit: APP_VERSION.split('+')[1] });
     
     // Token endpoints
+    if (pathname === "/head") return head(req);
     if (pathname === "/supply") return supply(req);
     if (pathname === "/balance") return balance(req);
     if (pathname === "/transfers") return transfers(req);

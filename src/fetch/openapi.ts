@@ -17,6 +17,17 @@ const timestampExamplesArrayFilter = ["greater_or_equals_by_timestamp", "greater
 const blockExamplesArrayFilter = ["greater_or_equals_by_block", "greater_by_block", "less_or_equals_by_block", "less_by_block"];
 const amountExamplesArrayFilter = ["amount_greater_or_equals", "amount_greater", "amount_less_or_equals", "amount_less"];
 
+const head_example = addMetadata({
+    meta: [],
+    data: [{ block_num: "107439534" }],
+    rows: 0,
+    rows_before_limit_at_least: 0,
+    statistics: {
+        elapsed: 0.00132,
+        rows_read: 4,
+        bytes_read: 32
+    }
+});
 const supply_example = await makeQuery(getTotalSupply(new URLSearchParams({ limit: "1" }), true)).then(res => addMetadata(res, 1, 1));
 const balance_example = await makeQuery(getBalanceChanges(new URLSearchParams({ limit: "2" }), true)).then(res => addMetadata(res, 2, 1));
 const transfers_example = await makeQuery(getTransfers(new URLSearchParams({ limit: "5" }), true)).then(res => addMetadata(res, 5, 1));
@@ -164,11 +175,18 @@ export default new OpenApiBuilder()
             responses: { 200: { description: "OK", content: { "text/plain": { example: "OK" } } } },
         },
     })
+    .addPath("/head", {
+        get: {
+            tags: [TAGS.MONITORING],
+            summary: "Information about the current head block in the database",
+            responses: { 200: { description: "Information about the current head block in the database", content: { "application/json": { example: head_example } } } },
+        },
+    })
     .addPath("/metrics", {
         get: {
             tags: [TAGS.MONITORING],
-            summary: "Prometheus metrics",
-            responses: { 200: { description: "Prometheus metrics", content: { "text/plain": { example: await registry.metrics(), schema: { type: "string" } } } } },
+            summary: "Prometheus metrics for the API",
+            responses: { 200: { description: "Prometheus metrics for the API", content: { "text/plain": { example: await registry.metrics(), schema: { type: "string" } } } } },
         },
     })
     .addPath("/openapi", {

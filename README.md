@@ -13,7 +13,8 @@
 | GET <br>`application/json` | `/balance` | Antelope Tokens balance changes |
 | GET <br>`application/json` | `/transfers` | Antelope Tokens transfers |
 | GET <br>`text/plain` | `/health` | Performs health checks and checks if the database is accessible |
-| GET <br>`text/plain` | `/metrics` | [Prometheus](https://prometheus.io/) metrics |
+| GET <br>`application/json` | `/head` | Information about the current head block in the database |
+| GET <br>`text/plain` | `/metrics` | [Prometheus](https://prometheus.io/) metrics for the API |
 | GET <br>`application/json` | `/openapi` | [OpenAPI](https://www.openapis.org/) specification |
 | GET <br>`application/json` | `/version` | API version and commit hash |
 

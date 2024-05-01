@@ -13,8 +13,8 @@ export default async function (_req: Request) {
         return new Response("Unknown response from ClickHouse");
     } catch (e: any) {
         logger.error(e);
-        prometheus.request_error.inc({ pathname: "/health", status: 500 });
+        prometheus.request_error.inc({ pathname: "/health", status: 503 });
     
-        return new Response(e.message, { status: 500 });
+        return new Response(e.message, { status: 503 });
     }
 }

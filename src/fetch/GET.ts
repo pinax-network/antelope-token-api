@@ -5,11 +5,10 @@ import head from "./head.js";
 import balance from "./balance.js";
 import supply from "./supply.js";
 import * as prometheus from "../prometheus.js";
-import { logger } from "../logger.js";
 import swaggerHtml from "../../swagger/index.html"
 import swaggerFavicon from "../../swagger/favicon.png"
 import transfers from "./transfers.js";
-import { toJSON } from "./utils.js";
+import { APIError, toJSON } from "./utils.js";
 import { APP_VERSION } from "../config.js";
 
 export default async function (req: Request) {
@@ -32,8 +31,5 @@ export default async function (req: Request) {
     if (pathname === "/balance") return balance(req);
     if (pathname === "/transfers") return transfers(req);
     
-    logger.warn(`Not found: ${pathname}`);
-    prometheus.request_error.inc({ pathname, status: 404 });
-    
-    return new Response("Not found", { status: 404 });
+    return APIError(pathname, 404, "path_not_found", "Invalid pathname");
 }

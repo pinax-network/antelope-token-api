@@ -5,7 +5,7 @@ import { config } from "../config.js";
 import { registry } from "../prometheus.js";
 import { makeQuery } from "../clickhouse/makeQuery.js";
 import { getBalanceChanges, getTotalSupply, getTransfers } from "../queries.js";
-import { addMetadata } from "./utils.js";
+import { APIError, addMetadata } from "./utils.js";
 const TAGS = {
     MONITORING: "Monitoring",
     HEALTH: "Health",
@@ -28,9 +28,30 @@ const head_example = addMetadata({
         bytes_read: 32
     }
 });
-const supply_example = await makeQuery(getTotalSupply(new URLSearchParams({ limit: "1" }), true)).then(res => addMetadata(res, 1, 1));
-const balance_example = await makeQuery(getBalanceChanges(new URLSearchParams({ limit: "2" }), true)).then(res => addMetadata(res, 2, 1));
-const transfers_example = await makeQuery(getTransfers(new URLSearchParams({ limit: "5" }), true)).then(res => addMetadata(res, 5, 1));
+
+const supply_example = await makeQuery(
+    getTotalSupply(new URLSearchParams({ limit: "1" }), true)
+).then(
+    res => addMetadata(res, 1, 1)
+).catch(
+    e => APIError("/openapi", 500, "failed_database_query", e.message)
+);
+
+const balance_example = await makeQuery(
+    getBalanceChanges(new URLSearchParams({ limit: "2" }), true)
+).then(
+    res => addMetadata(res, 2, 1)
+).catch(
+    e => APIError("/openapi", 500, "failed_database_query", e.message)
+);
+
+const transfers_example = await makeQuery(
+    getTotalSupply(new URLSearchParams({ limit: "5" }), true)
+).then(
+    res => addMetadata(res, 5, 1)
+).catch(
+    e => APIError("/openapi", 500, "failed_database_query", e.message)
+);
 
 const timestampSchema: SchemaObject = {
     anyOf: [

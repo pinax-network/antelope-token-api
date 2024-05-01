@@ -31,18 +31,8 @@ export async function makeQuery<T = unknown>(query: string) {
         
         return data;
     } catch (e: any) {
-        logger.error(e.message)
+        logger.error(e.message);
 
-        return {
-            meta: [],
-            data: [],
-            rows: 0,
-            rows_before_limit_at_least: 0,
-            statistics: {
-                elapsed: 0,
-                rows_read: 0,
-                bytes_read: 0,
-            }
-        };
+        throw new Error(e.message);
     }
 }

@@ -14,7 +14,7 @@ import { APP_VERSION } from "../config.js";
 export default async function (req: Request) {
     const { pathname } = new URL(req.url);
     prometheus.request.inc({ pathname });
-    
+
     // Landing page
     if (pathname === "/") return new Response(Bun.file(swaggerHtml));
     if (pathname === "/favicon.png") return new Response(Bun.file(swaggerFavicon));

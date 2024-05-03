@@ -36,7 +36,7 @@ export function addTimestampBlockFilter(searchParams: URLSearchParams, where: an
         const block_number = searchParams.get(`${key}_by_block`);
         const timestamp = parseTimestamp(searchParams.get(`${key}_by_timestamp`));
 
-        if (block_number) where.push(`block_number ${operator} ${block_number}`);
+        if (block_number) where.push(`block_num ${operator} ${block_number}`);
         if (timestamp) where.push(`toUnixTimestamp(timestamp) ${operator} ${timestamp}`);
     }
 }
@@ -62,7 +62,7 @@ export function getTotalSupply(searchParams: URLSearchParams, example?: boolean)
     const symbol = searchParams.get("symbol");
     const issuer = searchParams.get("issuer");
 
-    let query = 'SELECT *, updated_at_block_num AS block_number, updated_at_timestamp AS timestamp FROM token_supplies';
+    let query = 'SELECT *, updated_at_block_num AS block_num, updated_at_timestamp AS timestamp FROM token_supplies';
 
     if (!example) {
         // WHERE statements
@@ -79,7 +79,7 @@ export function getTotalSupply(searchParams: URLSearchParams, example?: boolean)
         if (where.length) query += ` FINAL WHERE(${where.join(' AND ')})`;
 
         const sort_by = searchParams.get("sort_by");
-        query += ` ORDER BY block_number ${sort_by ?? DEFAULT_SORT_BY} `;
+        query += ` ORDER BY block_num ${sort_by ?? DEFAULT_SORT_BY} `;
     }
 
     const limit = parseLimit(searchParams.get("limit"));
@@ -95,7 +95,7 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
     const contract = searchParams.get("contract");
     const account = searchParams.get("account");
 
-    let query = 'SELECT *, updated_at_block_num AS block_number, updated_at_timestamp AS timestamp FROM account_balances';
+    let query = 'SELECT *, updated_at_block_num AS block_num, updated_at_timestamp AS timestamp FROM account_balances';
 
     if (!example) {
         // WHERE statements
@@ -110,7 +110,7 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
 
         if (where.length) query += ` WHERE(${where.join(' AND ')})`;
 
-        if (contract && account) query += ` ORDER BY timestamp DESC`;
+        if (contract && account) query += ` ORDER BY block_num DESC`;
         //if (!contract && account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
         //if (contract && !account) query += `GROUP BY (contract, account) ORDER BY timestamp DESC`;
     }
@@ -124,6 +124,7 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
     return query;
 }
 
+// TODO: Investigate why transaction_id and timestamp (alone) request search in billions rows
 export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
     const contract = searchParams.get("contract");
     const from = searchParams.get("from");
@@ -143,7 +144,7 @@ export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
         if (contract) where.push(`contract == '${contract}'`);
         if (from) where.push(`from == '${from}'`);
         if (to) where.push(`to == '${to}'`);
-        if (transaction_id) where.push(`transaction == '${transaction_id}'`);
+        if (transaction_id) where.push(`trx_id == '${transaction_id}'`);
 
         addAmountFilter(searchParams, where);
         addTimestampBlockFilter(searchParams, where);

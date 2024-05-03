@@ -31,8 +31,8 @@ test("addTimestampBlockFilter", () => {
     });
     addTimestampBlockFilter(searchParams, where);
 
-    expect(where).toContain("block_number >= 123");
-    expect(where).toContain("block_number <= 123");
+    expect(where).toContain("block_num >= 123");
+    expect(where).toContain("block_num <= 123");
     expect(where).toContain("toUnixTimestamp(timestamp) >= 1697587200");
     expect(where).toContain("toUnixTimestamp(timestamp) <= 1697587100");
 });
@@ -57,13 +57,13 @@ test("getTotalSupply", () => {
     const parameters = new URLSearchParams({ contract });
     const query = formatSQL(getTotalSupply(parameters));
 
-    expect(query).toContain(formatSQL('SELECT *, updated_at_block_num AS block_number, updated_at_timestamp AS timestamp FROM token_supplies'));
+    expect(query).toContain(formatSQL('SELECT *, updated_at_block_num AS block_num, updated_at_timestamp AS timestamp FROM token_supplies'));
     expect(query).toContain(
         formatSQL(
             `WHERE(contract == '${contract}')`
         )
     );
-    expect(query).toContain(formatSQL(`ORDER BY block_number DESC`));
+    expect(query).toContain(formatSQL(`ORDER BY block_num DESC`));
     expect(query).toContain(formatSQL(`LIMIT 1`));
 });
 
@@ -91,13 +91,13 @@ test("getBalanceChange", () => {
     const parameters = new URLSearchParams({ account, contract });
     const query = formatSQL(getBalanceChanges(parameters));
 
-    expect(query).toContain(formatSQL(`SELECT *, updated_at_block_num AS block_number, updated_at_timestamp AS timestamp FROM account_balances`));
+    expect(query).toContain(formatSQL(`SELECT *, updated_at_block_num AS block_num, updated_at_timestamp AS timestamp FROM account_balances`));
     expect(query).toContain(
         formatSQL(
             `WHERE(account == '${account}' AND contract == '${contract}')`
         )
     );
-    expect(query).toContain(formatSQL(`ORDER BY timestamp DESC`));
+    expect(query).toContain(formatSQL(`ORDER BY block_num DESC`));
     expect(query).toContain(formatSQL(`LIMIT 1`));
 });
 
@@ -129,7 +129,7 @@ test("getTransfers", () => {
     expect(query).toContain(
         formatSQL(
             `WHERE(contract == '${contract}' 
-            AND from == '${account}' AND to == '${account}' AND transaction == '${transaction_id}')`
+            AND from == '${account}' AND to == '${account}' AND trx_id == '${transaction_id}')`
         )
     );
     expect(query).toContain(formatSQL(`ORDER BY block_num DESC`));

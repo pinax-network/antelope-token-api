@@ -8,9 +8,10 @@ export const registry = new client.Registry();
 export function registerCounter(name: string, help = "help", labelNames: string[] = [], config?: CounterConfiguration<string>) {
     try {
         registry.registerMetric(new Counter({ name, help, labelNames, ...config }));
+        logger.debug(`Registered new counter metric: ${name}`);
         return registry.getSingleMetric(name) as Counter;
     } catch (e) {
-        logger.error({ name, e });
+        logger.error("Error registering counter:", { name, e });
         throw new Error(`${e}`);
     }
 }
@@ -18,9 +19,10 @@ export function registerCounter(name: string, help = "help", labelNames: string[
 export function registerGauge(name: string, help = "help", labelNames: string[] = [], config?: GaugeConfiguration<string>) {
     try {
         registry.registerMetric(new Gauge({ name, help, labelNames, ...config }));
+        logger.debug(`Registered new gauge metric: ${name}`);
         return registry.getSingleMetric(name) as Gauge;
     } catch (e) {
-        logger.error({ name, e });
+        logger.error("Error registering gauge:", { name, e });
         throw new Error(`${e}`);
     }
 }

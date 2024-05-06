@@ -6,6 +6,7 @@ import { registry } from "../prometheus.js";
 import { makeQuery } from "../clickhouse/makeQuery.js";
 import { getBalanceChanges, getTotalSupply, getTransfers } from "../queries.js";
 import { APIError, addMetadata } from "./utils.js";
+import { logger } from "../logger.js";
 const TAGS = {
     MONITORING: "Monitoring",
     HEALTH: "Health",
@@ -29,6 +30,7 @@ const head_example = addMetadata({
     }
 });
 
+logger.debug("Querying examples for OpenAPI...");
 const supply_example = await makeQuery(
     getTotalSupply(new URLSearchParams({ limit: "1" }), true)
 ).then(

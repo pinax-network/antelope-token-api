@@ -3,13 +3,18 @@ import { makeQuery } from "../clickhouse/makeQuery.js";
 
 export default async function (req: Request) {
     let query = "SELECT block_num FROM cursors ORDER BY block_num DESC LIMIT 1";
+    let pathname = new URL(req.url).pathname;
     let response;
 
     try {
         response = await makeQuery(query);
     } catch (e: any) {
-        return APIError(new URL(req.url).pathname, 500, "failed_database_query", e.message);
+        return APIError(pathname, 500, "failed_database_query", e.message);
     }
 
-    return toJSON(addMetadata(response));
+    try {
+        return toJSON(addMetadata(response));
+    } catch (e: any) {
+        return APIError(pathname, 500, "failed_response", e.message);
+    }
 }

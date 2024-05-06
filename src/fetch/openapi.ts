@@ -46,7 +46,7 @@ const balance_example = await makeQuery(
 );
 
 const transfers_example = await makeQuery(
-    getTotalSupply(new URLSearchParams({ limit: "5" }), true)
+    getTransfers(new URLSearchParams({ limit: "5" }), true)
 ).then(
     res => addMetadata(res, 5, 1)
 ).catch(
@@ -64,7 +64,7 @@ const timestampExamples: ExampleObject = {
     unix: { summary: `Unix Timestamp (seconds)` },
     date: { summary: `Full-date notation`, value: '2023-10-18' },
     datetime: { summary: `Date-time notation`, value: '2023-10-18T00:00:00Z' },
-}
+};
 
 const parameterString = (name: string = "address", required = false) => ({
     name,
@@ -80,7 +80,7 @@ const parameterLimit: ParameterObject = {
     description: "Maximum number of records to return per query.",
     required: false,
     schema: { type: "number", maximum: config.maxLimit, minimum: 1 },
-}
+};
 
 const parameterOffset: ParameterObject = {
     name: "page",
@@ -88,7 +88,7 @@ const parameterOffset: ParameterObject = {
     description: "Page index for results pagination.",
     required: false,
     schema: { type: "number", minimum: 1 },
-}
+};
 
 const timestampFilter = timestampExamplesArrayFilter.map(name => {
     return {
@@ -98,8 +98,8 @@ const timestampFilter = timestampExamplesArrayFilter.map(name => {
         required: false,
         schema: timestampSchema,
         examples: timestampExamples,
-    } as ParameterObject
-})
+    } as ParameterObject;
+});
 
 const blockFilter = blockExamplesArrayFilter.map(name => {
     return {
@@ -108,8 +108,8 @@ const blockFilter = blockExamplesArrayFilter.map(name => {
         description: "Filter " + name.replace(/_/g, " "),
         required: false,
         schema: { type: "number" },
-    } as ParameterObject
-})
+    } as ParameterObject;
+});
 
 const amountFilter = amountExamplesArrayFilter.map(name => {
     return {
@@ -118,8 +118,8 @@ const amountFilter = amountExamplesArrayFilter.map(name => {
         description: "Filter " + name.replace(/_/g, " "),
         required: false,
         schema: { type: "number" },
-    } as ParameterObject
-})
+    } as ParameterObject;
+});
 
 export default new OpenApiBuilder()
     .addInfo({

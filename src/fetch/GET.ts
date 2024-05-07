@@ -10,9 +10,11 @@ import swaggerFavicon from "../../swagger/favicon.png"
 import transfers from "./transfers.js";
 import { APIError, toJSON } from "./utils.js";
 import { APP_VERSION } from "../config.js";
+import { logger } from "../logger.js";
 
 export default async function (req: Request) {
     const { pathname } = new URL(req.url);
+    logger.trace(`Incoming request: [${pathname}]`)
     prometheus.request.inc({ pathname });
 
     // Landing page

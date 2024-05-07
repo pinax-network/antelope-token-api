@@ -15,7 +15,7 @@ export function APIError(pathname: string, status: number, code?: string, detail
         detail: detail ? detail : ""
     }
 
-    logger.error(api_error);
+    logger.error("<APIError>\n", api_error);
     prometheus.request_error.inc({ pathname, status });
     return toJSON(api_error, status);
 }

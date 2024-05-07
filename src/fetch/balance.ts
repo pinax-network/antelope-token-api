@@ -1,7 +1,6 @@
 import { makeQuery } from "../clickhouse/makeQuery.js";
 import { logger } from "../logger.js";
 import { getBalanceChanges } from "../queries.js";
-import * as prometheus from "../prometheus.js";
 import { APIError, addMetadata, toJSON } from "./utils.js";
 import { parseLimit, parsePage } from "../utils.js";
 
@@ -13,25 +12,25 @@ function verifyParams(searchParams: URLSearchParams) {
 }
 
 export default async function (req: Request) {
+    const { pathname, searchParams } = new URL(req.url);
+    logger.trace("<balance>\n", { searchParams: Object.fromEntries(Array.from(searchParams)) });
+
     try {
-        const { pathname, searchParams } = new URL(req.url);
-        logger.info({ searchParams: Object.fromEntries(Array.from(searchParams)) });
+        verifyParams(searchParams);
+    } catch (e: any) {
+        return APIError(pathname, 400, "bad_query_input", e.message);
+    }
 
-        try {
-            verifyParams(searchParams);
-        } catch (e: any) {
-            return APIError(pathname, 400, "bad_query_input", e.message);
-        }
+    const query = getBalanceChanges(searchParams);
+    let response;
 
-        const query = getBalanceChanges(searchParams);
-        let response;
+    try {
+        response = await makeQuery(query);
+    } catch (e: any) {
+        return APIError(pathname, 500, "failed_database_query", e.message);
+    }
 
-        try {
-            response = await makeQuery(query);
-        } catch (e: any) {
-            return APIError(pathname, 500, "failed_database_query", e.message);
-        }
-
+    try {
         return toJSON(
             addMetadata(
                 response,
@@ -40,9 +39,6 @@ export default async function (req: Request) {
             )
         );
     } catch (e: any) {
-        logger.error(e);
-        prometheus.request_error.inc({ pathname: "/balance", status: 400 });
-
-        return new Response(e.message, { status: 400 });
+        return APIError(pathname, 500, "failed_response", e.message);
     }
 }

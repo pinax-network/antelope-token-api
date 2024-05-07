@@ -27,12 +27,10 @@ export async function makeQuery<T = unknown>(query: string) {
         prometheus.bytes_read.inc(data.statistics.bytes_read);
         prometheus.rows_read.inc(data.statistics.rows_read);
         prometheus.elapsed.inc(data.statistics.elapsed);
-        logger.info({ query, statistics: data.statistics, rows: data.rows });
+        logger.trace("<makeQuery>\n", { query, statistics: data.statistics, rows: data.rows });
         
         return data;
     } catch (e: any) {
-        logger.error(e.message);
-
         throw new Error(e.message);
     }
 }

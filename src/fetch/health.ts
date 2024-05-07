@@ -1,20 +1,13 @@
 import client from "../clickhouse/createClient.js";
-import { logger } from "../logger.js";
-import * as prometheus from "../prometheus.js";
+import { APIError } from "./utils.js";
 
 // TODO: Add log entry
-export default async function (_req: Request) {
-    try {
-        const response = await client.ping();
-    
-        if (response.success === false) throw new Error(response.error.message);
-        if (response.success === true) return new Response("OK");
-    
-        return new Response("Unknown response from ClickHouse");
-    } catch (e: any) {
-        logger.error(e);
-        prometheus.request_error.inc({ pathname: "/health", status: 503 });
-    
-        return new Response(e.message, { status: 503 });
+export default async function (req: Request) {
+    const response = await client.ping();
+
+    if (!response.success) {
+        return APIError(new URL(req.url).pathname, 503, "failed_ping_database", response.error.message);
     }
+    
+    return new Response("OK");
 }

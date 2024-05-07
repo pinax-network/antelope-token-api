@@ -124,7 +124,6 @@ export function getBalanceChanges(searchParams: URLSearchParams, example?: boole
     return query;
 }
 
-// TODO: Investigate why transaction_id and timestamp (alone) request search in billions rows
 export function getTransfers(searchParams: URLSearchParams, example?: boolean) {
     const contract = searchParams.get("contract");
     const from = searchParams.get("from");

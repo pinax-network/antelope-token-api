@@ -1,7 +1,6 @@
 import client from "../clickhouse/createClient.js";
 import { APIError } from "./utils.js";
 
-// TODO: Add log entry
 export default async function (req: Request) {
     const response = await client.ping();
 

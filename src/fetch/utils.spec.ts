@@ -41,8 +41,8 @@ test("addMetadata pagination", () => {
     expect(last_page.meta.total_pages).toBe(5);
     expect(last_page.meta.total_results).toBe(5 * limit);
 
-    // TODO: Expect error message on beyond last page
-    // const beyond_last_page = addMetadata(mock_query_reponse.data, mock_query_reponse.rows_before_limit_at_least, limit, 6);
+    // Expect error message on beyond last page
+    expect(() => addMetadata(mock_query_reponse, limit, limit + 1)).toThrow("Requested page exceeds total pages");
 });
 
 test("addMetadata no pagination", () => {

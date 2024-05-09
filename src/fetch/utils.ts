@@ -5,7 +5,7 @@ import * as prometheus from "../prometheus.js";
 interface APIError {
     status: number,
     code?: string,
-    detail?: string
+    detail?: string;
 }
 
 export function APIError(pathname: string, status: number, code?: string, detail?: string) {
@@ -13,7 +13,7 @@ export function APIError(pathname: string, status: number, code?: string, detail
         status,
         code: code ? code : "unknown",
         detail: detail ? detail : ""
-    }
+    };
 
     logger.error("<APIError>\n", api_error);
     prometheus.request_error.inc({ pathname, status });
@@ -25,12 +25,11 @@ export function toJSON(data: any, status: number = 200) {
 }
 
 export function addMetadata(response: Query<any>, req_limit?: number, req_page?: number) {
-    // TODO: Catch page number greater than total_pages and return error
     if (typeof (req_limit) !== 'undefined' && typeof (req_page) !== 'undefined') {
-        const total_pages = Math.ceil(response.rows_before_limit_at_least / req_limit);
+        const total_pages = Math.max(Math.ceil(response.rows_before_limit_at_least / req_limit), 1); // Always have a least one total page
 
         if (req_page > total_pages)
-            throw Error("Requested page exceeds total pages")
+            throw Error(`Requested page (${req_page}) exceeds total pages (${total_pages})`);
 
         return {
             data: response.data,
@@ -41,13 +40,13 @@ export function addMetadata(response: Query<any>, req_limit?: number, req_page?:
                 total_pages,
                 total_results: response.rows_before_limit_at_least
             }
-        }
+        };
     } else {
         return {
             data: response.data,
             meta: {
                 statistics: response.statistics,
             }
-        }
+        };
     }
 }

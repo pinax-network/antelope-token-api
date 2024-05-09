@@ -42,7 +42,7 @@ test("addMetadata pagination", () => {
     expect(last_page.meta.total_results).toBe(5 * limit);
 
     // Expect error message on beyond last page
-    expect(() => addMetadata(mock_query_reponse, limit, limit + 1)).toThrow("Requested page exceeds total pages");
+    expect(() => addMetadata(mock_query_reponse, limit, limit + 1)).toThrow(`Requested page (${limit + 1}) exceeds total pages (${limit})`);
 });
 
 test("addMetadata no pagination", () => {

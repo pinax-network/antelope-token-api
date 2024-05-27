@@ -1,0 +1,1126 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Antelope Token API",
+    "version": "0.0.0"
+  },
+  "tags": [
+    {
+      "name": "Usage"
+    },
+    {
+      "name": "Docs"
+    },
+    {
+      "name": "Monitoring"
+    }
+  ],
+  "paths": {
+    "/balance": {
+      "get": {
+        "tags": [
+          "Usage"
+        ],
+        "operationId": "Usage_balance",
+        "summary": "Token balance",
+        "description": "Balances of an account.",
+        "parameters": [
+          {
+            "name": "block_num",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "contract",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "symcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of balances.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BalanceChange"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/head": {
+      "get": {
+        "tags": [
+          "Usage"
+        ],
+        "operationId": "Usage_head",
+        "summary": "Head block information",
+        "description": "Information about the current head block in the database.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of block information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "block_num": {
+                            "type": "integer",
+                            "format": "uint64"
+                          }
+                        },
+                        "required": [
+                          "block_num"
+                        ]
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Monitoring"
+        ],
+        "operationId": "Monitoring_health",
+        "summary": "Health check",
+        "description": "Checks database connection.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK or APIError.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/holders": {
+      "get": {
+        "tags": [
+          "Usage"
+        ],
+        "operationId": "Usage_holders",
+        "summary": "Token holders",
+        "description": "List of holders of a token.",
+        "parameters": [
+          {
+            "name": "contract",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "symcode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of accounts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Holder"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "Monitoring"
+        ],
+        "operationId": "Monitoring_metrics",
+        "summary": "Prometheus metrics",
+        "description": "Prometheus metrics.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Metrics as text.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi": {
+      "get": {
+        "tags": [
+          "Docs"
+        ],
+        "operationId": "Docs_openapi",
+        "summary": "OpenAPI JSON spec",
+        "description": "Reflection endpoint to return OpenAPI JSON spec. Also used by Swagger to generate the frontpage.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The OpenAPI JSON spec",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supply": {
+      "get": {
+        "tags": [
+          "Usage"
+        ],
+        "operationId": "Usage_supply",
+        "summary": "Token supply",
+        "description": "Total supply for a token.",
+        "parameters": [
+          {
+            "name": "block_num",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64"
+            }
+          },
+          {
+            "name": "issuer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contract",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "symcode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of supplies.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Supply"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tokens": {
+      "get": {
+        "tags": [
+          "Usage"
+        ],
+        "operationId": "Usage_tokens",
+        "summary": "Tokens",
+        "description": "List of available tokens.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of supplies.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Supply"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transfers": {
+      "get": {
+        "tags": [
+          "Usage"
+        ],
+        "operationId": "Usage_transfers",
+        "summary": "Token transfers",
+        "description": "All transfers related to a token.",
+        "parameters": [
+          {
+            "name": "block_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "uint64"
+              }
+            },
+            "style": "form",
+            "explode": false
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "contract",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "symcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of transfers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Transfer"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transfers/{trx_id}": {
+      "get": {
+        "tags": [
+          "Usage"
+        ],
+        "operationId": "Usage_transfer",
+        "summary": "Token transfer",
+        "description": "Specific transfer related to a token.",
+        "parameters": [
+          {
+            "name": "trx_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of transfers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Transfer"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/version": {
+      "get": {
+        "tags": [
+          "Docs"
+        ],
+        "operationId": "Docs_version",
+        "summary": "API version",
+        "description": "API version and Git short commit hash.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The API version and commit hash.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Version"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/APIError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "APIError": {
+        "type": "object",
+        "required": [
+          "status",
+          "code",
+          "message"
+        ],
+        "properties": {
+          "status": {
+            "type": "number",
+            "enum": [
+              500,
+              504,
+              400,
+              401,
+              403,
+              404,
+              405
+            ]
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "bad_database_response",
+              "bad_header",
+              "missing_required_header",
+              "bad_query_input",
+              "database_timeout",
+              "forbidden",
+              "internal_server_error",
+              "method_not_allowed",
+              "route_not_found",
+              "unauthorized"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "BalanceChange": {
+        "type": "object",
+        "required": [
+          "trx_id",
+          "action_index",
+          "contract",
+          "symcode",
+          "precision",
+          "amount",
+          "value",
+          "block_num",
+          "timestamp",
+          "account",
+          "balance",
+          "balance_delta"
+        ],
+        "properties": {
+          "trx_id": {
+            "type": "string"
+          },
+          "action_index": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "contract": {
+            "type": "string"
+          },
+          "symcode": {
+            "type": "string"
+          },
+          "precision": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "value": {
+            "type": "number",
+            "format": "double"
+          },
+          "block_num": {
+            "type": "integer",
+            "format": "uint64"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "account": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "string"
+          },
+          "balance_delta": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Holder": {
+        "type": "object",
+        "required": [
+          "account",
+          "balance"
+        ],
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "balance": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "required": [
+          "next_page",
+          "previous_page",
+          "total_pages",
+          "total_results"
+        ],
+        "properties": {
+          "next_page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "previous_page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_results": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "QueryStatistics": {
+        "type": "object",
+        "required": [
+          "elapsed",
+          "rows_read",
+          "bytes_read"
+        ],
+        "properties": {
+          "elapsed": {
+            "type": "number"
+          },
+          "rows_read": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bytes_read": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ResponseMetadata": {
+        "type": "object",
+        "required": [
+          "statistics",
+          "next_page",
+          "previous_page",
+          "total_pages",
+          "total_results"
+        ],
+        "properties": {
+          "statistics": {
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QueryStatistics"
+              }
+            ],
+            "nullable": true
+          },
+          "next_page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "previous_page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_pages": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "total_results": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Supply": {
+        "type": "object",
+        "required": [
+          "trx_id",
+          "action_index",
+          "contract",
+          "symcode",
+          "precision",
+          "amount",
+          "value",
+          "block_num",
+          "timestamp",
+          "issuer",
+          "max_supply",
+          "supply",
+          "supply_delta"
+        ],
+        "properties": {
+          "trx_id": {
+            "type": "string"
+          },
+          "action_index": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "contract": {
+            "type": "string"
+          },
+          "symcode": {
+            "type": "string"
+          },
+          "precision": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "value": {
+            "type": "number",
+            "format": "double"
+          },
+          "block_num": {
+            "type": "integer",
+            "format": "uint64"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "max_supply": {
+            "type": "string"
+          },
+          "supply": {
+            "type": "string"
+          },
+          "supply_delta": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Transfer": {
+        "type": "object",
+        "required": [
+          "trx_id",
+          "action_index",
+          "contract",
+          "symcode",
+          "precision",
+          "amount",
+          "value",
+          "block_num",
+          "timestamp",
+          "from",
+          "to",
+          "quantity",
+          "memo"
+        ],
+        "properties": {
+          "trx_id": {
+            "type": "string"
+          },
+          "action_index": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "contract": {
+            "type": "string"
+          },
+          "symcode": {
+            "type": "string"
+          },
+          "precision": {
+            "type": "integer",
+            "format": "uint32"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "value": {
+            "type": "number",
+            "format": "double"
+          },
+          "block_num": {
+            "type": "integer",
+            "format": "uint64"
+          },
+          "timestamp": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string"
+          },
+          "memo": {
+            "type": "string"
+          }
+        }
+      },
+      "Version": {
+        "type": "object",
+        "required": [
+          "version",
+          "commit"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+          },
+          "commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{7}$"
+          }
+        }
+      }
+    }
+  }
+}

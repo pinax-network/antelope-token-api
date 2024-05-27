@@ -1,53 +1,29 @@
-import { config } from "./config.js";
+import { ZodError } from "zod";
 
-export function parseBlockId(block_id?: string | null) {
-    return block_id ? block_id.replace("0x", "") : undefined;
-}
+import type { Context } from "hono";
+import type { APIError } from "./types/zod.gen.js";
+import { logger } from "./logger.js";
+import * as prometheus from "./prometheus.js";
 
-export function parseLimit(limit?: string | null | number, defaultLimit?: number) {
-    let value = 1; // default 1
-    if (defaultLimit)
-        value = defaultLimit;
-    if (limit) {
-        if (typeof limit === "string") value = parseInt(limit);
-        if (typeof limit === "number") value = limit;
-    }
-    // limit must be between 1 and maxLimit
-    if (value <= 0) value = 1;
-    if (value > config.maxLimit) value = config.maxLimit;
-    return value;
-}
+export function APIErrorResponse(ctx: Context, status: APIError["status"], code: APIError["code"], err: unknown) {
+    let message = "An unexpected error occured";
 
-export function parsePage(page?: string | null | number) {
-    let value = 1;
-
-    if (page) {
-        if (typeof page === "string") value = parseInt(page);
-        if (typeof page === "number") value = page;
+    if (typeof err === "string") {
+        message = err;
+    } else if (err instanceof ZodError) {
+        message = err.issues.map(issue => `[${issue.code}] ${issue.path.join('/')}: ${issue.message}`).join('\n');
+    } else if (err instanceof Error) {
+        message = err.message;
     }
 
-    if (value <= 0)
-        value = 1;
+    const api_error = {
+        status,
+        code,
+        message
+    };
 
-    return value;
-}
+    logger.error(api_error);
+    prometheus.request_error.inc({ pathname: ctx.req.path, status });
 
-export function parseTimestamp(timestamp?: string | null | number) {
-    if (timestamp !== undefined && timestamp !== null) {
-        if (typeof timestamp === "string") {
-            if (/^[0-9]+$/.test(timestamp)) {
-                return parseTimestamp(parseInt(timestamp));
-            }
-            // append "Z" to timestamp if it doesn't have it
-            if (!timestamp.endsWith("Z")) timestamp += "Z";
-            return Math.floor(Number(new Date(timestamp)) / 1000);
-        }
-        if (typeof timestamp === "number") {
-            const length = timestamp.toString().length;
-            if (length === 10) return timestamp; // seconds
-            if (length === 13) return Math.floor(timestamp / 1000); // convert milliseconds to seconds
-            throw new Error("Invalid timestamp");
-        }
-    }
-    return undefined;
+    return ctx.json<APIError, typeof status>(api_error, status);
 }

@@ -1,36 +1,25 @@
+import client from "./client.js";
+
 import { logger } from "../logger.js";
 import * as prometheus from "../prometheus.js";
-import client from "./createClient.js";
 
-export interface Meta {
-    name: string,
-    type: string
-}
-export interface Query<T> {
-    meta: Meta[],
-    data: T[],
-    rows: number,
-    rows_before_limit_at_least: number,
-    statistics: {
-        elapsed: number,
-        rows_read: number,
-        bytes_read: number,
-    }
-}
+import type { ResponseJSON } from "@clickhouse/client-web";
+import type { ValidQueryParams } from "../types/api.js";
 
-export async function makeQuery<T = unknown>(query: string) {
-    try {
-        const response = await client.query({ query })
-        const data: Query<T> = await response.json();
+export async function makeQuery<T = unknown>(query: string, query_params: ValidQueryParams) {
+    logger.trace({ query, query_params });
 
-        prometheus.query.inc();
+    const response = await client.query({ query, query_params, format: "JSON" });
+    const data: ResponseJSON<T> = await response.json();
+
+    prometheus.query.inc();
+    if ( data.statistics ) {
         prometheus.bytes_read.inc(data.statistics.bytes_read);
         prometheus.rows_read.inc(data.statistics.rows_read);
         prometheus.elapsed.inc(data.statistics.elapsed);
-        logger.trace("<makeQuery>\n", { query, statistics: data.statistics, rows: data.rows });
-        
-        return data;
-    } catch (e: any) {
-        throw new Error(e.message);
     }
+
+    logger.trace({ statistics: data.statistics, rows: data.rows, rows_before_limit_at_least: data.rows_before_limit_at_least });
+    
+    return data;
 }

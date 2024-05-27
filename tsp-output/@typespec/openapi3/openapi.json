@@ -2,7 +2,12 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Antelope Token API",
-    "version": "0.0.0"
+    "summary": "Tokens information from the Antelope blockchains, powered by Substreams",
+    "license": {
+      "name": "MIT",
+      "url": "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
+    },
+    "version": "3.0.0"
   },
   "tags": [
     {

@@ -1,5 +1,5 @@
 import { PingResult } from "@clickhouse/client-web";
-import client from "./createClient.js";
+import client from "./client.js";
 import { logger } from "../logger.js";
 
 // Does not work with Bun's implementation of Node streams.

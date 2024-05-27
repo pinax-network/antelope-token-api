@@ -1,10 +1,9 @@
 {
   "name": "antelope-token-api",
   "description": "Token balances, supply and transfers from the Antelope blockchains",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "homepage": "https://github.com/pinax-network/antelope-token-api",
   "license": "MIT",
-  "type": "module",
   "authors": [
     {
       "name": "Etienne Donneger",
@@ -17,24 +16,38 @@
       "url": "https://github.com/DenisCarriere/"
     }
   ],
-  "scripts": {
-    "start": "export APP_VERSION=$(git rev-parse --short HEAD) && bun index.ts",
-    "dev": "export APP_VERSION=$(git rev-parse --short HEAD) && bun --watch index.ts",
-    "lint": "export APP_VERSION=$(git rev-parse --short HEAD) && bunx tsc --noEmit --skipLibCheck --pretty",
-    "test": "export APP_VERSION=$(git rev-parse --short HEAD) && bun test --coverage",
-    "build": "export APP_VERSION=$(git rev-parse --short HEAD) && bun build --compile ./index.ts --outfile antelope-token-api"
-  },
   "dependencies": {
     "@clickhouse/client-web": "latest",
-    "commander": "latest",
-    "dotenv": "latest",
-    "openapi3-ts": "latest",
-    "prom-client": "latest",
-    "tslog": "latest",
+    "@typespec/compiler": "latest",
+    "@typespec/openapi3": "latest",
+    "@typespec/protobuf": "latest",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "hono": "latest",
+    "prom-client": "^15.1.2",
+    "tslog": "^4.9.2",
+    "typed-openapi": "latest",
     "zod": "latest"
   },
+  "private": true,
+  "scripts": {
+    "build": "export APP_VERSION=$(git rev-parse --short HEAD) && bun build --compile index.ts --outfile antelope-token-api",
+    "clean": "bun i --force",
+    "dev": "export APP_VERSION=$(git rev-parse --short HEAD) && bun --watch index.ts",
+    "lint": "export APP_VERSION=$(git rev-parse --short HEAD) && bun run tsc --noEmit --skipLibCheck --pretty",
+    "start": "export APP_VERSION=$(git rev-parse --short HEAD) && bun index.ts",
+    "test": "bun test --coverage",
+    "types": "bun run tsp compile ./src/typespec && bun run typed-openapi ./tsp-output/@typespec/openapi3/openapi.json -o ./src/types/zod.gen.ts -r zod",
+    "types:check": "bun run tsp compile ./src/typespec --no-emit --pretty --warn-as-error",
+    "types:format": "bun run tsp format src/typespec/**/*.tsp",
+    "types:watch": "bun run tsp compile ./src/typespec --watch --pretty --warn-as-error"
+  },
+  "type": "module",
   "devDependencies": {
     "bun-types": "latest",
     "typescript": "latest"
+  },
+  "prettier": {
+    "tabWidth": 4
   }
 }

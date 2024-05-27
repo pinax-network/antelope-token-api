@@ -2,26 +2,41 @@
 
 [![.github/workflows/bun-test.yml](https://github.com/pinax-network/antelope-token-api/actions/workflows/bun-test.yml/badge.svg)](https://github.com/pinax-network/antelope-token-api/actions/workflows/bun-test.yml)
 
-> Token balances, supply and transfers from the Antelope blockchains
+> Tokens information from the Antelope blockchains, powered by [Substreams](https://substreams.streamingfast.io/)
 
 ## REST API
+
+### Usage
 
 | Method | Path | Description |
 | :---: | --- | --- |
 | GET <br>`text/html` | `/` | [Swagger](https://swagger.io/) API playground |
-| GET <br>`application/json` | `/supply` | Antelope Tokens total supply |
-| GET <br>`application/json` | `/balance` | Antelope Tokens balance changes |
-| GET <br>`application/json` | `/transfers` | Antelope Tokens transfers |
-| GET <br>`text/plain` | `/health` | Performs health checks and checks if the database is accessible |
+| GET <br>`application/json` | `/balance` | Balances of an account. |
 | GET <br>`application/json` | `/head` | Information about the current head block in the database |
-| GET <br>`text/plain` | `/metrics` | [Prometheus](https://prometheus.io/) metrics for the API |
+| GET <br>`application/json` | `/holders` | List of holders of a token |
+| GET <br>`application/json` | `/supply` | Total supply for a token |
+| GET <br>`application/json` | `/tokens` | List of available tokens |
+| GET <br>`application/json` | `/transfers` | All transfers related to a token |
+| GET <br>`application/json` | `/transfers/{trx_id}` | Specific transfer related to a token |
+
+### Docs
+
+| Method | Path | Description |
+| :---: | --- | --- |
 | GET <br>`application/json` | `/openapi` | [OpenAPI](https://www.openapis.org/) specification |
-| GET <br>`application/json` | `/version` | API version and commit hash |
+| GET <br>`application/json` | `/version` | API version and Git short commit hash |
+
+### Monitoring
+
+| Method | Path | Description |
+| :---: | --- | --- |
+| GET <br>`text/plain` | `/health` | Checks database connection |
+| GET <br>`text/plain` | `/metrics` | [Prometheus](https://prometheus.io/) metrics |
 
 ## Requirements
 
 - [ClickHouse](clickhouse.com/)
-- (Optional) A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/streamingfast/substreams-sink-sql).
+- (Optional) A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/streamingfast/substreams-sink-sql). You should use the generated [`protobuf` files](tsp-output/@typespec/protobuf) to build your substream.
 
 ## Quick start
 
@@ -40,10 +55,11 @@ $ bun test
 
 ## [`Bun` Binary Releases](https://github.com/pinax-network/antelope-token-api/releases)
 
-> For Linux x86
+> [!WARNING]
+> Linux x86 only
 
 ```console
-$ wget https://github.com/pinax-network/antelope-token-api/releases/download/v2.0.0/antelope-token-api
+$ wget https://github.com/pinax-network/antelope-token-api/releases/download/v3.0.0/antelope-token-api
 $ chmod +x ./antelope-token-api
 $ ./antelope-token-api --help                                                                                                       
 Usage: antelope-token-api [options]
@@ -90,6 +106,7 @@ VERBOSE=true
 ```bash
 docker pull ghcr.io/pinax-network/antelope-token-api:latest
 ```
+
 **For head of `develop` branch**
 ```bash
 docker pull ghcr.io/pinax-network/antelope-token-api:develop

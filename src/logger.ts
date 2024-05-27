@@ -5,7 +5,7 @@ class TsLogger extends Logger<ILogObj> {
     constructor() {
         super();
         this.settings.minLevel = 5;
-        this.settings.name = `${APP_NAME}:${APP_VERSION}`;
+        this.settings.name = `${APP_NAME}:${APP_VERSION.version}+${APP_VERSION.commit}`;
     }
 
     public enable(type: "pretty" | "json" = "pretty") {

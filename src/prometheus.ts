@@ -30,7 +30,7 @@ export function registerGauge(name: string, help = "help", labelNames: string[] 
 export async function getSingleMetric(name: string) {
     const metric = registry.getSingleMetric(name);
     const get = await metric?.get();
-    return get?.values[0].value;
+    return get?.values[0]?.value;
 }
 
 // REST API metrics

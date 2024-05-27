@@ -18,14 +18,11 @@
   ],
   "dependencies": {
     "@clickhouse/client-web": "latest",
-    "@typespec/compiler": "latest",
-    "@typespec/openapi3": "latest",
-    "@typespec/protobuf": "latest",
-    "commander": "^12.1.0",
-    "dotenv": "^16.4.5",
+    "commander": "latest",
+    "dotenv": "latest",
     "hono": "latest",
-    "prom-client": "^15.1.2",
-    "tslog": "^4.9.2",
+    "prom-client": "latest",
+    "tslog": "latest",
     "typed-openapi": "latest",
     "zod": "latest"
   },
@@ -44,6 +41,10 @@
   },
   "type": "module",
   "devDependencies": {
+    "@typespec/compiler": "latest",
+    "@typespec/openapi3": "latest",
+    "@typespec/protobuf": "latest",
+    "@typespec/openapi": "latest",
     "bun-types": "latest",
     "typescript": "latest"
   },

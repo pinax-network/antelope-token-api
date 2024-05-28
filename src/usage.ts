@@ -40,13 +40,15 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
             query += `transfers_from `;
         } else if (q.to) {
             query += `transfers_to `;
-        } else if (q.contract) {
+        } else if (q.contract || q.symcode) {
             query += `transfers_contract `;
         } else {
             query += `transfer_events `;
         }
 
-        query += `FINAL`;
+        // FINAL increases ClickHouse query response time significantly when lots of data needs merging
+        // Drop it for now
+        //query += `FINAL`;
     } else if (endpoint == "/holders") {
         query += `SELECT DISTINCT account, value FROM eos_tokens_v1.account_balances FINAL WHERE value > 0`;
     } else if (endpoint == "/head") {

@@ -1,11 +1,19 @@
 import "@typespec/http";
+import "@typespec/openapi";
 import "./models.tsp";
 
 using TypeSpec.Http;
+using TypeSpec.OpenAPI;
 
-@service({
-    title: "Antelope Token API",
-})
+@service({ title: "Antelope Token API" })
+@info({
+    summary: "Tokens information from the Antelope blockchains, powered by Substreams",
+    license: {
+        name: "MIT",
+        url: "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
+    },
+    version: "3.0.0"
+}) // From @typespec/openapi
 namespace AntelopeTokenAPI;
 
 // Error codes adapted from https://github.com/pinax-network/golang-base/blob/develop/response/errors.go

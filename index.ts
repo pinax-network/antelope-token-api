@@ -2,7 +2,7 @@ import client from './src/clickhouse/client.js';
 import openapi from "./tsp-output/@typespec/openapi3/openapi.json";
 
 import { Hono } from "hono";
-import { ZodBigInt, ZodBoolean, ZodDate, ZodNumber, ZodOptional, ZodTypeAny, ZodUndefined, ZodUnion, z } from "zod";
+import { ZodBigInt, ZodBoolean, ZodDate, ZodDefault, ZodNumber, ZodOptional, ZodTypeAny, ZodUndefined, ZodUnion, z } from "zod";
 import { EndpointByMethod } from './src/types/zod.gen.js';
 import { APP_VERSION } from "./src/config.js";
 import { logger } from './src/logger.js';
@@ -70,12 +70,17 @@ function AntelopeTokenAPI() {
             // Add type coercion for query and path parameters since the codegen doesn't coerce types natively
             const endpoint_parameters = Object.values(EndpointByMethod["get"][endpoint].parameters.shape).map(p => p.shape);
             endpoint_parameters.forEach(
-                // `p` can query or path parameters
+                // `p` can be query or path parameters
                 (p) => Object.keys(p).forEach(
                     (key, _) => {
-                        const zod_type = p[key] as ZodTypeAny;
+                        let zod_type = p[key] as ZodTypeAny;
                         let underlying_zod_type: ZodTypeAny;
                         let isOptional = false;
+
+                        // Strip default layer for value
+                        if (zod_type instanceof ZodDefault) {
+                            zod_type = zod_type.removeDefault();
+                        }
 
                         // Detect the underlying type from the codegen
                         if (zod_type instanceof ZodUnion) {

@@ -9,7 +9,7 @@ export type EndpointParameters<E extends keyof GetEndpoints> = z.infer<GetEndpoi
 export type UsageEndpoints = Exclude<keyof GetEndpoints, "/health" | "/metrics" | "/version" | "/openapi">;
 export type UsageResponse = z.infer<GetEndpoints[UsageEndpoints]["response"]>;
 
-export type ValidUserParams<E extends UsageEndpoints> = { path: unknown; } extends EndpointParameters<E> ?
+export type ValidUserParams<E extends UsageEndpoints> =  EndpointParameters<E> extends { path: unknown; } ?
     // Combine path and query parameters only if path exists to prevent "never" on intersection
     Extract<EndpointParameters<E>, { query: unknown; }>["query"] & Extract<EndpointParameters<E>, { path: unknown; }>["path"]
     :

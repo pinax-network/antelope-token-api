@@ -34,16 +34,14 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
         query += `SELECT * FROM `;
 
         const q = query_params as ValidUserParams<typeof endpoint>;
-        if (q.block_range) {
-            query += `transfers_block_num `;
-        } else if (q.from) {
+        if (q.from) {
             query += `transfers_from `;
         } else if (q.to) {
             query += `transfers_to `;
         } else if (q.contract || q.symcode) {
             query += `transfers_contract `;
         } else {
-            query += `transfer_events `;
+            query += `transfers_block_num `;
         }
 
         // FINAL increases ClickHouse query response time significantly when lots of data needs merging

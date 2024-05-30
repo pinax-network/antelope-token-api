@@ -104,7 +104,7 @@ function AntelopeTokenAPI() {
                             p[key] = z.coerce.date();
                             // Any other type will be coerced as string value directly
                         } else {
-                            p[key] = z.coerce.string();
+                            p[key] = z.string();
                         }
 
                         if (isOptional)

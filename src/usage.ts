@@ -15,6 +15,14 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     if (!page)
         page = 1;
 
+    let filters = "";
+    for (const k of Object.keys(query_params).filter(k => k !== "limit")) // Don't add limit to WHERE clause
+        filters += ` (${k} == {${k}: String}) AND`;
+    filters = filters.substring(0, filters.lastIndexOf(' ')); // Remove last item ` AND`
+
+    if (filters.length)
+        filters = `WHERE ${filters}`
+
     let query = "";
     if (endpoint == "/balance" || endpoint == "/supply") {
         // Need to narrow the type of `query_params` explicitly to access properties based on endpoint value
@@ -30,37 +38,32 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
                 `SELECT *, updated_at_block_num AS block_num, updated_at_timestamp AS timestamp`
                 + ` FROM ${endpoint == "/balance" ? "account_balances" : "token_supplies"}`
                 + ` FINAL`;
+
+        query += ` ${filters}`;
     } else if (endpoint == "/transfers") {
         query += `SELECT * FROM `;
 
         const q = query_params as ValidUserParams<typeof endpoint>;
         if (q.from) {
-            query += `transfers_from `;
+            query += `transfers_from`;
         } else if (q.to) {
-            query += `transfers_to `;
+            query += `transfers_to`;
         } else if (q.contract || q.symcode) {
-            query += `transfers_contract `;
+            query += `transfers_contract`;
         } else {
-            query += `transfers_block_num `;
+            query += `transfers_block_num`;
         }
 
-        // FINAL increases ClickHouse query response time significantly when lots of data needs merging
-        // Drop it for now
-        //query += `FINAL`;
+        query += ` ${filters}`;
     } else if (endpoint == "/holders") {
-        query += `SELECT DISTINCT account, value FROM eos_tokens_v1.account_balances FINAL WHERE value > 0`;
+        query += `SELECT account, value FROM (SELECT account, MAX(updated_at_block_num) AS last_updated FROM eos_tokens_v1.account_balances ${filters} GROUP BY account) AS x INNER JOIN eos_tokens_v1.account_balances AS y ON y.account = x.account AND y.updated_at_block_num = x.last_updated ${filters}`;
     } else if (endpoint == "/head") {
-        query += `SELECT block_num FROM cursors`
+        query += `SELECT MAX(block_num) as block_num FROM cursors ${filters} GROUP BY id`;
     } else if (endpoint == "/transfers/{trx_id}") {
-        query += `SELECT * FROM transfer_events FINAL`;
+        query += `SELECT * FROM transfer_events FINAL ${filters}`;
     } else {
-        query += `SELECT DISTINCT *, updated_at_block_num AS block_num FROM eos_tokens_v1.token_supplies FINAL`;
+        query += `SELECT DISTINCT *, updated_at_block_num AS block_num FROM eos_tokens_v1.token_supplies FINAL ${filters}`;
     }
-
-    query += endpoint == "/holders" ? " AND" : " WHERE";
-    for (const k of Object.keys(query_params).filter(k => k !== "limit")) // Don't add limit to WHERE clause
-        query += ` ${k} == {${k}: String} AND`;
-    query = query.substring(0, query.lastIndexOf(' ')); // Remove last item ` AND`
 
     query += endpoint == "/holders" ? "  ORDER BY value DESC" : " ORDER BY block_num DESC";
     query += " LIMIT {limit: int}";

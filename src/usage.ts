@@ -60,9 +60,9 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     } else if (endpoint == "/head") {
         query += `SELECT MAX(block_num) as block_num FROM cursors ${filters} GROUP BY id`;
     } else if (endpoint == "/transfers/{trx_id}") {
-        query += `SELECT * FROM transfer_events FINAL ${filters}`;
-    } else {
-        query += `SELECT DISTINCT *, updated_at_block_num AS block_num FROM eos_tokens_v1.token_supplies FINAL ${filters}`;
+        query += `SELECT * FROM transfer_events ${filters}`;
+    } else if (endpoint == "/tokens") {
+        query += `SELECT *, updated_at_block_num AS block_num FROM eos_tokens_v1.token_supplies FINAL ${filters}`;
     }
 
     query += endpoint == "/holders" ? "  ORDER BY value DESC" : " ORDER BY block_num DESC";

@@ -1,7 +1,7 @@
 {
   "name": "antelope-token-api",
   "description": "Token balances, supply and transfers from the Antelope blockchains",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "homepage": "https://github.com/pinax-network/antelope-token-api",
   "license": "MIT",
   "authors": [

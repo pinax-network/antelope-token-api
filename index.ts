@@ -4,7 +4,7 @@ import openapi from "./tsp-output/@typespec/openapi3/openapi.json";
 import { Hono } from "hono";
 import { ZodBigInt, ZodBoolean, ZodDate, ZodDefault, ZodNumber, ZodOptional, ZodTypeAny, ZodUndefined, ZodUnion, z } from "zod";
 import { EndpointByMethod } from './src/types/zod.gen.js';
-import { APP_VERSION } from "./src/config.js";
+import { APP_VERSION, config } from "./src/config.js";
 import { logger } from './src/logger.js';
 import * as prometheus from './src/prometheus.js';
 import { makeUsageQuery } from "./src/usage.js";
@@ -96,6 +96,8 @@ function AntelopeTokenAPI() {
                         // Query and path user input parameters come as strings and we need to coerce them to the right type using Zod
                         if (underlying_zod_type instanceof ZodNumber) {
                             p[key] = z.coerce.number();
+                            if (key === "limit")
+                                p[key] = p[key].max(config.maxLimit);
                         } else if (underlying_zod_type instanceof ZodBoolean) {
                             p[key] = z.coerce.boolean();
                         } else if (underlying_zod_type instanceof ZodBigInt) {

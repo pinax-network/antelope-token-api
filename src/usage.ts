@@ -16,8 +16,8 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
         page = 1;
 
     let filters = "";
-    for (const k of Object.keys(query_params).filter(k => k !== "limit")) // Don't add limit to WHERE clause
-        filters += ` (${k} == {${k}: String}) AND`;
+    for (const k of Object.keys(query_params).filter(k => k !== "limit")) // Don't add `limit` to WHERE clause
+        filters += ` (${k} = {${k}: String}) AND`;
     filters = filters.substring(0, filters.lastIndexOf(' ')); // Remove last item ` AND`
 
     if (filters.length)
@@ -48,6 +48,13 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
         const q = query_params as ValidUserParams<typeof endpoint>;
         if (q.from) {
+            // Find all incoming and outgoing transfers from single account
+            if (q.to && q.to === q.from)
+                filters = filters.replace(
+                    "(from = {from: String}) AND (to = {to: String})",
+                    "((from = {from: String}) OR (to = {to: String}))",
+                )
+
             query += `transfers_from`;
         } else if (q.to) {
             query += `transfers_to`;

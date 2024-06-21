@@ -28,18 +28,21 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
         // Need to narrow the type of `query_params` explicitly to access properties based on endpoint value
         // See https://github.com/microsoft/TypeScript/issues/33014
         const q = query_params as ValidUserParams<typeof endpoint>;
-        if (q.block_num)
+        if (q.block_num) {
             query +=
                 `SELECT *`
-                + ` FROM ${endpoint == "/balance" ? "balance_change_events" : "supply_change_events"}`
-                + ` FINAL`;
-        else
+                + ` FROM ${endpoint == "/balance" ? "balance_change_events" : "supply_change_events"}`;
+            
+            query += ` ${filters} ORDER BY action_index DESC`;
+            query_params.limit = 1;
+        } else {
             query +=
                 `SELECT *, updated_at_block_num AS block_num, updated_at_timestamp AS timestamp`
                 + ` FROM ${endpoint == "/balance" ? "account_balances" : "token_supplies"}`
                 + ` FINAL`;
 
-        query += ` ${filters}`;
+            query += ` ${filters} ORDER BY block_num DESC`;
+        }
     } else if (endpoint == "/transfers") {
         query += `SELECT * FROM `;
 
@@ -54,18 +57,17 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
             query += `transfers_block_num`;
         }
 
-        query += ` ${filters}`;
+        query += ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/holders") {
-        query += `SELECT account, value FROM (SELECT account, MAX(updated_at_block_num) AS last_updated FROM eos_tokens_v1.account_balances ${filters} GROUP BY account) AS x INNER JOIN eos_tokens_v1.account_balances AS y ON y.account = x.account AND y.updated_at_block_num = x.last_updated ${filters}`;
+        query += `SELECT account, value FROM (SELECT account, MAX(updated_at_block_num) AS last_updated FROM eos_tokens_v1.account_balances ${filters} GROUP BY account) AS x INNER JOIN eos_tokens_v1.account_balances AS y ON y.account = x.account AND y.updated_at_block_num = x.last_updated ${filters} ORDER BY value DESC`;
     } else if (endpoint == "/head") {
         query += `SELECT MAX(block_num) as block_num FROM cursors ${filters} GROUP BY id`;
     } else if (endpoint == "/transfers/{trx_id}") {
-        query += `SELECT * FROM transfer_events ${filters}`;
+        query += `SELECT * FROM transfer_events ${filters} ORDER BY action_index`;
     } else if (endpoint == "/tokens") {
-        query += `SELECT *, updated_at_block_num AS block_num FROM eos_tokens_v1.token_supplies FINAL ${filters}`;
+        query += `SELECT *, updated_at_block_num AS block_num FROM eos_tokens_v1.token_supplies FINAL ${filters} ORDER BY block_num DESC`;
     }
 
-    query += endpoint == "/holders" ? "  ORDER BY value DESC" : " ORDER BY block_num DESC";
     query += " LIMIT {limit: int}";
     query += " OFFSET {offset: int}";
 

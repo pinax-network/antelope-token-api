@@ -113,6 +113,7 @@ interface Usage {
     @route("/chains")
     @get
     chains(...PaginationQueryParams): APIResponse<UsageResponse<{
+        chain: SupportedChains,
         block_num: BlockInfo.block_num;
     }[]>>;
 

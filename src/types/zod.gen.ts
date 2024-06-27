@@ -128,6 +128,7 @@ export const get_Usage_chains = {
   response: z.object({
     data: z.array(
       z.object({
+        chain: SupportedChains,
         block_num: z.number(),
       }),
     ),

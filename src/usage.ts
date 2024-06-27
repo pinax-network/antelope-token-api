@@ -3,6 +3,7 @@ import { APIErrorResponse } from "./utils.js";
 
 import type { Context } from "hono";
 import type { AdditionalQueryParams, EndpointReturnTypes, UsageEndpoints, UsageResponse, ValidUserParams } from "./types/api.js";
+import { config } from "./config.js";
 
 export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, user_params: ValidUserParams<typeof endpoint>) {
     type EndpointElementReturnType = EndpointReturnTypes<typeof endpoint>[number];
@@ -17,7 +18,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
     let filters = "";
     // Don't add `limit` and `block_range` to WHERE clause
-    for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range"))
+    for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range" && k !== "chain"))
         filters += ` (${k} = {${k}: String}) AND`;
     filters = filters.substring(0, filters.lastIndexOf(' ')); // Remove last item ` AND`
 
@@ -26,31 +27,39 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
     let query = "";
     let additional_query_params: AdditionalQueryParams = {};
-    if (endpoint == "/balance" || endpoint == "/supply") {
+    let database = config.database;
+
+    if (endpoint !== "/chains") {
+        // TODO: Document required database setup
+        const q = query_params as ValidUserParams<typeof endpoint>;
+        database = `${q.chain}_tokens_v1`
+    }
+
+    if (endpoint == "/{chain}/balance" || endpoint == "/{chain}/supply") {
         // Need to narrow the type of `query_params` explicitly to access properties based on endpoint value
         // See https://github.com/microsoft/TypeScript/issues/33014
         const q = query_params as ValidUserParams<typeof endpoint>;
         if (q.block_num) {
             query +=
                 `SELECT *`
-                + ` FROM ${endpoint == "/balance" ? "balance_change_events" : "supply_change_events"}`;
+                + ` FROM ${endpoint == "/{chain}/balance" ? `${database}.balance_change_events` : `${database}.supply_change_events`}`;
             
             query += ` ${filters} ORDER BY action_index DESC`;
             query_params.limit = 1;
         } else {
             query +=
                 `SELECT *, updated_at_block_num AS block_num, updated_at_timestamp AS timestamp`
-                + ` FROM ${endpoint == "/balance" ? "account_balances" : "token_supplies"}`
+                + ` FROM ${endpoint == "/{chain}/balance" ? `${database}.account_balances` : `${database}.token_supplies`}`
                 + ` FINAL`;
 
             query += ` ${filters} ORDER BY block_num DESC`;
         }
-    } else if (endpoint == "/transfers") {
+    } else if (endpoint == "/{chain}/transfers") {
         query += `SELECT * FROM `;
 
         const q = query_params as ValidUserParams<typeof endpoint>;
         if (q.block_range) {
-            query += `transfers_block_num`;
+            query += `${database}.transfers_block_num`;
             console.log(q.block_range);
             if (q.block_range[0] && q.block_range[1]) {
                 filters += "AND (block_num >= {min_block: int} AND block_num <= {max_block: int})"
@@ -69,24 +78,30 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
                     "((from = {from: String}) OR (to = {to: String}))",
                 )
 
-            query += `transfers_from`;
+            query += `${database}.transfers_from`;
         } else if (q.to) {
-            query += `transfers_to`;
+            query += `${database}.transfers_to`;
         } else if (q.contract || q.symcode) {
-            query += `transfers_contract`;
+            query += `${database}.transfers_contract`;
         } else {
-            query += `transfers_block_num`;
+            query += `${database}.transfers_block_num`;
         }
 
         query += ` ${filters} ORDER BY block_num DESC`;
-    } else if (endpoint == "/holders") {
-        query += `SELECT account, value FROM (SELECT account, MAX(updated_at_block_num) AS last_updated FROM eos_tokens_v1.account_balances ${filters} GROUP BY account) AS x INNER JOIN eos_tokens_v1.account_balances AS y ON y.account = x.account AND y.updated_at_block_num = x.last_updated ${filters} ORDER BY value DESC`;
-    } else if (endpoint == "/head") {
-        query += `SELECT MAX(block_num) as block_num FROM cursors ${filters} GROUP BY id`;
-    } else if (endpoint == "/transfers/{trx_id}") {
-        query += `SELECT * FROM transfer_events ${filters} ORDER BY action_index`;
-    } else if (endpoint == "/tokens") {
-        query += `SELECT *, updated_at_block_num AS block_num FROM eos_tokens_v1.token_supplies FINAL ${filters} ORDER BY block_num DESC`;
+    } else if (endpoint == "/{chain}/holders") {
+        query += `SELECT account, value FROM (SELECT account, MAX(updated_at_block_num) AS last_updated FROM ${database}.account_balances ${filters} GROUP BY account) AS x INNER JOIN ${database}.account_balances AS y ON y.account = x.account AND y.updated_at_block_num = x.last_updated ${filters} ORDER BY value DESC`;
+    } else if (endpoint == "/chains") {
+        // TODO: More flexible to account for different chains ?
+        query +=
+            `SELECT 'wax' as chain, MAX(block_num) as block_num`
+            + ` FROM wax_tokens_v1.cursors GROUP BY id`
+            + ` UNION ALL`
+            + ` SELECT 'eos' as chain, MAX(block_num) as block_num`
+            + ` FROM eos_tokens_v1.cursors GROUP BY id`
+    } else if (endpoint == "/{chain}/transfers/{trx_id}") {
+        query += `SELECT * FROM ${database}.transfer_events ${filters} ORDER BY action_index`;
+    } else if (endpoint == "/{chain}/tokens") {
+        query += `SELECT *, updated_at_block_num AS block_num FROM ${database}.token_supplies FINAL ${filters} ORDER BY block_num DESC`;
     }
 
     query += " LIMIT {limit: int}";

@@ -68,12 +68,16 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "chain": {
+                            "$ref": "#/components/schemas/SupportedChains"
+                          },
                           "block_num": {
                             "type": "integer",
                             "format": "uint64"
                           }
                         },
                         "required": [
+                          "chain",
                           "block_num"
                         ]
                       }

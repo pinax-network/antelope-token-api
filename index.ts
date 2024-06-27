@@ -69,7 +69,7 @@ function AntelopeTokenAPI() {
     const createUsageEndpoint = (endpoint: UsageEndpoints) => app.get(
         // Hono using different syntax than OpenAPI for path parameters
         // `/{path_param}` (OpenAPI) VS `/:path_param` (Hono)
-        endpoint.replace(/{([^}]+)}/, ":$1"),
+        endpoint.replace(/{([^}]+)}/g, ":$1"),
         async (ctx: Context) => {
             const result = EndpointByMethod["get"][endpoint].parameters.safeParse({
                 query: ctx.req.query(),
@@ -92,13 +92,13 @@ function AntelopeTokenAPI() {
         }
     );
 
-    createUsageEndpoint("/balance"); // TODO: Maybe separate `block_num`/`timestamp` queries with path parameters (additional response schemas)
-    createUsageEndpoint("/head");
-    createUsageEndpoint("/holders");
-    createUsageEndpoint("/supply"); // TODO: Same as `balance``
-    createUsageEndpoint("/tokens");
-    createUsageEndpoint("/transfers"); // TODO: Redefine `block_range` params
-    createUsageEndpoint("/transfers/{trx_id}");
+    createUsageEndpoint("/{chain}/balance");
+    createUsageEndpoint("/chains");
+    createUsageEndpoint("/{chain}/holders");
+    createUsageEndpoint("/{chain}/supply");
+    createUsageEndpoint("/{chain}/tokens");
+    createUsageEndpoint("/{chain}/transfers");
+    createUsageEndpoint("/{chain}/transfers/{trx_id}");
 
     app.notFound((ctx: Context) => APIErrorResponse(ctx, 404, "route_not_found", `Path not found: ${ctx.req.method} ${ctx.req.path}`));
 

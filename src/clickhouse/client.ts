@@ -3,7 +3,6 @@ import { ping } from "./ping.js";
 import { APP_NAME, config } from "../config.js";
 
 // TODO: Check how to abort previous queries if haven't returned yet
-// TODO: Make client connect to all DB instances
 const client = createClient({
     ...config,
     clickhouse_settings: {

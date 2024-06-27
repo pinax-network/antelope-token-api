@@ -70,6 +70,11 @@ model UsageResponse<T> {
     meta: ResponseMetadata;
 }
 
+enum SupportedChains {
+    EOS: "eos",
+    WAX: "wax"
+}
+
 // Alias will *not* be present in the OpenAPI components.
 // This also helps preventing self-references in generated `components` for codegen to work properly.
 alias APIResponse<T> = T | APIError;
@@ -89,9 +94,10 @@ interface Usage {
         @returns Array of balances.
     */
     @summary("Token balance")
-    @route("/balance")
+    @route("/{chain}/balance")
     @get
     balance(
+        @path chain: SupportedChains,
         @query block_num?: BlockInfo.block_num,
         @query contract?: TokenIdentifier.contract,
         @query symcode?: TokenIdentifier.symcode,
@@ -100,13 +106,13 @@ interface Usage {
     ): APIResponse<UsageResponse<BalanceChange[]>>;
 
     /**
-        Information about the current head block in the database.
+        List of available Antelope chains and corresponding latest block for which data is available.
         @returns Array of block information.
     */
-    @summary("Head block information")
-    @route("/head")
+    @summary("Chains and latest block available")
+    @route("/chains")
     @get
-    head(...PaginationQueryParams): APIResponse<UsageResponse<{
+    chains(...PaginationQueryParams): APIResponse<UsageResponse<{
         block_num: BlockInfo.block_num;
     }[]>>;
 
@@ -115,9 +121,10 @@ interface Usage {
         @returns Array of accounts.
     */
     @summary("Token holders")
-    @route("/holders")
+    @route("/{chain}/holders")
     @get
     holders(
+        @path chain: SupportedChains,
         @query contract: TokenIdentifier.contract,
         @query symcode: TokenIdentifier.symcode,
         ...PaginationQueryParams,
@@ -128,9 +135,10 @@ interface Usage {
         @returns Array of supplies.
     */
     @summary("Token supply")
-    @route("/supply")
+    @route("/{chain}/supply")
     @get
     supply(
+        @path chain: SupportedChains,
         @query block_num?: BlockInfo.block_num,
         @query issuer?: Supply.issuer,
         @query contract: TokenIdentifier.contract,
@@ -143,23 +151,26 @@ interface Usage {
         @returns Array of supplies.
     */
     @summary("Tokens")
-    @route("/tokens")
+    @route("/{chain}/tokens")
     @get
-    tokens(...PaginationQueryParams): APIResponse<UsageResponse<Supply[]>>;
+    tokens(
+        @path chain: SupportedChains,
+        ...PaginationQueryParams
+    ): APIResponse<UsageResponse<Supply[]>>;
 
     /**
         All transfers related to a token.
         @returns Array of transfers.
     */
     @summary("Token transfers")
-    @route("/transfers")
+    @route("/{chain}/transfers")
     @get
     transfers(
+        @path chain: SupportedChains,
         @query({
             format: "csv",
         })
         block_range?: BlockInfo.block_num[],
-
         @query from?: Transfer.from,
         @query to?: Transfer.to,
         @query contract?: TokenIdentifier.contract,
@@ -172,9 +183,10 @@ interface Usage {
         @returns Array of transfers.
     */
     @summary("Token transfer")
-    @route("/transfers/{trx_id}")
+    @route("/{chain}/transfers/{trx_id}")
     @get
     transfer(
+        @path chain: SupportedChains,
         @path trx_id: Models.TraceInformation.trx_id,
         ...PaginationQueryParams,
     ): APIResponse<UsageResponse<Transfer[]>>;

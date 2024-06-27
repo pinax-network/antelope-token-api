@@ -25,7 +25,7 @@ export function fixEndpointParametersCoercion() {
         if (EndpointByMethod["get"][endpoint as UsageEndpoints].parameters.shape) {
             Object.values(EndpointByMethod["get"][endpoint as UsageEndpoints].parameters.shape).map(p => p.shape).forEach(
                 // `p` can be query or path parameters
-                (p) => Object.keys(p).forEach(
+                (p) => Object.keys(p).filter(k => k !== "chain").forEach(
                     (key, _) => {
                         let zod_type = p[key] as ZodTypeAny;
                         let underlying_zod_type: ZodTypeAny;

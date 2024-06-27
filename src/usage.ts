@@ -58,6 +58,13 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
         query += `SELECT * FROM `;
 
         const q = query_params as ValidUserParams<typeof endpoint>;
+        // Find all incoming and outgoing transfers from single account
+        if (q.from && q.to && q.from === q.to)
+            filters = filters.replace(
+                "(from = {from: String}) AND (to = {to: String})",
+                "((from = {from: String}) OR (to = {to: String}))",
+            )
+
         if (q.block_range) {
             query += `${database}.transfers_block_num`;
             console.log(q.block_range);
@@ -71,13 +78,6 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
                 additional_query_params.min_block = q.block_range[0];
             }
         } else if (q.from) {
-            // Find all incoming and outgoing transfers from single account
-            if (q.to && q.to === q.from)
-                filters = filters.replace(
-                    "(from = {from: String}) AND (to = {to: String})",
-                    "((from = {from: String}) OR (to = {to: String}))",
-                )
-
             query += `${database}.transfers_from`;
         } else if (q.to) {
             query += `${database}.transfers_to`;

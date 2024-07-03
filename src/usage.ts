@@ -18,12 +18,14 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
     let filters = "";
     // Don't add `limit` and `block_range` to WHERE clause
-    for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range" && k !== "chain"))
-        filters += ` (${k} = {${k}: String}) AND`;
-    filters = filters.substring(0, filters.lastIndexOf(' ')); // Remove last item ` AND`
+    for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range" && k !== "chain")) {
+        const clickhouse_type = typeof query_params[k as keyof typeof query_params] === "number" ? "int" : "String";
+        filters += ` (${k} = {${k}: ${clickhouse_type}}) AND`;
+    }
 
+    filters = filters.substring(0, filters.lastIndexOf(' ')); // Remove last item ` AND`
     if (filters.length)
-        filters = `WHERE ${filters}`
+        filters = `WHERE ${filters}`;
 
     let query = "";
     let additional_query_params: AdditionalQueryParams = {};
@@ -32,7 +34,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     if (endpoint !== "/chains") {
         // TODO: Document required database setup
         const q = query_params as ValidUserParams<typeof endpoint>;
-        database = `${q.chain}_tokens_v1`
+        database = `${q.chain}_tokens_v1`;
     }
 
     if (endpoint == "/{chain}/balance" || endpoint == "/{chain}/supply") {
@@ -69,12 +71,12 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
             query += `${database}.transfers_block_num`;
             console.log(q.block_range);
             if (q.block_range[0] && q.block_range[1]) {
-                filters += "AND (block_num >= {min_block: int} AND block_num <= {max_block: int})"
+                filters += "AND (block_num >= {min_block: int} AND block_num <= {max_block: int})";
                 // Use Min/Max to account for any ordering of parameters
                 additional_query_params.min_block = Math.min(q.block_range[0], q.block_range[1]);
                 additional_query_params.max_block = Math.max(q.block_range[0], q.block_range[1]);
             } else if (q.block_range[0]) {
-                filters += "AND (block_num >= {min_block: int})"
+                filters += "AND (block_num >= {min_block: int})";
                 additional_query_params.min_block = q.block_range[0];
             }
         } else if (q.from) {
@@ -97,7 +99,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
             + ` FROM wax_tokens_v1.cursors GROUP BY id`
             + ` UNION ALL`
             + ` SELECT 'eos' as chain, MAX(block_num) as block_num`
-            + ` FROM eos_tokens_v1.cursors GROUP BY id`
+            + ` FROM eos_tokens_v1.cursors GROUP BY id`;
     } else if (endpoint == "/{chain}/transfers/{trx_id}") {
         query += `SELECT * FROM ${database}.transfer_events ${filters} ORDER BY action_index`;
     } else if (endpoint == "/{chain}/tokens") {

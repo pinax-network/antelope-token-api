@@ -4,6 +4,9 @@
 
 > Tokens information from the Antelope blockchains, powered by [Substreams](https://substreams.streamingfast.io/)
 
+<a href="https://pinax.network/en/chain/eos"><img src="https://img.shields.io/badge/EOS-grey?style=for-the-badge&logo=data:image/svg%2bxml;base64,PHN2ZyB3aWR0aD0iNjciIGhlaWdodD0iMTAxIiB2aWV3Qm94PSIwIDAgNjcgMTAxIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzY2XzI5KSI+DQo8cGF0aCBkPSJNMzMuMzUwOCAwLjIyMTE5MUw5Ljk1MDg2IDMyLjQyMTJMMC4xNTA4NzkgODAuMDIxMkwzMy4zNTA4IDEwMC4yMjFMNjYuNTUwOCA4MC4wMjEyTDU2LjU1MDggMzIuMjIxMkwzMy4zNTA4IDAuMjIxMTkxWk01LjU1MDg3IDc3LjgyMTJMMTIuOTUwOSA0MS42MjEyTDI5Ljc1MDggOTIuNjIxMkw1LjU1MDg3IDc3LjgyMTJaTTE1LjM1MDkgMzMuNDIxMkwzMy4zNTA4IDguNjIxMTlMNTEuMzUwOCAzMy40MjEyTDMzLjM1MDggODcuODIxMkwxNS4zNTA5IDMzLjQyMTJaTTM2Ljc1MDggOTIuNjIxMkw1My41NTA4IDQxLjYyMTJMNjAuOTUwOCA3Ny44MjEyTDM2Ljc1MDggOTIuNjIxMloiIGZpbGw9IndoaXRlIi8+DQo8L2c+DQo8ZGVmcz4NCjxjbGlwUGF0aCBpZD0iY2xpcDBfNjZfMjkiPg0KPHJlY3Qgd2lkdGg9IjY2LjM5OTkiIGhlaWdodD0iMTAwIiBmaWxsPSJ3aGl0ZSIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMC4xNTA4NzkgMC4yMjExOTEpIi8+DQo8L2NsaXBQYXRoPg0KPC9kZWZzPg0KPC9zdmc+DQo=&logoSize=auto" height="30" /></a>
+<a href="https://pinax.network/en/chain/wax"><img src="https://img.shields.io/badge/WAX-grey?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTAxIiBoZWlnaHQ9IjEwMSIgdmlld0JveD0iMCAwIDEwMSAxMDEiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI%2BDQo8ZyBjbGlwLXBhdGg9InVybCgjY2xpcDBfNjdfOSkiPg0KPHBhdGggZD0iTTUwLjEzOTQgMTAwLjIyMUM3Ny43NTM2IDEwMC4yMjEgMTAwLjEzOSA3Ny44MzU0IDEwMC4xMzkgNTAuMjIxMkMxMDAuMTM5IDIyLjYwNyA3Ny43NTM2IDAuMjIxMTkxIDUwLjEzOTQgMC4yMjExOTFDMjIuNTI1MiAwLjIyMTE5MSAwLjEzOTQwNCAyMi42MDcgMC4xMzk0MDQgNTAuMjIxMkMwLjEzOTQwNCA3Ny44MzU0IDIyLjUyNTIgMTAwLjIyMSA1MC4xMzk0IDEwMC4yMjFaIiBmaWxsPSIjRjg5MDIyIi8%2BDQo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTg3LjYzOTUgNTkuNDc3Mkg4MC4yNTJMNzUuMDExNCA1NC45ODk3TDY5Ljc4OTUgNTkuNDU4NEg2My41NDU4TDYwLjU2MTQgNTUuODMzNEg1MC4yNzM5TDUyLjg3NyA1Mi42MTc4SDU3LjkzNjRMNTQuMDgzMyA0Ny45MDUzTDQwLjYzMDIgNjQuMjgzNEgzNC4zODk1TDM4LjI4MzMgNTkuNTI3MkgzMS43ODAyTDI4LjI2NDUgNDkuNjcwOUwyNC43NzcgNTkuNDUyMkgxOC4xODAyTDEyLjYzOTUgNDQuMDk5MUgxNy43MDJMMjEuNDI3IDU0LjU1NTNMMjUuMTM5NSA0NC4xNDU5SDMxLjM4OTVMMzUuMDkyNyA1NC41MzM0TDM4Ljc5MjcgNDQuMTQyOEg0My44NzA4TDM4LjI4MzMgNTkuNTI3MkwzOS41MjcgNTguMDA4NEw1MC45Mzk1IDQ0LjExNzhINTcuMjIwOEw2Ni43MTc3IDU1LjcwNTNMNzEuMjg2NCA1MS43NzcyTDU2LjgyNyAzOS4yODM0SDY0LjI0ODlMODcuNjM5NSA1OS40NzcyWk04MC4zMTE0IDUwLjE4OTdMNzYuODI3IDQ3LjIwMjJMODAuMzA1MiA0NC4yMzk3TDg3LjMzNjQgNDQuMjQ1OUw4MC4zMTE0IDUwLjE4OTdaIiBmaWxsPSJ3aGl0ZSIvPg0KPC9nPg0KPGRlZnM%2BDQo8Y2xpcFBhdGggaWQ9ImNsaXAwXzY3XzkiPg0KPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwLjEzOTQwNCAwLjIyMTE5MSkiLz4NCjwvY2xpcFBhdGg%2BDQo8L2RlZnM%2BDQo8L3N2Zz4NCg%3D%3D&logoSize=auto" height="30" /></a>
+
 ## REST API
 
 ### Usage
@@ -11,13 +14,13 @@
 | Method | Path | Description |
 | :---: | --- | --- |
 | GET <br>`text/html` | `/` | [Swagger](https://swagger.io/) API playground |
-| GET <br>`application/json` | `/balance` | Balances of an account. |
-| GET <br>`application/json` | `/head` | Information about the current head block in the database |
-| GET <br>`application/json` | `/holders` | List of holders of a token |
-| GET <br>`application/json` | `/supply` | Total supply for a token |
-| GET <br>`application/json` | `/tokens` | List of available tokens |
-| GET <br>`application/json` | `/transfers` | All transfers related to a token |
-| GET <br>`application/json` | `/transfers/{trx_id}` | Specific transfer related to a token |
+| GET <br>`application/json` | `/chains` | Information about the chains and latest head block in the database |
+| GET <br>`application/json` | `/{chain}/balance` | Balances of an account. |
+| GET <br>`application/json` | `/{chain}/holders` | List of holders of a token |
+| GET <br>`application/json` | `/{chain}/supply` | Total supply for a token |
+| GET <br>`application/json` | `/{chain}/tokens` | List of available tokens |
+| GET <br>`application/json` | `/{chain}/transfers` | All transfers related to a token |
+| GET <br>`application/json` | `/{chain}/transfers/{trx_id}` | Specific transfer related to a token |
 
 ### Docs
 

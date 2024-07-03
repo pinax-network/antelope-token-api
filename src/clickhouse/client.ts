@@ -7,8 +7,9 @@ const client = createClient({
     ...config,
     clickhouse_settings: {
         allow_experimental_object_type: 1,
-        readonly: "1",
-        exact_rows_before_limit: 1
+        exact_rows_before_limit: 1,
+        output_format_json_quote_64bit_integers: 0,
+        readonly: "1"
     },
     application: APP_NAME,
 });

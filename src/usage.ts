@@ -4,6 +4,7 @@ import { APIErrorResponse } from "./utils.js";
 import type { Context } from "hono";
 import type { AdditionalQueryParams, EndpointReturnTypes, UsageEndpoints, UsageResponse, ValidUserParams } from "./types/api.js";
 import { config } from "./config.js";
+import { SupportedChains } from "./types/zod.gen.js";
 
 export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, user_params: ValidUserParams<typeof endpoint>) {
     type EndpointElementReturnType = EndpointReturnTypes<typeof endpoint>[number];
@@ -32,8 +33,8 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     let database = config.database;
 
     if (endpoint !== "/chains") {
-        // TODO: Document required database setup
         const q = query_params as ValidUserParams<typeof endpoint>;
+        // TODO: Document required database setup
         database = `${q.chain}_tokens_v1`;
     }
 
@@ -65,7 +66,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
             filters = filters.replace(
                 "(from = {from: String}) AND (to = {to: String})",
                 "((from = {from: String}) OR (to = {to: String}))",
-            )
+            );
 
         if (q.block_range) {
             query += `${database}.transfers_block_num`;
@@ -93,13 +94,12 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     } else if (endpoint == "/{chain}/holders") {
         query += `SELECT account, value FROM (SELECT account, MAX(updated_at_block_num) AS last_updated FROM ${database}.account_balances ${filters} GROUP BY account) AS x INNER JOIN ${database}.account_balances AS y ON y.account = x.account AND y.updated_at_block_num = x.last_updated ${filters} ORDER BY value DESC`;
     } else if (endpoint == "/chains") {
-        // TODO: More flexible to account for different chains ?
-        query +=
-            `SELECT 'wax' as chain, MAX(block_num) as block_num`
-            + ` FROM wax_tokens_v1.cursors GROUP BY id`
-            + ` UNION ALL`
-            + ` SELECT 'eos' as chain, MAX(block_num) as block_num`
-            + ` FROM eos_tokens_v1.cursors GROUP BY id`;
+        for (const o of SupportedChains._def.options)
+            query += 
+                `SELECT '${o.value}' as chain, MAX(block_num) as block_num`
+                + ` FROM ${o.value}_tokens_v1.cursors GROUP BY id`
+                + ` UNION ALL `;
+        query = query.substring(0, query.lastIndexOf(' UNION')); // Remove last item ` UNION`
     } else if (endpoint == "/{chain}/transfers/{trx_id}") {
         query += `SELECT * FROM ${database}.transfer_events ${filters} ORDER BY action_index`;
     } else if (endpoint == "/{chain}/tokens") {

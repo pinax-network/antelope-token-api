@@ -44,5 +44,6 @@ export const config = z.object({
     username: z.string(),
     password: z.string(),
     maxLimit: z.coerce.number(),
-    verbose: z.coerce.boolean(),
+    // `z.coerce.boolean` doesn't parse boolean string values as expected (see https://github.com/colinhacks/zod/issues/1630)
+    verbose: z.coerce.string().transform((val) => val.toLowerCase() === "true"),
 }).parse(opts);

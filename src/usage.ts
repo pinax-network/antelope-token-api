@@ -70,14 +70,18 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
         if (q.block_range) {
             query += `${database}.transfers_block_num`;
-            console.log(q.block_range);
+
             if (q.block_range[0] && q.block_range[1]) {
-                filters += "AND (block_num >= {min_block: int} AND block_num <= {max_block: int})";
+                filters += 
+                    `${filters.length ? "AND" : "WHERE"}` +
+                    ` (block_num >= {min_block: int} AND block_num <= {max_block: int})`;
                 // Use Min/Max to account for any ordering of parameters
                 additional_query_params.min_block = Math.min(q.block_range[0], q.block_range[1]);
                 additional_query_params.max_block = Math.max(q.block_range[0], q.block_range[1]);
             } else if (q.block_range[0]) {
-                filters += "AND (block_num >= {min_block: int})";
+                filters += 
+                    `${filters.length ? "AND" : "WHERE"}` +
+                    ` (block_num >= {min_block: int})`;
                 additional_query_params.min_block = q.block_range[0];
             }
         } else if (q.from) {

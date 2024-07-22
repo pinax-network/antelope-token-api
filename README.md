@@ -38,7 +38,7 @@
 
 ## Requirements
 
-- [ClickHouse](clickhouse.com/), databases should follow a `{chain}_tokens_{version}` naming scheme. Tables can be created using the [`schema.sql`](./schema.sql) definitions.
+- [ClickHouse](clickhouse.com/), databases should follow a `{chain}_tokens_{version}` naming scheme. Database tables can be setup using the [`schema.sql`](./schema.sql) definitions created by the [`create_schema.sh`](./create_schema.sh) script.
 - A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/streamingfast/substreams-sink-sql). You should use the generated [`protobuf` files](tsp-output/@typespec/protobuf) to build your substream. This Token API makes use of the [`substreams-antelope-tokens`](https://github.com/pinax-network/substreams-antelope-tokens/) substream.
 
 ## Quick start

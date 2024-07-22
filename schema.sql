@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS cursors ON CLUSTER antelope
     block_num Int64,
     block_id  String
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (id)
         ORDER BY (id);
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS transfer_events ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (trx_id, action_index)
         ORDER BY (trx_id, action_index);
 
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS balance_change_events ON CLUSTER antelope
     block_num     UInt64,
     timestamp     DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (account, block_num, trx_id, action_index)
         ORDER BY (account, block_num, trx_id, action_index);
 
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS supply_change_events ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (contract, block_num, trx_id, action_index)
         ORDER BY (contract, block_num, trx_id, action_index);
 
@@ -117,7 +117,7 @@ CREATE TABLE IF NOT EXISTS issue_events ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (contract, symcode, to, amount, trx_id, action_index)
         ORDER BY (contract, symcode, to, amount, trx_id, action_index);
 
@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS retire_events ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (contract, symcode, amount, trx_id, action_index)
         ORDER BY (contract, symcode, amount, trx_id, action_index);
 
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS create_events ON CLUSTER antelope
     block_num      UInt64,
     timestamp      DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (contract, symcode, trx_id, action_index)
         ORDER BY (contract, symcode, trx_id, action_index);
 
@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS account_balances ON CLUSTER antelope
     updated_at_block_num UInt64,
     updated_at_timestamp DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree(updated_at_block_num)
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num)
         PRIMARY KEY (account, contract, symcode)
         ORDER BY (account, contract, symcode, value);
 
@@ -222,7 +222,7 @@ CREATE TABLE IF NOT EXISTS historical_account_balances ON CLUSTER antelope
     block_num            UInt64,
     timestamp            DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (block_num, account, contract, symcode)
         ORDER BY (block_num, account, contract, symcode, value);
 
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS token_holders ON CLUSTER antelope
     updated_at_timestamp DateTime,
     has_positive_balance UInt8
 )
-    ENGINE = ReplicatedReplacingMergeTree(updated_at_block_num, has_positive_balance)
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num, has_positive_balance)
         PRIMARY KEY (has_positive_balance, contract, symcode)
         ORDER BY (has_positive_balance, contract, symcode, value);
 
@@ -293,7 +293,7 @@ CREATE TABLE IF NOT EXISTS token_supplies ON CLUSTER antelope
     updated_at_block_num UInt64,
     updated_at_timestamp DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree(updated_at_block_num)
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num)
         PRIMARY KEY (contract, symcode, issuer)
         ORDER BY (contract, symcode, issuer);
 
@@ -329,7 +329,7 @@ CREATE TABLE IF NOT EXISTS historical_token_supplies ON CLUSTER antelope
     block_num            UInt64,
     timestamp            DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (block_num, contract, symcode, issuer)
         ORDER BY (block_num, contract, symcode, issuer);
 
@@ -369,7 +369,7 @@ CREATE TABLE IF NOT EXISTS transfers_from ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (from, to, contract, symcode, trx_id, action_index)
         ORDER BY (from, to, contract, symcode, trx_id, action_index);
 
@@ -412,7 +412,7 @@ CREATE TABLE IF NOT EXISTS historical_transfers_from ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (block_num, from, to, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, from, to, contract, symcode, trx_id, action_index);
 
@@ -455,7 +455,7 @@ CREATE TABLE IF NOT EXISTS transfers_to ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (to, contract, symcode, trx_id, action_index)
         ORDER BY (to, contract, symcode, trx_id, action_index);
 
@@ -498,7 +498,7 @@ CREATE TABLE IF NOT EXISTS historical_transfers_to ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (block_num, to, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, to, contract, symcode, trx_id, action_index);
 
@@ -541,7 +541,7 @@ CREATE TABLE IF NOT EXISTS transfers_block_num ON CLUSTER antelope
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree()
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (block_num, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, contract, symcode, trx_id, action_index);
 

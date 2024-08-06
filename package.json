@@ -37,7 +37,7 @@
     "lint": "export APP_VERSION=$(git rev-parse --short HEAD) && bun run tsc --noEmit --skipLibCheck --pretty",
     "start": "export APP_VERSION=$(git rev-parse --short HEAD) && bun index.ts",
     "test": "bun test --coverage",
-    "types": "bun run tsp compile ./src/typespec && bun run typed-openapi ./tsp-output/@typespec/openapi3/openapi.json -o ./src/types/zod.gen.ts -r zod",
+    "types": "bun run tsp compile ./src/typespec && bun run kubb",
     "types:check": "bun run tsp compile ./src/typespec --no-emit --pretty --warn-as-error",
     "types:format": "bun run tsp format src/typespec/**/*.tsp",
     "types:watch": "bun run tsp compile ./src/typespec --watch --pretty --warn-as-error"

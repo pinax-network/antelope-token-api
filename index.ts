@@ -9,7 +9,6 @@ import { logger } from './src/logger.js';
 import * as prometheus from './src/prometheus.js';
 import { makeUsageQuery } from "./src/usage.js";
 import { APIErrorResponse } from "./src/utils.js";
-// import { fixEndpointParametersCoercion } from "./src/types/api.js";
 
 import type { Context } from "hono";
 import type { EndpointReturnTypes, UsageEndpoints, ValidPathParams, ValidUserParams } from "./src/types/api.js";

@@ -1,11 +1,11 @@
 import { ZodError } from "zod";
 
 import type { Context } from "hono";
-import type { APIError } from "./types/zod.gen.js";
+import type { ApiErrorSchema } from "./types/zod.gen.js";
 import { logger } from "./logger.js";
 import * as prometheus from "./prometheus.js";
 
-export function APIErrorResponse(ctx: Context, status: APIError["status"], code: APIError["code"], err: unknown) {
+export function APIErrorResponse(ctx: Context, status: ApiErrorSchema["status"], code: ApiErrorSchema["code"], err: unknown) {
     let message = "An unexpected error occured";
 
     if (typeof err === "string") {
@@ -25,5 +25,5 @@ export function APIErrorResponse(ctx: Context, status: APIError["status"], code:
     logger.error(api_error);
     prometheus.request_error.inc({ pathname: ctx.req.path, status });
 
-    return ctx.json<APIError, typeof status>(api_error, status);
+    return ctx.json<ApiErrorSchema, typeof status>(api_error, status);
 }

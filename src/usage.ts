@@ -2,12 +2,12 @@ import { makeQuery } from "./clickhouse/makeQuery.js";
 import { APIErrorResponse } from "./utils.js";
 
 import type { Context } from "hono";
-import type { AdditionalQueryParams, EndpointReturnTypes, UsageEndpoints, UsageResponse, ValidUserParams } from "./types/api.js";
+import type { AdditionalQueryParams, UsageEndpoints, UsageResponse, ValidUserParams } from "./types/api.js";
 import { config } from "./config.js";
-import { SupportedChains } from "./types/zod.gen.js";
+import { supportedChainsSchema } from "./types/zod.gen.js";
 
 export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, user_params: ValidUserParams<typeof endpoint>) {
-    type EndpointElementReturnType = EndpointReturnTypes<typeof endpoint>[number];
+    type UsageElementReturnType = UsageResponse<typeof endpoint>[number];
 
     let { page, ...query_params } = user_params;
 
@@ -98,10 +98,10 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     } else if (endpoint == "/{chain}/holders") {
         query += `SELECT account, value FROM (SELECT account, MAX(updated_at_block_num) AS last_updated FROM ${database}.account_balances ${filters} GROUP BY account) AS x INNER JOIN ${database}.account_balances AS y ON y.account = x.account AND y.updated_at_block_num = x.last_updated ${filters} ORDER BY value DESC`;
     } else if (endpoint == "/chains") {
-        for (const o of SupportedChains._def.options)
+        for (const chain of supportedChainsSchema._def.values)
             query += 
-                `SELECT '${o.value}' as chain, MAX(block_num) as block_num`
-                + ` FROM ${o.value}_tokens_v1.cursors GROUP BY id`
+                `SELECT '${chain}' as chain, MAX(block_num) as block_num`
+                + ` FROM ${chain}_tokens_v1.cursors GROUP BY id`
                 + ` UNION ALL `;
         query = query.substring(0, query.lastIndexOf(' UNION')); // Remove last item ` UNION`
     } else if (endpoint == "/{chain}/transfers/{trx_id}") {
@@ -116,7 +116,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     let query_results;
     additional_query_params.offset = query_params.limit * (page - 1);
     try {
-        query_results = await makeQuery<EndpointElementReturnType>(query, { ...query_params, ...additional_query_params });
+        query_results = await makeQuery<UsageElementReturnType>(query, { ...query_params, ...additional_query_params });
     } catch (err) {
         return APIErrorResponse(ctx, 500, "bad_database_response", err);
     }
@@ -137,7 +137,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     t = v; // Error
     */
 
-    return ctx.json<UsageResponse, 200>({
+    return ctx.json<UsageResponse<typeof endpoint>, 200>({
         // @ts-ignore        
         data: query_results.data,
         meta: {

@@ -3,16 +3,16 @@ import openapi from "./tsp-output/@typespec/openapi3/openapi.json";
 
 import { Hono } from "hono";
 import { z } from 'zod';
-import { EndpointByMethod } from './src/types/zod.gen.js';
+import { paths } from './src/types/zod.gen.js';
 import { APP_VERSION } from "./src/config.js";
 import { logger } from './src/logger.js';
 import * as prometheus from './src/prometheus.js';
 import { makeUsageQuery } from "./src/usage.js";
 import { APIErrorResponse } from "./src/utils.js";
-import { fixEndpointParametersCoercion } from "./src/types/api.js";
+// import { fixEndpointParametersCoercion } from "./src/types/api.js";
 
 import type { Context } from "hono";
-import type { EndpointParameters, EndpointReturnTypes, UsageEndpoints } from "./src/types/api.js";
+import type { EndpointReturnTypes, UsageEndpoints, ValidPathParams, ValidUserParams } from "./src/types/api.js";
 
 function AntelopeTokenAPI() {
     const app = new Hono();
@@ -63,31 +63,28 @@ function AntelopeTokenAPI() {
         async (_) => new Response(await prometheus.registry.metrics(), { headers: { "Content-Type": prometheus.registry.contentType } })
     );
 
-    // Call once
-    fixEndpointParametersCoercion();
-    
     const createUsageEndpoint = (endpoint: UsageEndpoints) => app.get(
         // Hono using different syntax than OpenAPI for path parameters
         // `/{path_param}` (OpenAPI) VS `/:path_param` (Hono)
         endpoint.replace(/{([^}]+)}/g, ":$1"),
         async (ctx: Context) => {
-            const result = EndpointByMethod["get"][endpoint].parameters.safeParse({
-                query: ctx.req.query(),
-                path: ctx.req.param()
-            }) as z.SafeParseSuccess<EndpointParameters<typeof endpoint>>;
-
-            if (result.success) {
+            // Use `unknown` for undefined schemas definitions in `zod.gen.ts`
+            const path_params_schema = paths[endpoint]["get"]["parameters"]["path"] ?? z.unknown();
+            const query_params_schema = paths[endpoint]["get"]["parameters"]["query"] ?? z.unknown();
+            const path_params = path_params_schema.safeParse(ctx.req.param());
+            const query_params = query_params_schema.safeParse(ctx.req.query());
+            
+            if (path_params.success && query_params.success) {
                 return makeUsageQuery(
                     ctx,
                     endpoint,
                     {
-                        ...result.data.query,
-                        // Path parameters may not always be present
-                        ...("path" in result.data ? result.data.path : {})
-                    }
+                        ...path_params.data as ValidPathParams<typeof endpoint>,
+                        ...query_params.data
+                    } as ValidUserParams<typeof endpoint>
                 );
             } else {
-                return APIErrorResponse(ctx, 400, "bad_query_input", result.error);
+                return APIErrorResponse(ctx, 400, "bad_query_input", { ...path_params.error, ...query_params.error });
             }
         }
     );

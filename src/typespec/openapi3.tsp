@@ -12,7 +12,7 @@ using TypeSpec.OpenAPI;
         name: "MIT",
         url: "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
     },
-    version: "3.2.0"
+    version: "4.0.0"
 }) // From @typespec/openapi
 namespace AntelopeTokenAPI;
 

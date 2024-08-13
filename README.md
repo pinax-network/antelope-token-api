@@ -11,16 +11,16 @@
 
 ### Usage
 
-| Method | Path | Description |
-| :---: | --- | --- |
-| GET <br>`text/html` | `/` | [Swagger](https://swagger.io/) API playground |
-| GET <br>`application/json` | `/chains` | Information about the chains and latest head block in the database |
-| GET <br>`application/json` | `/{chain}/balance` | Balances of an account. |
-| GET <br>`application/json` | `/{chain}/holders` | List of holders of a token |
-| GET <br>`application/json` | `/{chain}/supply` | Total supply for a token |
-| GET <br>`application/json` | `/{chain}/tokens` | List of available tokens |
-| GET <br>`application/json` | `/{chain}/transfers` | All transfers related to a token |
-| GET <br>`application/json` | `/{chain}/transfers/{trx_id}` | Specific transfer related to a token |
+| Method | Path | Query parameters<br>(* = **Required**) | Description |
+| :---: | --- | --- | --- |
+| GET <br>`text/html` | `/` | - | [Swagger](https://swagger.io/) API playground |
+| GET <br>`application/json` | `/chains` | `limit`<br>`page` | Information about the chains and latest head block in the database |
+| GET <br>`application/json` | `/{chain}/balance` | `block_num`<br>`contract`<br>`symcode`<br>**`account*`**<br>`limit`<br>`page` | Balances of an account. |
+| GET <br>`application/json` | `/{chain}/holders` | **`contract*`**<br>**`symcode*`**<br>`limit`<br>`page` | List of holders of a token |
+| GET <br>`application/json` | `/{chain}/supply` | `block_num`<br>`issuer`<br>**`contract*`**<br>**`symcode*`**<br>`limit`<br>`page` | Total supply for a token |
+| GET <br>`application/json` | `/{chain}/tokens` | `limit`<br>`page` | List of available tokens |
+| GET <br>`application/json` | `/{chain}/transfers` | `block_range`<br>`from`<br>`to`<br>`contract`<br>`symcode`<br>`limit`<br>`page` | All transfers related to a token |
+| GET <br>`application/json` | `/{chain}/transfers/{trx_id}` | `limit`<br>`page` | Specific transfer related to a token |
 
 ### Docs
 
@@ -39,22 +39,75 @@
 ## Requirements
 
 - [ClickHouse](clickhouse.com/), databases should follow a `{chain}_tokens_{version}` naming scheme. Database tables can be setup using the [`schema.sql`](./schema.sql) definitions created by the [`create_schema.sh`](./create_schema.sh) script.
-- A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/streamingfast/substreams-sink-sql). You should use the generated [`protobuf` files](tsp-output/@typespec/protobuf) to build your substream. This Token API makes use of the [`substreams-antelope-tokens`](https://github.com/pinax-network/substreams-antelope-tokens/) substream.
+- A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/pinax-network/substreams-sink-sql). You should use the generated [`protobuf` files](tsp-output/@typespec/protobuf) to build your substream. This Token API makes use of the [`substreams-antelope-tokens`](https://github.com/pinax-network/substreams-antelope-tokens/) substream.
 
-## Quick start
+### API stack architecture
 
-Install [Bun](https://bun.sh/)
+![Token API architecture diagram](token_api_architecture_diagram.png)
+
+### Setting up the database backend (ClickHouse)
+
+#### Without a cluster
+
+Example on how to set up the ClickHouse backend for sinking [EOS](https://pinax.network/en/chain/eos) data.
+
+1. Start the ClickHouse server
 
 ```console
-$ bun install
-$ bun dev
+clickhouse server
 ```
 
-**Tests**
+2. Create the token database
+
 ```console
-$ bun lint
-$ bun test
+echo "CREATE DATABASE eos_tokens_v1" | clickhouse client -h <host> --port 9000 -d <database> -u <user> --password <password>
 ```
+
+3. Run the [`create_schema.sh`](./create_schema.sh) script
+
+```console
+./create_schema.sh -o /tmp/schema.sql
+```
+
+4. Execute the schema
+
+```console
+cat /tmp/schema.sql | clickhouse client -h <host> --port 9000 -d <database> -u <user> --password <password>
+```
+
+5. Run the [sink](https://github.com/pinax-network/substreams-sink-sql)
+
+```console
+substreams-sink-sql run clickhouse://<username>:<password>@<host>:9000/eos_tokens_v1 \
+https://github.com/pinax-network/substreams-antelope-tokens/releases/download/v0.4.0/antelope-tokens-v0.4.0.spkg `#Substreams package` \
+-e eos.substreams.pinax.network:443 `#Substreams endpoint` \
+1: `#Block range <start>:<end>` \
+--final-blocks-only --undo-buffer-size 1 --on-module-hash-mistmatch=warn --batch-block-flush-interval 100 --development-mode `#Additional flags`
+```
+
+6. Start the API
+
+```console
+# Will be available on locahost:8080 by default
+antelope-token-api --host <host> --database eos_tokens_v1 --username <username> --password <password> --verbose
+```
+
+#### With a cluster
+
+If you run ClickHouse in a [cluster](https://clickhouse.com/docs/en/architecture/cluster-deployment), change step 2 & 3:
+
+2. Create the token database
+
+```console
+echo "CREATE DATABASE eos_tokens_v1 ON CLUSTER <cluster>" | clickhouse client -h <host> --port 9000 -d <database> -u <user> --password <password>
+```
+
+3. Run the [`create_schema.sh`](./create_schema.sh) script
+
+```console
+./create_schema.sh -o /tmp/schema.sql -c <cluster>
+```
+
 
 ## [`Bun` Binary Releases](https://github.com/pinax-network/antelope-token-api/releases)
 
@@ -62,7 +115,7 @@ $ bun test
 > Linux x86 only
 
 ```console
-$ wget https://github.com/pinax-network/antelope-token-api/releases/download/v3.0.0/antelope-token-api
+$ wget https://github.com/pinax-network/antelope-token-api/releases/download/v4.0.0/antelope-token-api
 $ chmod +x ./antelope-token-api
 $ ./antelope-token-api --help                                                                                                       
 Usage: antelope-token-api [options]
@@ -105,12 +158,12 @@ VERBOSE=true
 
 - Pull from GitHub Container registry
 
-**For latest release**
+**For latest tagged release**
 ```bash
 docker pull ghcr.io/pinax-network/antelope-token-api:latest
 ```
 
-**For head of `develop` branch**
+**For head of `main` branch**
 ```bash
 docker pull ghcr.io/pinax-network/antelope-token-api:develop
 ```
@@ -128,3 +181,18 @@ docker run -it --rm --env-file .env ghcr.io/pinax-network/antelope-token-api
 ## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+### Quick start
+
+Install [Bun](https://bun.sh/)
+
+```console
+$ bun install
+$ bun dev
+```
+
+**Tests**
+```console
+$ bun lint
+$ bun test
+```

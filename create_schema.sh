@@ -21,8 +21,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 ON_CLUSTER_DIRECTIVE=""
+ENGINE_TYPE="ReplacingMergeTree()"
 if [ -n "$CLUSTER_NAME" ]; then
     ON_CLUSTER_DIRECTIVE="ON CLUSTER $CLUSTER_NAME"
+    ENGINE_TYPE="ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')"
 fi
 
 cat > $SCHEMA_FILE <<- EOM
@@ -44,7 +46,7 @@ CREATE TABLE IF NOT EXISTS cursors $ON_CLUSTER_DIRECTIVE
     block_num Int64,
     block_id  String
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (id)
         ORDER BY (id);
 
@@ -74,7 +76,7 @@ CREATE TABLE IF NOT EXISTS transfer_events $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (trx_id, action_index)
         ORDER BY (trx_id, action_index);
 
@@ -99,7 +101,7 @@ CREATE TABLE IF NOT EXISTS balance_change_events $ON_CLUSTER_DIRECTIVE
     block_num     UInt64,
     timestamp     DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (account, block_num, trx_id, action_index)
         ORDER BY (account, block_num, trx_id, action_index);
 
@@ -125,7 +127,7 @@ CREATE TABLE IF NOT EXISTS supply_change_events $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (contract, block_num, trx_id, action_index)
         ORDER BY (contract, block_num, trx_id, action_index);
 
@@ -150,7 +152,7 @@ CREATE TABLE IF NOT EXISTS issue_events $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (contract, symcode, to, amount, trx_id, action_index)
         ORDER BY (contract, symcode, to, amount, trx_id, action_index);
 
@@ -174,7 +176,7 @@ CREATE TABLE IF NOT EXISTS retire_events $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (contract, symcode, amount, trx_id, action_index)
         ORDER BY (contract, symcode, amount, trx_id, action_index);
 
@@ -197,7 +199,7 @@ CREATE TABLE IF NOT EXISTS create_events $ON_CLUSTER_DIRECTIVE
     block_num      UInt64,
     timestamp      DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (contract, symcode, trx_id, action_index)
         ORDER BY (contract, symcode, trx_id, action_index);
 
@@ -255,7 +257,7 @@ CREATE TABLE IF NOT EXISTS historical_account_balances $ON_CLUSTER_DIRECTIVE
     block_num            UInt64,
     timestamp            DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (block_num, account, contract, symcode)
         ORDER BY (block_num, account, contract, symcode, value);
 
@@ -362,7 +364,7 @@ CREATE TABLE IF NOT EXISTS historical_token_supplies $ON_CLUSTER_DIRECTIVE
     block_num            UInt64,
     timestamp            DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (block_num, contract, symcode, issuer)
         ORDER BY (block_num, contract, symcode, issuer);
 
@@ -402,7 +404,7 @@ CREATE TABLE IF NOT EXISTS transfers_from $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (from, to, contract, symcode, trx_id, action_index)
         ORDER BY (from, to, contract, symcode, trx_id, action_index);
 
@@ -445,7 +447,7 @@ CREATE TABLE IF NOT EXISTS historical_transfers_from $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (block_num, from, to, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, from, to, contract, symcode, trx_id, action_index);
 
@@ -488,7 +490,7 @@ CREATE TABLE IF NOT EXISTS transfers_to $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (to, contract, symcode, trx_id, action_index)
         ORDER BY (to, contract, symcode, trx_id, action_index);
 
@@ -531,7 +533,7 @@ CREATE TABLE IF NOT EXISTS historical_transfers_to $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (block_num, to, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, to, contract, symcode, trx_id, action_index);
 
@@ -574,7 +576,7 @@ CREATE TABLE IF NOT EXISTS transfers_block_num $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+    ENGINE = $ENGINE_TYPE
         PRIMARY KEY (block_num, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, contract, symcode, trx_id, action_index);
 

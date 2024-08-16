@@ -21,7 +21,10 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     // Don't add `limit` and `block_range` to WHERE clause
     for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range" && k !== "chain")) {
         const clickhouse_type = typeof query_params[k as keyof typeof query_params] === "number" ? "int" : "String";
-        filters += ` (${k} = {${k}: ${clickhouse_type}}) AND`;
+        if (k === 'symcode') // Special case to allow case-insensitive symcode input
+            filters += ` (${k} = upper({${k}: ${clickhouse_type}})) AND`;
+        else
+            filters += ` (${k} = {${k}: ${clickhouse_type}}) AND`;
     }
 
     filters = filters.substring(0, filters.lastIndexOf(' ')); // Remove last item ` AND`

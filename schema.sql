@@ -353,6 +353,49 @@ SELECT contract,
        timestamp AS updated_at_timestamp
 FROM supply_change_events;
 
+-- Table to store token transfers primarily indexed by the 'contract' field --
+CREATE TABLE IF NOT EXISTS transfers_contract ON CLUSTER "antelope"
+(
+    trx_id       String,
+    action_index UInt32,
+
+    contract     String,
+    symcode      String,
+
+    from         String,
+    to           String,
+    quantity     String,
+    memo         String,
+
+    precision    UInt32,
+    amount       Int64,
+    value        Float64,
+
+    block_num    UInt64,
+    timestamp    DateTime
+)
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
+        PRIMARY KEY (contract, symcode, trx_id, action_index)
+        ORDER BY (contract, symcode, trx_id, action_index);
+
+CREATE MATERIALIZED VIEW transfers_contract_mv ON CLUSTER "antelope"
+    TO transfers_contract
+AS
+SELECT trx_id,
+       action_index,
+       contract,
+       symcode,
+       from,
+       to,
+       quantity,
+       memo,
+       precision,
+       amount,
+       value,
+       block_num,
+       timestamp
+FROM transfer_events;
+
 -- Table to store token transfers primarily indexed by the 'from' field --
 CREATE TABLE IF NOT EXISTS transfers_from ON CLUSTER "antelope"
 (

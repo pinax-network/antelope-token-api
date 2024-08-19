@@ -23,7 +23,7 @@ done
 ON_CLUSTER_DIRECTIVE=""
 ENGINE_TYPE="ReplacingMergeTree()"
 if [ -n "$CLUSTER_NAME" ]; then
-    ON_CLUSTER_DIRECTIVE="ON CLUSTER $CLUSTER_NAME"
+    ON_CLUSTER_DIRECTIVE="ON CLUSTER \"$CLUSTER_NAME\""
     ENGINE_TYPE="ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')"
 fi
 

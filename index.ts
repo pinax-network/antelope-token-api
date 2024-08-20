@@ -72,7 +72,7 @@ async function AntelopeTokenAPI() {
 
     app.get(
         "/metrics",
-        async (_) => new Response(await prometheus.registry.metrics(), { headers: { "Content-Type": prometheus.registry.contentType } })
+        async (ctx: Context) => ctx.json<EndpointReturnTypes<"/metrics">, 200>(await prometheus.registry.getMetricsAsJSON())
     );
 
     // --------------------------

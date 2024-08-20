@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { paths } from './zod.gen.js';
+import { operations, paths } from './zod.gen.js';
 
 type GetEndpoints = typeof paths;
 export type EndpointReturnTypes<E extends keyof GetEndpoints> = z.infer<GetEndpoints[E]["get"]["responses"]["default"]>;
@@ -21,3 +21,14 @@ export type ValidUserParams<E extends UsageEndpoints> = EndpointParameters<E> ex
 export type AdditionalQueryParams = { offset?: number; min_block?: number; max_block?: number; };
 // Allow any valid parameters from the endpoint to be used as SQL query parameters
 export type ValidQueryParams = ValidUserParams<UsageEndpoints> & AdditionalQueryParams;
+
+// Map stripped operations name (e.g. `Usage_transfers` stripped to `transfers`) to endpoint paths (e.g. `/{chain}/transfers`)
+// This is used to map GraphQL operations to REST endpoints
+export const usageOperationsToEndpointsMap = Object.entries(operations).filter(([k, _]) => k.startsWith("Usage")).reduce(
+    (o, [k, v]) => Object.assign(
+        o, 
+        {
+            [k.split('_')[1] as string]: Object.entries(paths).find(([k_, v_]) => v_.get === v)?.[0]
+        }
+    ), {}
+) as { [key in string]: UsageEndpoints };

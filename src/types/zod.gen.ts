@@ -5,7 +5,7 @@ export const apiErrorSchema = z.object({ "status": z.union([z.literal(500), z.li
 export type ApiErrorSchema = z.infer<typeof apiErrorSchema>;
 
 
-export const balanceChangeSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.number(), "account": z.coerce.string(), "balance": z.coerce.string(), "balance_delta": z.coerce.number() });
+export const balanceChangeSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.string(), "account": z.coerce.string(), "balance": z.coerce.string(), "balance_delta": z.coerce.number() });
 export type BalanceChangeSchema = z.infer<typeof balanceChangeSchema>;
 
 
@@ -25,15 +25,15 @@ export const responseMetadataSchema = z.object({ "statistics": z.lazy(() => quer
 export type ResponseMetadataSchema = z.infer<typeof responseMetadataSchema>;
 
 
-export const supplySchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.number(), "issuer": z.coerce.string(), "max_supply": z.coerce.string(), "supply": z.coerce.string(), "supply_delta": z.coerce.number() });
+export const supplySchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.string(), "issuer": z.coerce.string(), "max_supply": z.coerce.string(), "supply": z.coerce.string(), "supply_delta": z.coerce.number() });
 export type SupplySchema = z.infer<typeof supplySchema>;
 
 
-export const supportedChainsSchema = z.enum(["eos", "wax"]);
+export const supportedChainsSchema = z.enum(["EOS", "WAX"]);
 export type SupportedChainsSchema = z.infer<typeof supportedChainsSchema>;
 
 
-export const transferSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.number(), "from": z.coerce.string(), "to": z.coerce.string(), "quantity": z.coerce.string(), "memo": z.coerce.string() });
+export const transferSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.string(), "from": z.coerce.string(), "to": z.coerce.string(), "quantity": z.coerce.string(), "memo": z.coerce.string() });
 export type TransferSchema = z.infer<typeof transferSchema>;
 
 
@@ -78,12 +78,12 @@ export type MonitoringHealthQueryResponseSchema = z.infer<typeof monitoringHealt
  /**
  * @description Metrics as text.
  */
-export const monitoringMetrics200Schema = z.coerce.string();
+export const monitoringMetrics200Schema = z.object({});
 export type MonitoringMetrics200Schema = z.infer<typeof monitoringMetrics200Schema>;
 /**
  * @description Metrics as text.
  */
-export const monitoringMetricsQueryResponseSchema = z.coerce.string();
+export const monitoringMetricsQueryResponseSchema = z.object({});
 export type MonitoringMetricsQueryResponseSchema = z.infer<typeof monitoringMetricsQueryResponseSchema>;
 
  /**

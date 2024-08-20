@@ -1,0 +1,209 @@
+type Query {
+  """
+  Balances of an account.
+  
+  Equivalent to GET /{chain}/balance
+  """
+  balance(account: String!, block_num: Int, chain: Chain!, contract: String, limit: Int, page: Int, symcode: String): Balance
+
+  """
+  List of available Antelope chains and corresponding latest block for which data is available.
+  
+  Equivalent to GET /chains
+  """
+  chains(limit: Int, page: Int): Chains
+
+  """
+  Checks database connection.
+  
+  Equivalent to GET /health
+  """
+  health: String
+
+  """
+  List of holders of a token.
+  
+  Equivalent to GET /{chain}/holders
+  """
+  holders(chain: Chain!, contract: String!, limit: Int, page: Int, symcode: String!): Holders
+
+  """
+  Prometheus metrics.
+  
+  Equivalent to GET /metrics
+  """
+  metrics: JSON
+
+  """
+  Reflection endpoint to return OpenAPI JSON spec. Also used by Swagger to generate the frontpage.
+  
+  Equivalent to GET /openapi
+  """
+  openapi: JSON
+
+  """
+  Total supply for a token.
+  
+  Equivalent to GET /{chain}/supply
+  """
+  supply(block_num: Int, chain: Chain!, contract: String!, issuer: String, limit: Int, page: Int, symcode: String!): Supply
+
+  """
+  List of available tokens.
+  
+  Equivalent to GET /{chain}/tokens
+  """
+  tokens(chain: Chain!, limit: Int, page: Int): Tokens
+
+  """
+  Specific transfer related to a token.
+  
+  Equivalent to GET /{chain}/transfers/{trx_id}
+  """
+  transfer(chain: Chain!, limit: Int, page: Int, trx_id: String!): Transfer2
+
+  """
+  All transfers related to a token.
+  
+  Equivalent to GET /{chain}/transfers
+  """
+  transfers(block_range: [Int], chain: Chain!, contract: String, from: String, limit: Int, page: Int, symcode: String, to: String): Transfers
+
+  """
+  API version and Git short commit hash.
+  
+  Equivalent to GET /version
+  """
+  version: Version
+}
+
+type Balance {
+  data: [BalanceChange]!
+  meta: ResponseMetadata!
+}
+
+type BalanceChange {
+  account: String!
+  action_index: Int!
+  amount: BigInt!
+  balance: String!
+  balance_delta: BigInt!
+  block_num: Int!
+  contract: String!
+  precision: Int!
+  symcode: String!
+  timestamp: String!
+  trx_id: String!
+  value: Float!
+}
+
+"""
+The `BigInt` scalar type represents non-fractional signed whole numeric values.
+"""
+scalar BigInt
+
+type ResponseMetadata {
+  next_page: BigInt!
+  previous_page: BigInt!
+  statistics: Statistics!
+  total_pages: BigInt!
+  total_results: BigInt!
+}
+
+type Statistics {
+  bytes_read: BigInt!
+  elapsed: Float!
+  rows_read: BigInt!
+}
+
+enum Chain {
+  EOS
+  WAX
+}
+
+type Chains {
+  data: [DataListItem]!
+  meta: ResponseMetadata!
+}
+
+type DataListItem {
+  block_num: Int!
+  chain: SupportedChains!
+}
+
+enum SupportedChains {
+  EOS
+  WAX
+}
+
+type Holders {
+  data: [Holder]!
+  meta: ResponseMetadata!
+}
+
+type Holder {
+  account: String!
+  balance: Float!
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+type Supply {
+  data: [Supply2]!
+  meta: ResponseMetadata!
+}
+
+type Supply2 {
+  action_index: Int!
+  amount: BigInt!
+  block_num: Int!
+  contract: String!
+  issuer: String!
+  max_supply: String!
+  precision: Int!
+  supply: String!
+  supply_delta: BigInt!
+  symcode: String!
+  timestamp: String!
+  trx_id: String!
+  value: Float!
+}
+
+type Tokens {
+  data: [Supply2]!
+  meta: ResponseMetadata!
+}
+
+type Transfer2 {
+  data: [Transfer]!
+  meta: ResponseMetadata!
+}
+
+type Transfer {
+  action_index: Int!
+  amount: BigInt!
+  block_num: Int!
+  contract: String!
+  from: String!
+  memo: String!
+  precision: Int!
+  quantity: String!
+  symcode: String!
+  timestamp: String!
+  to: String!
+  trx_id: String!
+  value: Float!
+}
+
+type Transfers {
+  data: [Transfer]!
+  meta: ResponseMetadata!
+}
+
+type Version {
+  commit: String!
+  version: String!
+}

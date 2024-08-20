@@ -1,21 +1,22 @@
-import client from './src/clickhouse/client.js';
-import openapi from "./tsp-output/@typespec/openapi3/openapi.json";
-
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
+import { type RootResolver, graphqlServer } from '@hono/graphql-server';
+import { buildSchema } from 'graphql';
 import { z } from 'zod';
-import { paths } from './src/types/zod.gen.js';
+
+import client from './src/clickhouse/client.js';
+import openapi from "./static/@typespec/openapi3/openapi.json";
+import * as prometheus from './src/prometheus.js';
 import { APP_VERSION } from "./src/config.js";
 import { logger } from './src/logger.js';
-import * as prometheus from './src/prometheus.js';
 import { makeUsageQuery } from "./src/usage.js";
 import { APIErrorResponse } from "./src/utils.js";
+import { usageOperationsToEndpointsMap, type EndpointReturnTypes, type UsageEndpoints, type ValidPathParams, type ValidUserParams } from "./src/types/api.js";
+import { paths } from './src/types/zod.gen.js';
 
-import type { Context } from "hono";
-import type { EndpointReturnTypes, UsageEndpoints, ValidPathParams, ValidUserParams } from "./src/types/api.js";
-
-function AntelopeTokenAPI() {
+async function AntelopeTokenAPI() {
     const app = new Hono();
 
+    // Tracking all incoming requests
     app.use(async (ctx: Context, next) => {
         const pathname = ctx.req.path;
         logger.trace(`Incoming request: [${pathname}]`);
@@ -23,6 +24,10 @@ function AntelopeTokenAPI() {
 
         await next();
     });
+
+    // ---------------
+    // --- Swagger ---
+    // ---------------
 
     app.get(
         "/",
@@ -34,6 +39,10 @@ function AntelopeTokenAPI() {
         async (_) => new Response(Bun.file("./swagger/favicon.ico"))
     );
 
+    // ------------
+    // --- Docs ---
+    // ------------
+
     app.get(
         "/openapi",
         async (ctx: Context) => ctx.json<{ [key: string]: EndpointReturnTypes<"/openapi">; }, 200>(openapi)
@@ -43,6 +52,10 @@ function AntelopeTokenAPI() {
         "/version",
         async (ctx: Context) => ctx.json<EndpointReturnTypes<"/version">, 200>(APP_VERSION)
     );
+
+    // ------------------
+    // --- Monitoring ---
+    // ------------------
 
     app.get(
         "/health",
@@ -61,6 +74,10 @@ function AntelopeTokenAPI() {
         "/metrics",
         async (_) => new Response(await prometheus.registry.metrics(), { headers: { "Content-Type": prometheus.registry.contentType } })
     );
+
+    // --------------------------
+    // --- REST API endpoints ---
+    // --------------------------
 
     const createUsageEndpoint = (endpoint: UsageEndpoints) => app.get(
         // Hono using different syntax than OpenAPI for path parameters
@@ -88,17 +105,57 @@ function AntelopeTokenAPI() {
         }
     );
 
-    createUsageEndpoint("/{chain}/balance");
-    createUsageEndpoint("/chains");
-    createUsageEndpoint("/{chain}/holders");
-    createUsageEndpoint("/{chain}/supply");
-    createUsageEndpoint("/{chain}/tokens");
-    createUsageEndpoint("/{chain}/transfers");
-    createUsageEndpoint("/{chain}/transfers/{trx_id}");
+    // Create all API endpoints interacting with DB
+    Object.values(usageOperationsToEndpointsMap).forEach(e => createUsageEndpoint(e));
+
+    // ------------------------
+    // --- GraphQL endpoint ---
+    // ------------------------
+
+    const schema = buildSchema(await Bun.file("./static/@openapi-to-graphql/graphql/schema.graphql").text());
+    const rootResolver: RootResolver = async (ctx?: Context) => {
+        if (ctx) {
+            const createGraphQLUsageResolver = (endpoint: UsageEndpoints) => 
+                async (args: ValidUserParams<typeof endpoint>) => await (await makeUsageQuery(ctx, endpoint, { ...args })).json();
+
+            return Object.keys(usageOperationsToEndpointsMap).reduce(
+                // SQL queries endpoints
+                (resolver, op) => Object.assign(
+                    resolver,
+                    {
+                        [op]: createGraphQLUsageResolver(usageOperationsToEndpointsMap[op] as UsageEndpoints)
+                    }
+                ),
+                // Other endpoints
+                {
+                    health: async () => {
+                        const response = await client.ping();
+                        return response.success ? "OK" : `[500] bad_database_response: ${response.error.message}`;
+                    },
+                    openapi: () => openapi,
+                    metrics: async () => await prometheus.registry.getMetricsAsJSON(),
+                    version: () => APP_VERSION
+                }
+            );
+        }
+    };
+
+    app.use(
+        '/graphql',
+        graphqlServer({
+            schema,
+            rootResolver,
+            graphiql: true, // if `true`, presents GraphiQL when the GraphQL endpoint is loaded in a browser.
+        })
+    );
+
+    // -------------
+    // --- Miscs ---
+    // -------------
 
     app.notFound((ctx: Context) => APIErrorResponse(ctx, 404, "route_not_found", `Path not found: ${ctx.req.method} ${ctx.req.path}`));
 
     return app;
 }
 
-export default AntelopeTokenAPI();
+export default await AntelopeTokenAPI();

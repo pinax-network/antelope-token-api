@@ -36,10 +36,14 @@
 | GET <br>`text/plain` | `/health` | Checks database connection |
 | GET <br>`text/plain` | `/metrics` | [Prometheus](https://prometheus.io/) metrics |
 
+## GraphQL
+
+Go to `/graphql` for a GraphIQL interface.
+
 ## Requirements
 
 - [ClickHouse](clickhouse.com/), databases should follow a `{chain}_tokens_{version}` naming scheme. Database tables can be setup using the [`schema.sql`](./schema.sql) definitions created by the [`create_schema.sh`](./create_schema.sh) script.
-- A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/pinax-network/substreams-sink-sql). You should use the generated [`protobuf` files](tsp-output/@typespec/protobuf) to build your substream. This Token API makes use of the [`substreams-antelope-tokens`](https://github.com/pinax-network/substreams-antelope-tokens/) substream.
+- A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/pinax-network/substreams-sink-sql). You should use the generated [`protobuf` files](static/@typespec/protobuf) to build your substream. This Token API makes use of the [`substreams-antelope-tokens`](https://github.com/pinax-network/substreams-antelope-tokens/) substream.
 
 ### API stack architecture
 

@@ -14,6 +14,6 @@ The data models used for both outputs can be found in [`models.tsp`](./models.ts
 
 ## Compiling definitions
 
-Use the `bun run types:watch` to auto-compile the definitions on file changes. Generated outputs can be found in the [`tsp-output`](/tsp-output/) folder.
+Use the `bun run types:watch` to auto-compile the definitions on file changes. Generated outputs can be found in the [`static`](/static/) folder.
 
 Typescript compiler options can be found in [`tspconfig.yaml`](/tspconfig.yaml). 

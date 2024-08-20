@@ -37,8 +37,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
     if (endpoint !== "/chains") {
         const q = query_params as ValidUserParams<typeof endpoint>;
-        // TODO: Document required database setup
-        database = `${q.chain}_tokens_v1`;
+        database = `${q.chain.toLowerCase()}_tokens_v1`;
     }
 
     if (endpoint == "/{chain}/balance" || endpoint == "/{chain}/supply") {
@@ -104,7 +103,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
         for (const chain of supportedChainsSchema._def.values)
             query += 
                 `SELECT '${chain}' as chain, MAX(block_num) as block_num`
-                + ` FROM ${chain}_tokens_v1.cursors GROUP BY id`
+                + ` FROM ${chain.toLowerCase()}_tokens_v1.cursors GROUP BY id`
                 + ` UNION ALL `;
         query = query.substring(0, query.lastIndexOf(' UNION')); // Remove last item ` UNION`
     } else if (endpoint == "/{chain}/transfers/{trx_id}") {

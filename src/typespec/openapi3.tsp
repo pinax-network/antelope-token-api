@@ -12,7 +12,7 @@ using TypeSpec.OpenAPI;
         name: "MIT",
         url: "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
     },
-    version: "4.0.0"
+    version: "5.0.0"
 }) // From @typespec/openapi
 namespace AntelopeTokenAPI;
 
@@ -38,10 +38,12 @@ model APIError {
     message: string;
 }
 
+alias TimestampType = string;
+
 // Models will be present in the OpenAPI components
-model Transfer is Models.Transfer<unixTimestamp32>;
-model BalanceChange is Models.BalanceChange<unixTimestamp32>;
-model Supply is Models.Supply<unixTimestamp32>;
+model Transfer is Models.Transfer<TimestampType>;
+model BalanceChange is Models.BalanceChange<TimestampType>;
+model Supply is Models.Supply<TimestampType>;
 model Holder {
     account: BalanceChange.account;
     balance: BalanceChange.value;
@@ -71,8 +73,8 @@ model UsageResponse<T> {
 }
 
 enum SupportedChains {
-    EOS: "eos",
-    WAX: "wax"
+    EOS,
+    WAX
 }
 
 // Alias will *not* be present in the OpenAPI components.
@@ -84,7 +86,7 @@ alias PaginationQueryParams = {
 };
 
 // Helper aliases for accessing underlying properties
-alias BlockInfo = Models.BlockInfo<unixTimestamp32>;
+alias BlockInfo = Models.BlockInfo<TimestampType>;
 alias TokenIdentifier = Models.Scope;
 
 @tag("Usage")
@@ -240,5 +242,5 @@ interface Monitoring {
     @summary("Prometheus metrics")
     @route("/metrics")
     @get
-    metrics(): string;
+    metrics(): Record<unknown>;
 }

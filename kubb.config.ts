@@ -5,7 +5,7 @@ export default defineConfig(() => {
     return {
         root: '.',
         input: {
-            path: './tsp-output/@typespec/openapi3/openapi.json',
+            path: './static/@typespec/openapi3/openapi.json',
         },
         output: {
             path: './src/types'

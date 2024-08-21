@@ -40,6 +40,13 @@
 
 Go to `/graphql` for a GraphIQL interface.
 
+### Additional notes
+
+- For the `block_range` parameter in `transfers`, you can pass a single integer value (low bound) or an array of two values (inclusive range).
+- If you input the same account in the `from` and `to` field for transfers, you'll get all inbound and outbound transfers for that account.
+- The more parameters you add (i.e. the more precise your query is), the faster it should be for the back-end to fetch it.
+- Don't forget to request for the `meta` fields in the response to get access to pagination and statistics !
+
 ## Requirements
 
 - [ClickHouse](clickhouse.com/), databases should follow a `{chain}_tokens_{version}` naming scheme. Database tables can be setup using the [`schema.sql`](./schema.sql) definitions created by the [`create_schema.sh`](./create_schema.sh) script.

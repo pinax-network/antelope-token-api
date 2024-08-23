@@ -21,10 +21,14 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 ON_CLUSTER_DIRECTIVE=""
-ENGINE_TYPE="ReplacingMergeTree()"
+ENGINE_DEFAULT="ReplacingMergeTree()"
+ENGINE_VER="ReplacingMergeTree(ver)"
+ENGINE_VER_DELETE="ReplacingMergeTree(ver, has_null_balance)"
 if [ -n "$CLUSTER_NAME" ]; then
     ON_CLUSTER_DIRECTIVE="ON CLUSTER \"$CLUSTER_NAME\""
-    ENGINE_TYPE="ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')"
+    ENGINE_DEFAULT="ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')"
+    ENGINE_VER="ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', ver)"
+    ENGINE_VER_DELETE="ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', ver, has_null_balance)"
 fi
 
 cat > $SCHEMA_FILE <<- EOM
@@ -46,7 +50,7 @@ CREATE TABLE IF NOT EXISTS cursors $ON_CLUSTER_DIRECTIVE
     block_num Int64,
     block_id  String
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (id)
         ORDER BY (id);
 
@@ -76,7 +80,7 @@ CREATE TABLE IF NOT EXISTS transfer_events $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (trx_id, action_index)
         ORDER BY (trx_id, action_index);
 
@@ -101,7 +105,7 @@ CREATE TABLE IF NOT EXISTS balance_change_events $ON_CLUSTER_DIRECTIVE
     block_num     UInt64,
     timestamp     DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (account, block_num, trx_id, action_index)
         ORDER BY (account, block_num, trx_id, action_index);
 
@@ -127,7 +131,7 @@ CREATE TABLE IF NOT EXISTS supply_change_events $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (contract, block_num, trx_id, action_index)
         ORDER BY (contract, block_num, trx_id, action_index);
 
@@ -152,7 +156,7 @@ CREATE TABLE IF NOT EXISTS issue_events $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (contract, symcode, to, amount, trx_id, action_index)
         ORDER BY (contract, symcode, to, amount, trx_id, action_index);
 
@@ -176,7 +180,7 @@ CREATE TABLE IF NOT EXISTS retire_events $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (contract, symcode, amount, trx_id, action_index)
         ORDER BY (contract, symcode, amount, trx_id, action_index);
 
@@ -199,7 +203,7 @@ CREATE TABLE IF NOT EXISTS create_events $ON_CLUSTER_DIRECTIVE
     block_num      UInt64,
     timestamp      DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (contract, symcode, trx_id, action_index)
         ORDER BY (contract, symcode, trx_id, action_index);
 
@@ -210,177 +214,159 @@ CREATE TABLE IF NOT EXISTS create_events $ON_CLUSTER_DIRECTIVE
 -- Table to store up to date balances per account and token
 CREATE TABLE IF NOT EXISTS account_balances $ON_CLUSTER_DIRECTIVE
 (
-    account              String,
+    trx_id        String,
+    action_index  UInt32,
 
-    contract             String,
-    symcode              String,
-    balance              String,
+    contract      String,
+    symcode       String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    account       String,
+    balance       String,
+    balance_delta Int64,
 
-    updated_at_block_num UInt64,
-    updated_at_timestamp DateTime
+    precision     UInt32,
+    amount        Int64,
+    value         Float64,
+
+    block_num     UInt64,
+    timestamp     DateTime,
+    ver           UInt64
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num)
+    ENGINE = $ENGINE_VER
         PRIMARY KEY (account, contract, symcode)
-        ORDER BY (account, contract, symcode, value);
+        ORDER BY (account, contract, symcode);
 
-CREATE MATERIALIZED VIEW account_balances_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS account_balances_mv $ON_CLUSTER_DIRECTIVE
     TO account_balances
 AS
-SELECT account,
-       contract,
-       symcode,
-       balance,
-       precision,
-       amount,
-       value,
-       block_num AS updated_at_block_num,
-       timestamp AS updated_at_timestamp
-FROM balance_change_events;        
+SELECT *,
+       (block_num + action_index) AS ver
+FROM balance_change_events;
 
 -- Table to store historical balances per account and token
 CREATE TABLE IF NOT EXISTS historical_account_balances $ON_CLUSTER_DIRECTIVE
 (
-    account              String,
+    trx_id        String,
+    action_index  UInt32,
 
-    contract             String,
-    symcode              String,
-    balance              String,
+    contract      String,
+    symcode       String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    account       String,
+    balance       String,
+    balance_delta Int64,
 
-    block_num            UInt64,
-    timestamp            DateTime
+    precision     UInt32,
+    amount        Int64,
+    value         Float64,
+
+    block_num     UInt64,
+    timestamp     DateTime,
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (block_num, account, contract, symcode)
-        ORDER BY (block_num, account, contract, symcode, value);
+        ORDER BY (block_num, account, contract, symcode);
 
-CREATE MATERIALIZED VIEW historical_account_balances_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS historical_account_balances_mv $ON_CLUSTER_DIRECTIVE
     TO historical_account_balances
 AS
-SELECT account,
-       contract,
-       symcode,
-       balance,
-       precision,
-       amount,
-       value,
-       block_num,
-       timestamp
+SELECT *
 FROM balance_change_events;
 
 -- Table to store up to date positive balances per account and token for token holders
 CREATE TABLE IF NOT EXISTS token_holders $ON_CLUSTER_DIRECTIVE
 (
-    account              String,
+    action_index  UInt32,
 
-    contract             String,
-    symcode              String,
-    balance              String,
+    contract      String,
+    symcode       String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    account       String,
+    value         Float64,
 
-    updated_at_block_num UInt64,
-    updated_at_timestamp DateTime,
-    has_positive_balance UInt8
+    block_num     UInt64,
+    has_null_balance UInt8,
+    ver                  UInt64
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num, has_positive_balance)
-        PRIMARY KEY (has_positive_balance, contract, symcode)
-        ORDER BY (has_positive_balance, contract, symcode, value);
+    ENGINE = $ENGINE_VER_DELETE
+        PRIMARY KEY (has_null_balance, contract, symcode, account)
+        ORDER BY (has_null_balance, contract, symcode, account);
 
-CREATE MATERIALIZED VIEW token_holders_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS token_holders_mv $ON_CLUSTER_DIRECTIVE
     TO token_holders
 AS
-SELECT account,
+SELECT action_index,
        contract,
        symcode,
-       balance,
-       precision,
-       amount,
+       account,
        value,
-       block_num            AS updated_at_block_num,
-       timestamp            AS updated_at_timestamp,
-       if(amount > 0, 1, 0) AS has_positive_balance
+       block_num,
+       if(amount > 0, 0, 1) AS has_null_balance,
+       (block_num + action_index) AS ver
 FROM balance_change_events;
 
 -- Table to store up to date token supplies
 CREATE TABLE IF NOT EXISTS token_supplies $ON_CLUSTER_DIRECTIVE
 (
-    contract             String,
-    symcode              String,
+    trx_id       String,
+    action_index UInt32,
 
-    issuer               String,
-    max_supply           String,
-    supply               String,
+    contract     String,
+    symcode      String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    issuer       String,
+    max_supply   String,
+    supply       String,
+    supply_delta Int64,
 
-    updated_at_block_num UInt64,
-    updated_at_timestamp DateTime
+    precision    UInt32,
+    amount       Int64,
+    value        Float64,
+
+    block_num    UInt64,
+    timestamp    DateTime,
+    ver          UInt64
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num)
+    ENGINE = $ENGINE_VER
         PRIMARY KEY (contract, symcode, issuer)
         ORDER BY (contract, symcode, issuer);
 
-CREATE MATERIALIZED VIEW token_supplies_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS token_supplies_mv $ON_CLUSTER_DIRECTIVE
     TO token_supplies
 AS
-SELECT contract,
-       symcode,
-       issuer,
-       max_supply,
-       supply,
-       precision,
-       amount,
-       value,
-       block_num AS updated_at_block_num,
-       timestamp AS updated_at_timestamp
+SELECT *,
+       (block_num + action_index) AS ver
 FROM supply_change_events;
 
 -- Table to store historical token supplies per token
 CREATE TABLE IF NOT EXISTS historical_token_supplies $ON_CLUSTER_DIRECTIVE
 (
-    contract             String,
-    symcode              String,
+    trx_id       String,
+    action_index UInt32,
 
-    issuer               String,
-    max_supply           String,
-    supply               String,
+    contract     String,
+    symcode      String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    issuer       String,
+    max_supply   String,
+    supply       String,
+    supply_delta Int64,
 
-    block_num            UInt64,
-    timestamp            DateTime
+    precision    UInt32,
+    amount       Int64,
+    value        Float64,
+
+    block_num    UInt64,
+    timestamp    DateTime,
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (block_num, contract, symcode, issuer)
         ORDER BY (block_num, contract, symcode, issuer);
 
-CREATE MATERIALIZED VIEW historical_token_supplies_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS historical_token_supplies_mv $ON_CLUSTER_DIRECTIVE
     TO historical_token_supplies
 AS
-SELECT contract,
-       symcode,
-       issuer,
-       max_supply,
-       supply,
-       precision,
-       amount,
-       value,
-       block_num AS updated_at_block_num,
-       timestamp AS updated_at_timestamp
+SELECT *
 FROM supply_change_events;
 
 -- Table to store token transfers primarily indexed by the 'contract' field --
@@ -404,11 +390,11 @@ CREATE TABLE IF NOT EXISTS transfers_contract $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (contract, symcode, trx_id, action_index)
         ORDER BY (contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW transfers_contract_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS transfers_contract_mv $ON_CLUSTER_DIRECTIVE
     TO transfers_contract
 AS
 SELECT trx_id,
@@ -447,11 +433,11 @@ CREATE TABLE IF NOT EXISTS transfers_from $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (from, to, contract, symcode, trx_id, action_index)
         ORDER BY (from, to, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW transfers_from_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS transfers_from_mv $ON_CLUSTER_DIRECTIVE
     TO transfers_from
 AS
 SELECT trx_id,
@@ -490,11 +476,11 @@ CREATE TABLE IF NOT EXISTS historical_transfers_from $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (block_num, from, to, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, from, to, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW historical_transfers_from_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS historical_transfers_from_mv $ON_CLUSTER_DIRECTIVE
     TO historical_transfers_from
 AS
 SELECT trx_id,
@@ -533,11 +519,11 @@ CREATE TABLE IF NOT EXISTS transfers_to $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (to, contract, symcode, trx_id, action_index)
         ORDER BY (to, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW transfers_to_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS transfers_to_mv $ON_CLUSTER_DIRECTIVE
     TO transfers_to
 AS
 SELECT trx_id,
@@ -576,11 +562,11 @@ CREATE TABLE IF NOT EXISTS historical_transfers_to $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (block_num, to, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, to, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW historical_transfers_to_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS historical_transfers_to_mv $ON_CLUSTER_DIRECTIVE
     TO historical_transfers_to
 AS
 SELECT trx_id,
@@ -619,11 +605,11 @@ CREATE TABLE IF NOT EXISTS transfers_block_num $ON_CLUSTER_DIRECTIVE
     block_num    UInt64,
     timestamp    DateTime
 )
-    ENGINE = $ENGINE_TYPE
+    ENGINE = $ENGINE_DEFAULT
         PRIMARY KEY (block_num, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW transfers_block_num_mv $ON_CLUSTER_DIRECTIVE
+CREATE MATERIALIZED VIEW IF NOT EXISTS transfers_block_num_mv $ON_CLUSTER_DIRECTIVE
     TO transfers_block_num
 AS
 SELECT trx_id,

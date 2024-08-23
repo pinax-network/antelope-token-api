@@ -180,177 +180,159 @@ CREATE TABLE IF NOT EXISTS create_events ON CLUSTER "antelope"
 -- Table to store up to date balances per account and token
 CREATE TABLE IF NOT EXISTS account_balances ON CLUSTER "antelope"
 (
-    account              String,
+    trx_id        String,
+    action_index  UInt32,
 
-    contract             String,
-    symcode              String,
-    balance              String,
+    contract      String,
+    symcode       String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    account       String,
+    balance       String,
+    balance_delta Int64,
 
-    updated_at_block_num UInt64,
-    updated_at_timestamp DateTime
+    precision     UInt32,
+    amount        Int64,
+    value         Float64,
+
+    block_num     UInt64,
+    timestamp     DateTime,
+    ver           UInt64
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num)
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', ver)
         PRIMARY KEY (account, contract, symcode)
-        ORDER BY (account, contract, symcode, value);
+        ORDER BY (account, contract, symcode);
 
-CREATE MATERIALIZED VIEW account_balances_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS account_balances_mv ON CLUSTER "antelope"
     TO account_balances
 AS
-SELECT account,
-       contract,
-       symcode,
-       balance,
-       precision,
-       amount,
-       value,
-       block_num AS updated_at_block_num,
-       timestamp AS updated_at_timestamp
-FROM balance_change_events;        
+SELECT *,
+       (block_num + action_index) AS ver
+FROM balance_change_events;
 
 -- Table to store historical balances per account and token
 CREATE TABLE IF NOT EXISTS historical_account_balances ON CLUSTER "antelope"
 (
-    account              String,
+    trx_id        String,
+    action_index  UInt32,
 
-    contract             String,
-    symcode              String,
-    balance              String,
+    contract      String,
+    symcode       String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    account       String,
+    balance       String,
+    balance_delta Int64,
 
-    block_num            UInt64,
-    timestamp            DateTime
+    precision     UInt32,
+    amount        Int64,
+    value         Float64,
+
+    block_num     UInt64,
+    timestamp     DateTime,
 )
     ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (block_num, account, contract, symcode)
-        ORDER BY (block_num, account, contract, symcode, value);
+        ORDER BY (block_num, account, contract, symcode);
 
-CREATE MATERIALIZED VIEW historical_account_balances_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS historical_account_balances_mv ON CLUSTER "antelope"
     TO historical_account_balances
 AS
-SELECT account,
-       contract,
-       symcode,
-       balance,
-       precision,
-       amount,
-       value,
-       block_num,
-       timestamp
+SELECT *
 FROM balance_change_events;
 
 -- Table to store up to date positive balances per account and token for token holders
 CREATE TABLE IF NOT EXISTS token_holders ON CLUSTER "antelope"
 (
-    account              String,
+    action_index  UInt32,
 
-    contract             String,
-    symcode              String,
-    balance              String,
+    contract      String,
+    symcode       String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    account       String,
+    value         Float64,
 
-    updated_at_block_num UInt64,
-    updated_at_timestamp DateTime,
-    has_positive_balance UInt8
+    block_num     UInt64,
+    has_null_balance UInt8,
+    ver                  UInt64
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num, has_positive_balance)
-        PRIMARY KEY (has_positive_balance, contract, symcode)
-        ORDER BY (has_positive_balance, contract, symcode, value);
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', ver, has_null_balance)
+        PRIMARY KEY (has_null_balance, contract, symcode, account)
+        ORDER BY (has_null_balance, contract, symcode, account);
 
-CREATE MATERIALIZED VIEW token_holders_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS token_holders_mv ON CLUSTER "antelope"
     TO token_holders
 AS
-SELECT account,
+SELECT action_index,
        contract,
        symcode,
-       balance,
-       precision,
-       amount,
+       account,
        value,
-       block_num            AS updated_at_block_num,
-       timestamp            AS updated_at_timestamp,
-       if(amount > 0, 1, 0) AS has_positive_balance
+       block_num,
+       if(amount > 0, 0, 1) AS has_null_balance,
+       (block_num + action_index) AS ver
 FROM balance_change_events;
 
 -- Table to store up to date token supplies
 CREATE TABLE IF NOT EXISTS token_supplies ON CLUSTER "antelope"
 (
-    contract             String,
-    symcode              String,
+    trx_id       String,
+    action_index UInt32,
 
-    issuer               String,
-    max_supply           String,
-    supply               String,
+    contract     String,
+    symcode      String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    issuer       String,
+    max_supply   String,
+    supply       String,
+    supply_delta Int64,
 
-    updated_at_block_num UInt64,
-    updated_at_timestamp DateTime
+    precision    UInt32,
+    amount       Int64,
+    value        Float64,
+
+    block_num    UInt64,
+    timestamp    DateTime,
+    ver          UInt64
 )
-    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', updated_at_block_num)
+    ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}', ver)
         PRIMARY KEY (contract, symcode, issuer)
         ORDER BY (contract, symcode, issuer);
 
-CREATE MATERIALIZED VIEW token_supplies_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS token_supplies_mv ON CLUSTER "antelope"
     TO token_supplies
 AS
-SELECT contract,
-       symcode,
-       issuer,
-       max_supply,
-       supply,
-       precision,
-       amount,
-       value,
-       block_num AS updated_at_block_num,
-       timestamp AS updated_at_timestamp
+SELECT *,
+       (block_num + action_index) AS ver
 FROM supply_change_events;
 
 -- Table to store historical token supplies per token
 CREATE TABLE IF NOT EXISTS historical_token_supplies ON CLUSTER "antelope"
 (
-    contract             String,
-    symcode              String,
+    trx_id       String,
+    action_index UInt32,
 
-    issuer               String,
-    max_supply           String,
-    supply               String,
+    contract     String,
+    symcode      String,
 
-    precision            UInt32,
-    amount               Int64,
-    value                Float64,
+    issuer       String,
+    max_supply   String,
+    supply       String,
+    supply_delta Int64,
 
-    block_num            UInt64,
-    timestamp            DateTime
+    precision    UInt32,
+    amount       Int64,
+    value        Float64,
+
+    block_num    UInt64,
+    timestamp    DateTime,
 )
     ENGINE = ReplicatedReplacingMergeTree('/clickhouse/tables/{uuid}/{shard}', '{replica}')
         PRIMARY KEY (block_num, contract, symcode, issuer)
         ORDER BY (block_num, contract, symcode, issuer);
 
-CREATE MATERIALIZED VIEW historical_token_supplies_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS historical_token_supplies_mv ON CLUSTER "antelope"
     TO historical_token_supplies
 AS
-SELECT contract,
-       symcode,
-       issuer,
-       max_supply,
-       supply,
-       precision,
-       amount,
-       value,
-       block_num AS updated_at_block_num,
-       timestamp AS updated_at_timestamp
+SELECT *
 FROM supply_change_events;
 
 -- Table to store token transfers primarily indexed by the 'contract' field --
@@ -378,7 +360,7 @@ CREATE TABLE IF NOT EXISTS transfers_contract ON CLUSTER "antelope"
         PRIMARY KEY (contract, symcode, trx_id, action_index)
         ORDER BY (contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW transfers_contract_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS transfers_contract_mv ON CLUSTER "antelope"
     TO transfers_contract
 AS
 SELECT trx_id,
@@ -421,7 +403,7 @@ CREATE TABLE IF NOT EXISTS transfers_from ON CLUSTER "antelope"
         PRIMARY KEY (from, to, contract, symcode, trx_id, action_index)
         ORDER BY (from, to, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW transfers_from_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS transfers_from_mv ON CLUSTER "antelope"
     TO transfers_from
 AS
 SELECT trx_id,
@@ -464,7 +446,7 @@ CREATE TABLE IF NOT EXISTS historical_transfers_from ON CLUSTER "antelope"
         PRIMARY KEY (block_num, from, to, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, from, to, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW historical_transfers_from_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS historical_transfers_from_mv ON CLUSTER "antelope"
     TO historical_transfers_from
 AS
 SELECT trx_id,
@@ -507,7 +489,7 @@ CREATE TABLE IF NOT EXISTS transfers_to ON CLUSTER "antelope"
         PRIMARY KEY (to, contract, symcode, trx_id, action_index)
         ORDER BY (to, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW transfers_to_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS transfers_to_mv ON CLUSTER "antelope"
     TO transfers_to
 AS
 SELECT trx_id,
@@ -550,7 +532,7 @@ CREATE TABLE IF NOT EXISTS historical_transfers_to ON CLUSTER "antelope"
         PRIMARY KEY (block_num, to, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, to, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW historical_transfers_to_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS historical_transfers_to_mv ON CLUSTER "antelope"
     TO historical_transfers_to
 AS
 SELECT trx_id,
@@ -593,7 +575,7 @@ CREATE TABLE IF NOT EXISTS transfers_block_num ON CLUSTER "antelope"
         PRIMARY KEY (block_num, contract, symcode, trx_id, action_index)
         ORDER BY (block_num, contract, symcode, trx_id, action_index);
 
-CREATE MATERIALIZED VIEW transfers_block_num_mv ON CLUSTER "antelope"
+CREATE MATERIALIZED VIEW IF NOT EXISTS transfers_block_num_mv ON CLUSTER "antelope"
     TO transfers_block_num
 AS
 SELECT trx_id,

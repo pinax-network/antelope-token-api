@@ -44,21 +44,12 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
         // Need to narrow the type of `query_params` explicitly to access properties based on endpoint value
         // See https://github.com/microsoft/TypeScript/issues/33014
         const q = query_params as ValidUserParams<typeof endpoint>;
-        if (q.block_num) {
-            query +=
-                `SELECT *`
-                + ` FROM ${endpoint == "/{chain}/balance" ? `${database}.balance_change_events` : `${database}.supply_change_events`}`;
-            
-            query += ` ${filters} ORDER BY action_index DESC`;
-            query_params.limit = 1;
-        } else {
-            query +=
-                `SELECT *, updated_at_block_num AS block_num, updated_at_timestamp AS timestamp`
-                + ` FROM ${endpoint == "/{chain}/balance" ? `${database}.account_balances` : `${database}.token_supplies`}`
-                + ` FINAL`;
-
-            query += ` ${filters} ORDER BY block_num DESC`;
-        }
+        query +=
+            `SELECT *`
+            + ` FROM ${endpoint == "/{chain}/balance" ? 
+                `${database}.${q.block_num ? 'historical_' : ''}account_balances`
+                : `${database}.${q.block_num ? 'historical_' : ''}token_supplies`}`
+            + ` ${filters}`;
     } else if (endpoint == "/{chain}/transfers") {
         query += `SELECT * FROM `;
 
@@ -98,7 +89,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
         query += ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/{chain}/holders") {
-        query += `SELECT account, value FROM (SELECT account, MAX(updated_at_block_num) AS last_updated FROM ${database}.account_balances ${filters} GROUP BY account) AS x INNER JOIN ${database}.account_balances AS y ON y.account = x.account AND y.updated_at_block_num = x.last_updated ${filters} ORDER BY value DESC`;
+        query += `SELECT account, value AS balance FROM ${database}.token_holders FINAL ${filters} ORDER BY value DESC`;
     } else if (endpoint == "/chains") {
         for (const chain of supportedChainsSchema._def.values)
             query += 
@@ -109,7 +100,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     } else if (endpoint == "/{chain}/transfers/{trx_id}") {
         query += `SELECT * FROM ${database}.transfer_events ${filters} ORDER BY action_index`;
     } else if (endpoint == "/{chain}/tokens") {
-        query += `SELECT *, updated_at_block_num AS block_num FROM ${database}.token_supplies FINAL ${filters} ORDER BY block_num DESC`;
+        query += `SELECT * FROM ${database}.token_supplies FINAL ${filters} ORDER BY block_num DESC`;
     }
 
     query += " LIMIT {limit: int}";

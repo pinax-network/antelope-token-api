@@ -78,12 +78,17 @@ export type MonitoringHealthQueryResponseSchema = z.infer<typeof monitoringHealt
  /**
  * @description Metrics as text.
  */
-export const monitoringMetrics200Schema = z.object({});
+export const monitoringMetrics200Schema = z.coerce.string();
 export type MonitoringMetrics200Schema = z.infer<typeof monitoringMetrics200Schema>;
+/**
+ * @description An unexpected error response.
+ */
+export const monitoringMetricsErrorSchema = z.lazy(() => apiErrorSchema);
+export type MonitoringMetricsErrorSchema = z.infer<typeof monitoringMetricsErrorSchema>;
 /**
  * @description Metrics as text.
  */
-export const monitoringMetricsQueryResponseSchema = z.object({});
+export const monitoringMetricsQueryResponseSchema = z.coerce.string();
 export type MonitoringMetricsQueryResponseSchema = z.infer<typeof monitoringMetricsQueryResponseSchema>;
 
  /**

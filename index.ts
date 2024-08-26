@@ -72,7 +72,7 @@ async function AntelopeTokenAPI() {
 
     app.get(
         "/metrics",
-        async (ctx: Context) => ctx.json<EndpointReturnTypes<"/metrics">, 200>(await prometheus.registry.getMetricsAsJSON())
+        async (ctx: Context) => new Response(await prometheus.registry.metrics())
     );
 
     // --------------------------
@@ -133,7 +133,7 @@ async function AntelopeTokenAPI() {
                         return response.success ? "OK" : `[500] bad_database_response: ${response.error.message}`;
                     },
                     openapi: () => openapi,
-                    metrics: async () => await prometheus.registry.getMetricsAsJSON(),
+                    metrics: async () => await prometheus.registry.metrics(),
                     version: () => APP_VERSION
                 }
             );

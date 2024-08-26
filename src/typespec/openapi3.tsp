@@ -242,5 +242,5 @@ interface Monitoring {
     @summary("Prometheus metrics")
     @route("/metrics")
     @get
-    metrics(): Record<unknown>;
+    metrics(): APIResponse<string>;
 }

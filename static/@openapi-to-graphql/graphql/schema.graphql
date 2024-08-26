@@ -32,7 +32,7 @@ type Query {
   
   Equivalent to GET /metrics
   """
-  metrics: JSON
+  metrics: String
 
   """
   Reflection endpoint to return OpenAPI JSON spec. Also used by Swagger to generate the frontpage.

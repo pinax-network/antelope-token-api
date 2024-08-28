@@ -1,23 +1,26 @@
 import "@typespec/http";
 import "@typespec/openapi";
 import "./models.tsp";
+import "./config.js";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
 
-@service({ title: "Antelope Token API" })
+@service({ title: "Antelope Token Api" })
 @info({
     summary: "Tokens information from the Antelope blockchains, powered by Substreams",
     license: {
         name: "MIT",
         url: "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
     },
-    version: "5.0.0"
+    version: "6.0.0"
 }) // From @typespec/openapi
-namespace AntelopeTokenAPI;
+//@server("https://eos.api.pinax.network/v1", "EOS V1 Api Endpoint")
+namespace AntelopeTokenApi;
 
+alias ApiKeyHeader = "X-Api-Key";
 // Error codes adapted from https://github.com/pinax-network/golang-base/blob/develop/response/errors.go
-alias APIErrorCode =
+alias ApiErrorCode =
     | "bad_database_response" // invalid response from the database
     | "bad_header" // invalid or malformed header given
     | "missing_required_header" // request is missing a header
@@ -32,13 +35,16 @@ alias APIErrorCode =
 alias ErrorStatusCode = 500 | 504 | 400 | 401 | 403 | 404 | 405;
 
 @error
-model APIError {
+model ApiError {
     status: ErrorStatusCode;
-    code: APIErrorCode;
+    code: ApiErrorCode;
     message: string;
 }
 
 alias TimestampType = string;
+// Helper aliases for accessing underlying properties
+alias BlockInfo = Models.BlockInfo<TimestampType>;
+alias TokenIdentifier = Models.Scope;
 
 // Models will be present in the OpenAPI components
 model Transfer is Models.Transfer<TimestampType>;
@@ -47,6 +53,11 @@ model Supply is Models.Supply<TimestampType>;
 model Holder {
     account: BalanceChange.account;
     balance: BalanceChange.value;
+}
+model Balance {
+    last_updated_block: BalanceChange.block_num,
+    ...TokenIdentifier,
+    balance: BalanceChange.value
 }
 
 model QueryStatistics {
@@ -72,51 +83,59 @@ model UsageResponse<T> {
     meta: ResponseMetadata;
 }
 
-enum SupportedChains {
-    EOS,
-    WAX
-}
-
 // Alias will *not* be present in the OpenAPI components.
 // This also helps preventing self-references in generated `components` for codegen to work properly.
-alias APIResponse<T> = T | APIError;
+alias ApiResponse<T> = T | ApiError;
 alias PaginationQueryParams = {
     @query limit?: uint64 = 10;
     @query page?: uint64 = 1;
 };
 
-// Helper aliases for accessing underlying properties
-alias BlockInfo = Models.BlockInfo<TimestampType>;
-alias TokenIdentifier = Models.Scope;
-
 @tag("Usage")
 interface Usage {
     /**
-        Balances of an account.
+        Token balances of an account.
         @returns Array of balances.
     */
-    @summary("Token balance")
-    @route("/{chain}/balance")
+    @summary("Token balances")
+    @route("/balance")
     @get
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     balance(
-        @path chain: SupportedChains,
-        @query block_num?: BlockInfo.block_num,
+        @query account: BalanceChange.account,
         @query contract?: TokenIdentifier.contract,
         @query symcode?: TokenIdentifier.symcode,
-        @query account: BalanceChange.account,
         ...PaginationQueryParams,
-    ): APIResponse<UsageResponse<BalanceChange[]>>;
+    ): ApiResponse<UsageResponse<Balance[]>>;
 
     /**
-        List of available Antelope chains and corresponding latest block for which data is available.
-        @returns Array of block information.
+        Historical token balances of an account.
+        @returns Array of balances.
     */
-    @summary("Chains and latest block available")
-    @route("/chains")
+    @summary("Historical token balances")
+    @route("/balance/historical")
     @get
-    chains(...PaginationQueryParams): APIResponse<UsageResponse<{
-        chain: SupportedChains,
-        block_num: BlockInfo.block_num;
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
+    balanceHistorical(
+        @query account: BalanceChange.account,
+        @query block_num: BlockInfo.block_num,
+        @query contract?: TokenIdentifier.contract,
+        @query symcode?: TokenIdentifier.symcode,
+        ...PaginationQueryParams,
+    ): ApiResponse<UsageResponse<BalanceChange[]>>;
+
+    /**
+        Current head block for which data is available (can be lower than head block of the chain).
+        @returns Head block information.
+    */
+    @summary("Head block information")
+    @route("/head")
+    @get
+    head(
+        ...PaginationQueryParams
+    ): ApiResponse<UsageResponse<{
+        block_num: BlockInfo.block_num,
+        block_id: string
     }[]>>;
 
     /**
@@ -124,75 +143,88 @@ interface Usage {
         @returns Array of accounts.
     */
     @summary("Token holders")
-    @route("/{chain}/holders")
+    @route("/holders")
     @get
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     holders(
-        @path chain: SupportedChains,
         @query contract: TokenIdentifier.contract,
         @query symcode: TokenIdentifier.symcode,
         ...PaginationQueryParams,
-    ): APIResponse<UsageResponse<Holder[]>>;
+    ): ApiResponse<UsageResponse<Holder[]>>;
 
     /**
         Total supply for a token.
         @returns Array of supplies.
     */
     @summary("Token supply")
-    @route("/{chain}/supply")
+    @route("/supply")
     @get
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     supply(
-        @path chain: SupportedChains,
         @query block_num?: BlockInfo.block_num,
         @query issuer?: Supply.issuer,
         @query contract: TokenIdentifier.contract,
         @query symcode: TokenIdentifier.symcode,
         ...PaginationQueryParams,
-    ): APIResponse<UsageResponse<Supply[]>>;
+    ): ApiResponse<UsageResponse<Supply[]>>;
 
     /**
         List of available tokens.
-        @returns Array of supplies.
+        @returns Array of token identifier.
     */
     @summary("Tokens")
-    @route("/{chain}/tokens")
+    @route("/tokens")
     @get
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     tokens(
-        @path chain: SupportedChains,
         ...PaginationQueryParams
-    ): APIResponse<UsageResponse<Supply[]>>;
+    ): ApiResponse<UsageResponse<TokenIdentifier[]>>;
 
     /**
         All transfers related to a token.
         @returns Array of transfers.
     */
     @summary("Token transfers")
-    @route("/{chain}/transfers")
+    @route("/transfers")
     @get
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     transfers(
-        @path chain: SupportedChains,
-        @query({
-            format: "csv",
-        })
-        block_range?: BlockInfo.block_num[],
+        @query({ format: "csv"}) block_range?: BlockInfo.block_num[],
+        @query contract: TokenIdentifier.contract,
+        @query symcode: TokenIdentifier.symcode,
+        ...PaginationQueryParams,
+    ): ApiResponse<UsageResponse<Transfer[]>>;
+
+    /**
+        All transfers related to an account.
+        @returns Array of transfers.
+    */
+    @summary("Token transfers from and to an account")
+    @route("/transfers/account")
+    @get
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
+    transfersAccount(
+        @query account: BalanceChange.account,
+        @query({ format: "csv"}) block_range?: BlockInfo.block_num[],
         @query from?: Transfer.from,
         @query to?: Transfer.to,
         @query contract?: TokenIdentifier.contract,
         @query symcode?: TokenIdentifier.symcode,
         ...PaginationQueryParams,
-    ): APIResponse<UsageResponse<Transfer[]>>;
+    ): ApiResponse<UsageResponse<Transfer[]>>;
 
     /**
         Specific transfer related to a token.
         @returns Array of transfers.
     */
     @summary("Token transfer")
-    @route("/{chain}/transfers/{trx_id}")
+    @route("/transfers/id")
     @get
-    transfer(
-        @path chain: SupportedChains,
-        @path trx_id: Models.TraceInformation.trx_id,
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
+    transferId(
+        @query trx_id: Models.TraceInformation.trx_id,
         ...PaginationQueryParams,
-    ): APIResponse<UsageResponse<Transfer[]>>;
+    ): ApiResponse<UsageResponse<Transfer[]>>;
 }
 
 model Version {
@@ -212,28 +244,28 @@ interface Docs {
     @summary("OpenAPI JSON spec")
     @route("/openapi")
     @get
-    openapi(): APIResponse<Record<unknown>>;
+    openapi(): ApiResponse<Record<unknown>>;
 
     /**
-        API version and Git short commit hash.
-        @returns The API version and commit hash.
+        Api version and Git short commit hash.
+        @returns The Api version and commit hash.
     */
-    @summary("API version")
+    @summary("Api version")
     @route("/version")
     @get
-    version(): APIResponse<Version>;
+    version(): ApiResponse<Version>;
 }
 
 @tag("Monitoring")
 interface Monitoring {
     /**
         Checks database connection.
-        @returns OK or APIError.
+        @returns OK or ApiError.
     */
     @summary("Health check")
     @route("/health")
     @get
-    health(): APIResponse<string>;
+    health(): ApiResponse<string>;
 
     /**
         Prometheus metrics.
@@ -242,5 +274,5 @@ interface Monitoring {
     @summary("Prometheus metrics")
     @route("/metrics")
     @get
-    metrics(): APIResponse<string>;
+    metrics(): ApiResponse<string>;
 }

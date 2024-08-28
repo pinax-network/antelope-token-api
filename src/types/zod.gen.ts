@@ -5,12 +5,20 @@ export const apiErrorSchema = z.object({ "status": z.union([z.literal(500), z.li
 export type ApiErrorSchema = z.infer<typeof apiErrorSchema>;
 
 
+export const balanceSchema = z.object({ "last_updated_block": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "balance": z.coerce.number() });
+export type BalanceSchema = z.infer<typeof balanceSchema>;
+
+
 export const balanceChangeSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.string(), "account": z.coerce.string(), "balance": z.coerce.string(), "balance_delta": z.coerce.number() });
 export type BalanceChangeSchema = z.infer<typeof balanceChangeSchema>;
 
 
 export const holderSchema = z.object({ "account": z.coerce.string(), "balance": z.coerce.number() });
 export type HolderSchema = z.infer<typeof holderSchema>;
+
+
+export const modelsScopeSchema = z.object({ "contract": z.coerce.string(), "symcode": z.coerce.string() });
+export type ModelsScopeSchema = z.infer<typeof modelsScopeSchema>;
 
 
 export const paginationSchema = z.object({ "next_page": z.coerce.number(), "previous_page": z.coerce.number(), "total_pages": z.coerce.number(), "total_results": z.coerce.number() });
@@ -29,10 +37,6 @@ export const supplySchema = z.object({ "trx_id": z.coerce.string(), "action_inde
 export type SupplySchema = z.infer<typeof supplySchema>;
 
 
-export const supportedChainsSchema = z.enum(["EOS", "WAX"]);
-export type SupportedChainsSchema = z.infer<typeof supportedChainsSchema>;
-
-
 export const transferSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.string(), "from": z.coerce.string(), "to": z.coerce.string(), "quantity": z.coerce.string(), "memo": z.coerce.string() });
 export type TransferSchema = z.infer<typeof transferSchema>;
 
@@ -41,26 +45,64 @@ export const versionSchema = z.object({ "version": z.coerce.string().regex(new R
 export type VersionSchema = z.infer<typeof versionSchema>;
 
 
-export const usageChainsQueryParamsSchema = z.object({ "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() }).optional();
-export type UsageChainsQueryParamsSchema = z.infer<typeof usageChainsQueryParamsSchema>;
+export const usageBalanceQueryParamsSchema = z.object({ "account": z.coerce.string(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export type UsageBalanceQueryParamsSchema = z.infer<typeof usageBalanceQueryParamsSchema>;
 /**
- * @description Array of block information.
+ * @description Array of balances.
  */
-export const usageChains200Schema = z.object({ "data": z.array(z.object({ "chain": z.lazy(() => supportedChainsSchema), "block_num": z.coerce.number() })), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageChains200Schema = z.infer<typeof usageChains200Schema>;
+export const usageBalance200Schema = z.object({ "data": z.array(z.lazy(() => balanceSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageBalance200Schema = z.infer<typeof usageBalance200Schema>;
 /**
  * @description An unexpected error response.
  */
-export const usageChainsErrorSchema = z.lazy(() => apiErrorSchema);
-export type UsageChainsErrorSchema = z.infer<typeof usageChainsErrorSchema>;
+export const usageBalanceErrorSchema = z.lazy(() => apiErrorSchema);
+export type UsageBalanceErrorSchema = z.infer<typeof usageBalanceErrorSchema>;
 /**
- * @description Array of block information.
+ * @description Array of balances.
  */
-export const usageChainsQueryResponseSchema = z.object({ "data": z.array(z.object({ "chain": z.lazy(() => supportedChainsSchema), "block_num": z.coerce.number() })), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageChainsQueryResponseSchema = z.infer<typeof usageChainsQueryResponseSchema>;
+export const usageBalanceQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => balanceSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageBalanceQueryResponseSchema = z.infer<typeof usageBalanceQueryResponseSchema>;
+
+
+export const usageBalanceHistoricalQueryParamsSchema = z.object({ "account": z.coerce.string(), "block_num": z.coerce.number(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export type UsageBalanceHistoricalQueryParamsSchema = z.infer<typeof usageBalanceHistoricalQueryParamsSchema>;
+/**
+ * @description Array of balances.
+ */
+export const usageBalanceHistorical200Schema = z.object({ "data": z.array(z.lazy(() => balanceChangeSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageBalanceHistorical200Schema = z.infer<typeof usageBalanceHistorical200Schema>;
+/**
+ * @description An unexpected error response.
+ */
+export const usageBalanceHistoricalErrorSchema = z.lazy(() => apiErrorSchema);
+export type UsageBalanceHistoricalErrorSchema = z.infer<typeof usageBalanceHistoricalErrorSchema>;
+/**
+ * @description Array of balances.
+ */
+export const usageBalanceHistoricalQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => balanceChangeSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageBalanceHistoricalQueryResponseSchema = z.infer<typeof usageBalanceHistoricalQueryResponseSchema>;
+
+
+export const usageHeadQueryParamsSchema = z.object({ "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() }).optional();
+export type UsageHeadQueryParamsSchema = z.infer<typeof usageHeadQueryParamsSchema>;
+/**
+ * @description Head block information.
+ */
+export const usageHead200Schema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageHead200Schema = z.infer<typeof usageHead200Schema>;
+/**
+ * @description An unexpected error response.
+ */
+export const usageHeadErrorSchema = z.lazy(() => apiErrorSchema);
+export type UsageHeadErrorSchema = z.infer<typeof usageHeadErrorSchema>;
+/**
+ * @description Head block information.
+ */
+export const usageHeadQueryResponseSchema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageHeadQueryResponseSchema = z.infer<typeof usageHeadQueryResponseSchema>;
 
  /**
- * @description OK or APIError.
+ * @description OK or ApiError.
  */
 export const monitoringHealth200Schema = z.coerce.string();
 export type MonitoringHealth200Schema = z.infer<typeof monitoringHealth200Schema>;
@@ -70,10 +112,29 @@ export type MonitoringHealth200Schema = z.infer<typeof monitoringHealth200Schema
 export const monitoringHealthErrorSchema = z.lazy(() => apiErrorSchema);
 export type MonitoringHealthErrorSchema = z.infer<typeof monitoringHealthErrorSchema>;
 /**
- * @description OK or APIError.
+ * @description OK or ApiError.
  */
 export const monitoringHealthQueryResponseSchema = z.coerce.string();
 export type MonitoringHealthQueryResponseSchema = z.infer<typeof monitoringHealthQueryResponseSchema>;
+
+
+export const usageHoldersQueryParamsSchema = z.object({ "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export type UsageHoldersQueryParamsSchema = z.infer<typeof usageHoldersQueryParamsSchema>;
+/**
+ * @description Array of accounts.
+ */
+export const usageHolders200Schema = z.object({ "data": z.array(z.lazy(() => holderSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageHolders200Schema = z.infer<typeof usageHolders200Schema>;
+/**
+ * @description An unexpected error response.
+ */
+export const usageHoldersErrorSchema = z.lazy(() => apiErrorSchema);
+export type UsageHoldersErrorSchema = z.infer<typeof usageHoldersErrorSchema>;
+/**
+ * @description Array of accounts.
+ */
+export const usageHoldersQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => holderSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageHoldersQueryResponseSchema = z.infer<typeof usageHoldersQueryResponseSchema>;
 
  /**
  * @description Metrics as text.
@@ -107,71 +168,8 @@ export type DocsOpenapiErrorSchema = z.infer<typeof docsOpenapiErrorSchema>;
 export const docsOpenapiQueryResponseSchema = z.object({});
 export type DocsOpenapiQueryResponseSchema = z.infer<typeof docsOpenapiQueryResponseSchema>;
 
- /**
- * @description The API version and commit hash.
- */
-export const docsVersion200Schema = z.lazy(() => versionSchema);
-export type DocsVersion200Schema = z.infer<typeof docsVersion200Schema>;
-/**
- * @description An unexpected error response.
- */
-export const docsVersionErrorSchema = z.lazy(() => apiErrorSchema);
-export type DocsVersionErrorSchema = z.infer<typeof docsVersionErrorSchema>;
-/**
- * @description The API version and commit hash.
- */
-export const docsVersionQueryResponseSchema = z.lazy(() => versionSchema);
-export type DocsVersionQueryResponseSchema = z.infer<typeof docsVersionQueryResponseSchema>;
 
-
-export const usageBalancePathParamsSchema = z.object({ "chain": z.lazy(() => supportedChainsSchema) });
-export type UsageBalancePathParamsSchema = z.infer<typeof usageBalancePathParamsSchema>;
-
- export const usageBalanceQueryParamsSchema = z.object({ "block_num": z.coerce.number().optional(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "account": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
-export type UsageBalanceQueryParamsSchema = z.infer<typeof usageBalanceQueryParamsSchema>;
-/**
- * @description Array of balances.
- */
-export const usageBalance200Schema = z.object({ "data": z.array(z.lazy(() => balanceChangeSchema)), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageBalance200Schema = z.infer<typeof usageBalance200Schema>;
-/**
- * @description An unexpected error response.
- */
-export const usageBalanceErrorSchema = z.lazy(() => apiErrorSchema);
-export type UsageBalanceErrorSchema = z.infer<typeof usageBalanceErrorSchema>;
-/**
- * @description Array of balances.
- */
-export const usageBalanceQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => balanceChangeSchema)), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageBalanceQueryResponseSchema = z.infer<typeof usageBalanceQueryResponseSchema>;
-
-
-export const usageHoldersPathParamsSchema = z.object({ "chain": z.lazy(() => supportedChainsSchema) });
-export type UsageHoldersPathParamsSchema = z.infer<typeof usageHoldersPathParamsSchema>;
-
- export const usageHoldersQueryParamsSchema = z.object({ "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
-export type UsageHoldersQueryParamsSchema = z.infer<typeof usageHoldersQueryParamsSchema>;
-/**
- * @description Array of accounts.
- */
-export const usageHolders200Schema = z.object({ "data": z.array(z.lazy(() => holderSchema)), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageHolders200Schema = z.infer<typeof usageHolders200Schema>;
-/**
- * @description An unexpected error response.
- */
-export const usageHoldersErrorSchema = z.lazy(() => apiErrorSchema);
-export type UsageHoldersErrorSchema = z.infer<typeof usageHoldersErrorSchema>;
-/**
- * @description Array of accounts.
- */
-export const usageHoldersQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => holderSchema)), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageHoldersQueryResponseSchema = z.infer<typeof usageHoldersQueryResponseSchema>;
-
-
-export const usageSupplyPathParamsSchema = z.object({ "chain": z.lazy(() => supportedChainsSchema) });
-export type UsageSupplyPathParamsSchema = z.infer<typeof usageSupplyPathParamsSchema>;
-
- export const usageSupplyQueryParamsSchema = z.object({ "block_num": z.coerce.number().optional(), "issuer": z.coerce.string().optional(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export const usageSupplyQueryParamsSchema = z.object({ "block_num": z.coerce.number().optional(), "issuer": z.coerce.string().optional(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
 export type UsageSupplyQueryParamsSchema = z.infer<typeof usageSupplyQueryParamsSchema>;
 /**
  * @description Array of supplies.
@@ -190,15 +188,12 @@ export const usageSupplyQueryResponseSchema = z.object({ "data": z.array(z.lazy(
 export type UsageSupplyQueryResponseSchema = z.infer<typeof usageSupplyQueryResponseSchema>;
 
 
-export const usageTokensPathParamsSchema = z.object({ "chain": z.lazy(() => supportedChainsSchema) });
-export type UsageTokensPathParamsSchema = z.infer<typeof usageTokensPathParamsSchema>;
-
- export const usageTokensQueryParamsSchema = z.object({ "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() }).optional();
+export const usageTokensQueryParamsSchema = z.object({ "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() }).optional();
 export type UsageTokensQueryParamsSchema = z.infer<typeof usageTokensQueryParamsSchema>;
 /**
- * @description Array of supplies.
+ * @description Array of token identifier.
  */
-export const usageTokens200Schema = z.object({ "data": z.array(z.lazy(() => supplySchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export const usageTokens200Schema = z.object({ "data": z.array(z.lazy(() => modelsScopeSchema)), "meta": z.lazy(() => responseMetadataSchema) });
 export type UsageTokens200Schema = z.infer<typeof usageTokens200Schema>;
 /**
  * @description An unexpected error response.
@@ -206,16 +201,13 @@ export type UsageTokens200Schema = z.infer<typeof usageTokens200Schema>;
 export const usageTokensErrorSchema = z.lazy(() => apiErrorSchema);
 export type UsageTokensErrorSchema = z.infer<typeof usageTokensErrorSchema>;
 /**
- * @description Array of supplies.
+ * @description Array of token identifier.
  */
-export const usageTokensQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => supplySchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export const usageTokensQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => modelsScopeSchema)), "meta": z.lazy(() => responseMetadataSchema) });
 export type UsageTokensQueryResponseSchema = z.infer<typeof usageTokensQueryResponseSchema>;
 
 
-export const usageTransfersPathParamsSchema = z.object({ "chain": z.lazy(() => supportedChainsSchema) });
-export type UsageTransfersPathParamsSchema = z.infer<typeof usageTransfersPathParamsSchema>;
-
- export const usageTransfersQueryParamsSchema = z.object({ "block_range": z.array(z.coerce.number()).optional(), "from": z.coerce.string().optional(), "to": z.coerce.string().optional(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() }).optional();
+export const usageTransfersQueryParamsSchema = z.object({ "block_range": z.array(z.coerce.number()).optional(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
 export type UsageTransfersQueryParamsSchema = z.infer<typeof usageTransfersQueryParamsSchema>;
 /**
  * @description Array of transfers.
@@ -234,37 +226,93 @@ export const usageTransfersQueryResponseSchema = z.object({ "data": z.array(z.la
 export type UsageTransfersQueryResponseSchema = z.infer<typeof usageTransfersQueryResponseSchema>;
 
 
-export const usageTransferPathParamsSchema = z.object({ "chain": z.lazy(() => supportedChainsSchema), "trx_id": z.coerce.string() });
-export type UsageTransferPathParamsSchema = z.infer<typeof usageTransferPathParamsSchema>;
-
- export const usageTransferQueryParamsSchema = z.object({ "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() }).optional();
-export type UsageTransferQueryParamsSchema = z.infer<typeof usageTransferQueryParamsSchema>;
+export const usageTransfersAccountQueryParamsSchema = z.object({ "account": z.coerce.string(), "block_range": z.array(z.coerce.number()).optional(), "from": z.coerce.string().optional(), "to": z.coerce.string().optional(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export type UsageTransfersAccountQueryParamsSchema = z.infer<typeof usageTransfersAccountQueryParamsSchema>;
 /**
  * @description Array of transfers.
  */
-export const usageTransfer200Schema = z.object({ "data": z.array(z.lazy(() => transferSchema)), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageTransfer200Schema = z.infer<typeof usageTransfer200Schema>;
+export const usageTransfersAccount200Schema = z.object({ "data": z.array(z.lazy(() => transferSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageTransfersAccount200Schema = z.infer<typeof usageTransfersAccount200Schema>;
 /**
  * @description An unexpected error response.
  */
-export const usageTransferErrorSchema = z.lazy(() => apiErrorSchema);
-export type UsageTransferErrorSchema = z.infer<typeof usageTransferErrorSchema>;
+export const usageTransfersAccountErrorSchema = z.lazy(() => apiErrorSchema);
+export type UsageTransfersAccountErrorSchema = z.infer<typeof usageTransfersAccountErrorSchema>;
 /**
  * @description Array of transfers.
  */
-export const usageTransferQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => transferSchema)), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageTransferQueryResponseSchema = z.infer<typeof usageTransferQueryResponseSchema>;
+export const usageTransfersAccountQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => transferSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageTransfersAccountQueryResponseSchema = z.infer<typeof usageTransfersAccountQueryResponseSchema>;
 
- export const operations = { "Usage_chains": {
+
+export const usageTransferIdQueryParamsSchema = z.object({ "trx_id": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export type UsageTransferIdQueryParamsSchema = z.infer<typeof usageTransferIdQueryParamsSchema>;
+/**
+ * @description Array of transfers.
+ */
+export const usageTransferId200Schema = z.object({ "data": z.array(z.lazy(() => transferSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageTransferId200Schema = z.infer<typeof usageTransferId200Schema>;
+/**
+ * @description An unexpected error response.
+ */
+export const usageTransferIdErrorSchema = z.lazy(() => apiErrorSchema);
+export type UsageTransferIdErrorSchema = z.infer<typeof usageTransferIdErrorSchema>;
+/**
+ * @description Array of transfers.
+ */
+export const usageTransferIdQueryResponseSchema = z.object({ "data": z.array(z.lazy(() => transferSchema)), "meta": z.lazy(() => responseMetadataSchema) });
+export type UsageTransferIdQueryResponseSchema = z.infer<typeof usageTransferIdQueryResponseSchema>;
+
+ /**
+ * @description The Api version and commit hash.
+ */
+export const docsVersion200Schema = z.lazy(() => versionSchema);
+export type DocsVersion200Schema = z.infer<typeof docsVersion200Schema>;
+/**
+ * @description An unexpected error response.
+ */
+export const docsVersionErrorSchema = z.lazy(() => apiErrorSchema);
+export type DocsVersionErrorSchema = z.infer<typeof docsVersionErrorSchema>;
+/**
+ * @description The Api version and commit hash.
+ */
+export const docsVersionQueryResponseSchema = z.lazy(() => versionSchema);
+export type DocsVersionQueryResponseSchema = z.infer<typeof docsVersionQueryResponseSchema>;
+
+ export const operations = { "Usage_balance": {
         request: undefined,
         parameters: {
             path: undefined,
-            query: usageChainsQueryParamsSchema,
+            query: usageBalanceQueryParamsSchema,
             header: undefined
         },
         responses: {
-            200: usageChainsQueryResponseSchema,
-            default: usageChainsQueryResponseSchema
+            200: usageBalanceQueryResponseSchema,
+            default: usageBalanceQueryResponseSchema
+        },
+        errors: {}
+    }, "Usage_balanceHistorical": {
+        request: undefined,
+        parameters: {
+            path: undefined,
+            query: usageBalanceHistoricalQueryParamsSchema,
+            header: undefined
+        },
+        responses: {
+            200: usageBalanceHistoricalQueryResponseSchema,
+            default: usageBalanceHistoricalQueryResponseSchema
+        },
+        errors: {}
+    }, "Usage_head": {
+        request: undefined,
+        parameters: {
+            path: undefined,
+            query: usageHeadQueryParamsSchema,
+            header: undefined
+        },
+        responses: {
+            200: usageHeadQueryResponseSchema,
+            default: usageHeadQueryResponseSchema
         },
         errors: {}
     }, "Monitoring_health": {
@@ -277,6 +325,18 @@ export type UsageTransferQueryResponseSchema = z.infer<typeof usageTransferQuery
         responses: {
             200: monitoringHealthQueryResponseSchema,
             default: monitoringHealthQueryResponseSchema
+        },
+        errors: {}
+    }, "Usage_holders": {
+        request: undefined,
+        parameters: {
+            path: undefined,
+            query: usageHoldersQueryParamsSchema,
+            header: undefined
+        },
+        responses: {
+            200: usageHoldersQueryResponseSchema,
+            default: usageHoldersQueryResponseSchema
         },
         errors: {}
     }, "Monitoring_metrics": {
@@ -303,6 +363,66 @@ export type UsageTransferQueryResponseSchema = z.infer<typeof usageTransferQuery
             default: docsOpenapiQueryResponseSchema
         },
         errors: {}
+    }, "Usage_supply": {
+        request: undefined,
+        parameters: {
+            path: undefined,
+            query: usageSupplyQueryParamsSchema,
+            header: undefined
+        },
+        responses: {
+            200: usageSupplyQueryResponseSchema,
+            default: usageSupplyQueryResponseSchema
+        },
+        errors: {}
+    }, "Usage_tokens": {
+        request: undefined,
+        parameters: {
+            path: undefined,
+            query: usageTokensQueryParamsSchema,
+            header: undefined
+        },
+        responses: {
+            200: usageTokensQueryResponseSchema,
+            default: usageTokensQueryResponseSchema
+        },
+        errors: {}
+    }, "Usage_transfers": {
+        request: undefined,
+        parameters: {
+            path: undefined,
+            query: usageTransfersQueryParamsSchema,
+            header: undefined
+        },
+        responses: {
+            200: usageTransfersQueryResponseSchema,
+            default: usageTransfersQueryResponseSchema
+        },
+        errors: {}
+    }, "Usage_transfersAccount": {
+        request: undefined,
+        parameters: {
+            path: undefined,
+            query: usageTransfersAccountQueryParamsSchema,
+            header: undefined
+        },
+        responses: {
+            200: usageTransfersAccountQueryResponseSchema,
+            default: usageTransfersAccountQueryResponseSchema
+        },
+        errors: {}
+    }, "Usage_transferId": {
+        request: undefined,
+        parameters: {
+            path: undefined,
+            query: usageTransferIdQueryParamsSchema,
+            header: undefined
+        },
+        responses: {
+            200: usageTransferIdQueryResponseSchema,
+            default: usageTransferIdQueryResponseSchema
+        },
+        errors: {}
     }, "Docs_version": {
         request: undefined,
         parameters: {
@@ -315,99 +435,31 @@ export type UsageTransferQueryResponseSchema = z.infer<typeof usageTransferQuery
             default: docsVersionQueryResponseSchema
         },
         errors: {}
-    }, "Usage_balance": {
-        request: undefined,
-        parameters: {
-            path: usageBalancePathParamsSchema,
-            query: usageBalanceQueryParamsSchema,
-            header: undefined
-        },
-        responses: {
-            200: usageBalanceQueryResponseSchema,
-            default: usageBalanceQueryResponseSchema
-        },
-        errors: {}
-    }, "Usage_holders": {
-        request: undefined,
-        parameters: {
-            path: usageHoldersPathParamsSchema,
-            query: usageHoldersQueryParamsSchema,
-            header: undefined
-        },
-        responses: {
-            200: usageHoldersQueryResponseSchema,
-            default: usageHoldersQueryResponseSchema
-        },
-        errors: {}
-    }, "Usage_supply": {
-        request: undefined,
-        parameters: {
-            path: usageSupplyPathParamsSchema,
-            query: usageSupplyQueryParamsSchema,
-            header: undefined
-        },
-        responses: {
-            200: usageSupplyQueryResponseSchema,
-            default: usageSupplyQueryResponseSchema
-        },
-        errors: {}
-    }, "Usage_tokens": {
-        request: undefined,
-        parameters: {
-            path: usageTokensPathParamsSchema,
-            query: usageTokensQueryParamsSchema,
-            header: undefined
-        },
-        responses: {
-            200: usageTokensQueryResponseSchema,
-            default: usageTokensQueryResponseSchema
-        },
-        errors: {}
-    }, "Usage_transfers": {
-        request: undefined,
-        parameters: {
-            path: usageTransfersPathParamsSchema,
-            query: usageTransfersQueryParamsSchema,
-            header: undefined
-        },
-        responses: {
-            200: usageTransfersQueryResponseSchema,
-            default: usageTransfersQueryResponseSchema
-        },
-        errors: {}
-    }, "Usage_transfer": {
-        request: undefined,
-        parameters: {
-            path: usageTransferPathParamsSchema,
-            query: usageTransferQueryParamsSchema,
-            header: undefined
-        },
-        responses: {
-            200: usageTransferQueryResponseSchema,
-            default: usageTransferQueryResponseSchema
-        },
-        errors: {}
     } } as const;
-export const paths = { "/chains": {
-        get: operations["Usage_chains"]
+export const paths = { "/balance": {
+        get: operations["Usage_balance"]
+    }, "/balance/historical": {
+        get: operations["Usage_balanceHistorical"]
+    }, "/head": {
+        get: operations["Usage_head"]
     }, "/health": {
         get: operations["Monitoring_health"]
+    }, "/holders": {
+        get: operations["Usage_holders"]
     }, "/metrics": {
         get: operations["Monitoring_metrics"]
     }, "/openapi": {
         get: operations["Docs_openapi"]
+    }, "/supply": {
+        get: operations["Usage_supply"]
+    }, "/tokens": {
+        get: operations["Usage_tokens"]
+    }, "/transfers": {
+        get: operations["Usage_transfers"]
+    }, "/transfers/account": {
+        get: operations["Usage_transfersAccount"]
+    }, "/transfers/id": {
+        get: operations["Usage_transferId"]
     }, "/version": {
         get: operations["Docs_version"]
-    }, "/{chain}/balance": {
-        get: operations["Usage_balance"]
-    }, "/{chain}/holders": {
-        get: operations["Usage_holders"]
-    }, "/{chain}/supply": {
-        get: operations["Usage_supply"]
-    }, "/{chain}/tokens": {
-        get: operations["Usage_tokens"]
-    }, "/{chain}/transfers": {
-        get: operations["Usage_transfers"]
-    }, "/{chain}/transfers/{trx_id}": {
-        get: operations["Usage_transfer"]
     } } as const;

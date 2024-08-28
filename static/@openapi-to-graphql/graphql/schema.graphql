@@ -1,17 +1,24 @@
 type Query {
   """
-  Balances of an account.
+  Token balances of an account.
   
-  Equivalent to GET /{chain}/balance
+  Equivalent to GET /balance
   """
-  balance(account: String!, block_num: Int, chain: Chain!, contract: String, limit: Int, page: Int, symcode: String): Balance
+  balance(account: String!, contract: String, limit: Int, page: Int, symcode: String): Balance
 
   """
-  List of available Antelope chains and corresponding latest block for which data is available.
+  Historical token balances of an account.
   
-  Equivalent to GET /chains
+  Equivalent to GET /balance/historical
   """
-  chains(limit: Int, page: Int): Chains
+  balanceHistorical(account: String!, block_num: Int!, contract: String, limit: Int, page: Int, symcode: String): BalanceHistorical
+
+  """
+  Current head block for which data is available (can be lower than head block of the chain).
+  
+  Equivalent to GET /head
+  """
+  head(limit: Int, page: Int): Head
 
   """
   Checks database connection.
@@ -23,9 +30,9 @@ type Query {
   """
   List of holders of a token.
   
-  Equivalent to GET /{chain}/holders
+  Equivalent to GET /holders
   """
-  holders(chain: Chain!, contract: String!, limit: Int, page: Int, symcode: String!): Holders
+  holders(contract: String!, limit: Int, page: Int, symcode: String!): Holders
 
   """
   Prometheus metrics.
@@ -44,33 +51,40 @@ type Query {
   """
   Total supply for a token.
   
-  Equivalent to GET /{chain}/supply
+  Equivalent to GET /supply
   """
-  supply(block_num: Int, chain: Chain!, contract: String!, issuer: String, limit: Int, page: Int, symcode: String!): Supply
+  supply(block_num: Int, contract: String!, issuer: String, limit: Int, page: Int, symcode: String!): Supply
 
   """
   List of available tokens.
   
-  Equivalent to GET /{chain}/tokens
+  Equivalent to GET /tokens
   """
-  tokens(chain: Chain!, limit: Int, page: Int): Tokens
-
-  """
-  Specific transfer related to a token.
-  
-  Equivalent to GET /{chain}/transfers/{trx_id}
-  """
-  transfer(chain: Chain!, limit: Int, page: Int, trx_id: String!): Transfer2
+  tokens(limit: Int, page: Int): Tokens
 
   """
   All transfers related to a token.
   
-  Equivalent to GET /{chain}/transfers
+  Equivalent to GET /transfers
   """
-  transfers(block_range: [Int], chain: Chain!, contract: String, from: String, limit: Int, page: Int, symcode: String, to: String): Transfers
+  transfers(block_range: [Int], contract: String!, limit: Int, page: Int, symcode: String!): Transfers
 
   """
-  API version and Git short commit hash.
+  All transfers related to an account.
+  
+  Equivalent to GET /transfers/account
+  """
+  transfersAccount(account: String!, block_range: [Int], contract: String, from: String, limit: Int, page: Int, symcode: String, to: String): TransfersAccount
+
+  """
+  Specific transfer related to a token.
+  
+  Equivalent to GET /transfers/id
+  """
+  transfersId(limit: Int, page: Int, trx_id: String!): TransfersId
+
+  """
+  Api version and Git short commit hash.
   
   Equivalent to GET /version
   """
@@ -78,6 +92,37 @@ type Query {
 }
 
 type Balance {
+  data: [Balance2]!
+  meta: ResponseMetadata!
+}
+
+type Balance2 {
+  balance: Float!
+  contract: String!
+  last_updated_block: Int!
+  symcode: String!
+}
+
+type ResponseMetadata {
+  next_page: BigInt!
+  previous_page: BigInt!
+  statistics: Statistics!
+  total_pages: BigInt!
+  total_results: BigInt!
+}
+
+"""
+The `BigInt` scalar type represents non-fractional signed whole numeric values.
+"""
+scalar BigInt
+
+type Statistics {
+  bytes_read: BigInt!
+  elapsed: Float!
+  rows_read: BigInt!
+}
+
+type BalanceHistorical {
   data: [BalanceChange]!
   meta: ResponseMetadata!
 }
@@ -97,43 +142,14 @@ type BalanceChange {
   value: Float!
 }
 
-"""
-The `BigInt` scalar type represents non-fractional signed whole numeric values.
-"""
-scalar BigInt
-
-type ResponseMetadata {
-  next_page: BigInt!
-  previous_page: BigInt!
-  statistics: Statistics!
-  total_pages: BigInt!
-  total_results: BigInt!
-}
-
-type Statistics {
-  bytes_read: BigInt!
-  elapsed: Float!
-  rows_read: BigInt!
-}
-
-enum Chain {
-  EOS
-  WAX
-}
-
-type Chains {
-  data: [DataListItem]!
+type Head {
+  data: [Data3ListItem]!
   meta: ResponseMetadata!
 }
 
-type DataListItem {
+type Data3ListItem {
+  block_id: String!
   block_num: Int!
-  chain: SupportedChains!
-}
-
-enum SupportedChains {
-  EOS
-  WAX
 }
 
 type Holders {
@@ -173,11 +189,16 @@ type Supply2 {
 }
 
 type Tokens {
-  data: [Supply2]!
+  data: [ModelsScope]!
   meta: ResponseMetadata!
 }
 
-type Transfer2 {
+type ModelsScope {
+  contract: String!
+  symcode: String!
+}
+
+type Transfers {
   data: [Transfer]!
   meta: ResponseMetadata!
 }
@@ -198,7 +219,12 @@ type Transfer {
   value: Float!
 }
 
-type Transfers {
+type TransfersAccount {
+  data: [Transfer]!
+  meta: ResponseMetadata!
+}
+
+type TransfersId {
   data: [Transfer]!
   meta: ResponseMetadata!
 }

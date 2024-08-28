@@ -3,8 +3,14 @@ import { APIErrorResponse } from "./utils.js";
 
 import type { Context } from "hono";
 import type { AdditionalQueryParams, UsageEndpoints, UsageResponse, ValidUserParams } from "./types/api.js";
-import { config } from "./config.js";
-import { supportedChainsSchema } from "./types/zod.gen.js";
+
+/**
+ * This function creates and send the SQL queries to the ClickHouse database based on the endpoint requested.
+ * 
+ * Both the REST API and GraphQL endpoint use those.
+ * `endpoint` is a valid "Usage" endpoint (e.g. not a `/version`, `/metrics`, etc. endpoint, an actual data endpoint).
+ * `user_params` is an key-value object created from the path and query parameters present in the request.
+ **/
 
 export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, user_params: ValidUserParams<typeof endpoint>) {
     type UsageElementReturnType = UsageResponse<typeof endpoint>[number];
@@ -19,7 +25,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
     let filters = "";
     // Don't add `limit` and `block_range` to WHERE clause
-    for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range" && k !== "chain")) {
+    for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range")) {
         const clickhouse_type = typeof query_params[k as keyof typeof query_params] === "number" ? "int" : "String";
         if (k === 'symcode') // Special case to allow case-insensitive symcode input
             filters += ` (${k} = upper({${k}: ${clickhouse_type}})) AND`;
@@ -33,37 +39,11 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
     let query = "";
     let additional_query_params: AdditionalQueryParams = {};
-    let database = config.database;
 
-    if (endpoint !== "/chains") {
+    // Parse block range for endpoints that uses it. Check for single value or two comma-separated values.
+    if (endpoint == "/transfers" || endpoint == "/transfers/account") {
         const q = query_params as ValidUserParams<typeof endpoint>;
-        database = `${q.chain.toLowerCase()}_tokens_v1`;
-    }
-
-    if (endpoint == "/{chain}/balance" || endpoint == "/{chain}/supply") {
-        // Need to narrow the type of `query_params` explicitly to access properties based on endpoint value
-        // See https://github.com/microsoft/TypeScript/issues/33014
-        const q = query_params as ValidUserParams<typeof endpoint>;
-        query +=
-            `SELECT *`
-            + ` FROM ${endpoint == "/{chain}/balance" ? 
-                `${database}.${q.block_num ? 'historical_' : ''}account_balances`
-                : `${database}.${q.block_num ? 'historical_' : ''}token_supplies`}`
-            + ` ${filters}`;
-    } else if (endpoint == "/{chain}/transfers") {
-        query += `SELECT * FROM `;
-
-        const q = query_params as ValidUserParams<typeof endpoint>;
-        // Find all incoming and outgoing transfers from single account
-        if (q.from && q.to && q.from === q.to)
-            filters = filters.replace(
-                "(from = {from: String}) AND (to = {to: String})",
-                "((from = {from: String}) OR (to = {to: String}))",
-            );
-
         if (q.block_range) {
-            query += `${database}.transfers_block_num`;
-
             if (q.block_range[0] && q.block_range[1]) {
                 filters += 
                     `${filters.length ? "AND" : "WHERE"}` +
@@ -77,30 +57,51 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
                     ` (block_num >= {min_block: int})`;
                 additional_query_params.min_block = q.block_range[0];
             }
-        } else if (q.from) {
-            query += `${database}.transfers_from`;
-        } else if (q.to) {
-            query += `${database}.transfers_to`;
-        } else if (q.contract || q.symcode) {
-            query += `${database}.transfers_contract`;
-        } else {
-            query += `${database}.transfers_block_num`;
         }
+    }
+
+    if (endpoint == "/balance") {
+        query +=
+            `SELECT block_num AS last_updated_block, contract, symcode, value as balance FROM token_holders FINAL`
+            + ` ${filters} ORDER BY value DESC`
+    } else if (endpoint == "/balance/historical") {
+        query +=
+            `SELECT * FROM historical_account_balances`
+            + ` ${filters} ORDER BY value DESC`
+    } else if (endpoint == "/supply") {
+        // Need to narrow the type of `query_params` explicitly to access properties based on endpoint value
+        // See https://github.com/microsoft/TypeScript/issues/33014
+        const q = query_params as ValidUserParams<typeof endpoint>;
+        query +=
+            `SELECT * FROM ${q.block_num ? 'historical_' : ''}token_supplies`
+            +` ${filters} ORDER BY block_num DESC`;
+    } else if (endpoint == "/transfers") {
+        query += `SELECT * FROM `;
+
+        const q = query_params as ValidUserParams<typeof endpoint>;
+        if (q.contract && q.symcode)
+            query += `transfers_contract`;
+        else
+            query += `transfers_block_num`;
 
         query += ` ${filters} ORDER BY block_num DESC`;
-    } else if (endpoint == "/{chain}/holders") {
-        query += `SELECT account, value AS balance FROM ${database}.token_holders FINAL ${filters} ORDER BY value DESC`;
-    } else if (endpoint == "/chains") {
-        for (const chain of supportedChainsSchema._def.values)
-            query += 
-                `SELECT '${chain}' as chain, MAX(block_num) as block_num`
-                + ` FROM ${chain.toLowerCase()}_tokens_v1.cursors GROUP BY id`
-                + ` UNION ALL `;
-        query = query.substring(0, query.lastIndexOf(' UNION')); // Remove last item ` UNION`
-    } else if (endpoint == "/{chain}/transfers/{trx_id}") {
-        query += `SELECT * FROM ${database}.transfer_events ${filters} ORDER BY action_index`;
-    } else if (endpoint == "/{chain}/tokens") {
-        query += `SELECT * FROM ${database}.token_supplies FINAL ${filters} ORDER BY block_num DESC`;
+    } else if (endpoint == "/transfers/account") {
+        // Remove `account` from filters, only using it in the subquery
+        filters.replace('(account = {account: String})', '');
+        query += 
+            `SELECT * FROM`
+            + ` (SELECT DISTINCT * FROM transfers_from WHERE ((from = {account: String}) OR (to = {account: String})))`
+            + ` ${filters} ORDER BY block_num DESC`;
+    } else if (endpoint == "/transfers/id") {
+        query += `SELECT * FROM transfer_events ${filters} ORDER BY action_index`;
+    } else if (endpoint == "/holders") {
+        query += `SELECT account, value AS balance FROM token_holders FINAL ${filters} ORDER BY value DESC`;
+    } else if (endpoint == "/head") {
+        query += `SELECT block_num, block_id FROM cursors FINAL`;
+    } else if (endpoint == "/tokens") {
+        // NB: Using `account_balances` seems to return the most results
+        //     Have to try with fully synced chain to compare with `create_events` and others
+        query += `SELECT contract, symcode FROM account_balances GROUP BY (contract, symcode) ${filters}`;
     }
 
     query += " LIMIT {limit: int}";

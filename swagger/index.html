@@ -16,10 +16,11 @@
   <script src="https://unpkg.com/swagger-ui-dist@latest/swagger-ui-bundle.js" crossorigin></script>
   <script src="https://unpkg.com/swagger-ui-dist@latest/swagger-ui-standalone-preset.js" crossorigin></script>
   <script>
+    // https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
     window.onload = () => {
       window.ui = SwaggerUIBundle({
-        url: '/openapi',
         dom_id: '#swagger-ui',
+        url: '/openapi',
         presets: [
           SwaggerUIBundle.presets.apis,
           SwaggerUIStandalonePreset

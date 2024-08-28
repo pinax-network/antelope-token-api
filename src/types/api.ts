@@ -13,22 +13,23 @@ export type UsageResponse<E extends UsageEndpoints> = EndpointReturnTypes<E>["da
 export type UsageParameters<E extends UsageEndpoints> = EndpointParameters<E>;
 
 export type ValidPathParams<E extends UsageEndpoints> = EndpointParameters<E>["path"];
-export type ValidUserParams<E extends UsageEndpoints> = EndpointParameters<E> extends { path: undefined; } ?
+export type ValidUserParams<E extends UsageEndpoints> = NonNullable<EndpointParameters<E> extends { path: undefined; } ?
     // Combine path and query parameters only if path exists to prevent "never" on intersection
     z.infer<EndpointParameters<E>["query"]>
     :
-    z.infer<EndpointParameters<E>["query"] & ValidPathParams<E>>;
+    z.infer<EndpointParameters<E>["query"] & ValidPathParams<E>>>;
 export type AdditionalQueryParams = { offset?: number; min_block?: number; max_block?: number; };
 // Allow any valid parameters from the endpoint to be used as SQL query parameters
 export type ValidQueryParams = ValidUserParams<UsageEndpoints> & AdditionalQueryParams;
 
-// Map stripped operations name (e.g. `Usage_transfers` stripped to `transfers`) to endpoint paths (e.g. `/{chain}/transfers`)
+// Map stripped operations name (e.g. `Usage_transfers` stripped to `transfers`) to endpoint paths (e.g. `/transfers`)
 // This is used to map GraphQL operations to REST endpoints
 export const usageOperationsToEndpointsMap = Object.entries(operations).filter(([k, _]) => k.startsWith("Usage")).reduce(
     (o, [k, v]) => Object.assign(
         o, 
         {
-            [k.split('_')[1] as string]: Object.entries(paths).find(([k_, v_]) => v_.get === v)?.[0]
+            // Split once on first underscore to create keys (e.g. `Usage_transfersAccount` => `transfersAccount`)
+            [k.split('_')[1] as string]: Object.entries(paths).find(([_, v_]) => v_.get === v)?.[0]
         }
     ), {}
 ) as { [key in string]: UsageEndpoints };

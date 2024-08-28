@@ -1,7 +1,7 @@
 {
   "name": "antelope-token-api",
   "description": "Token balances, supply and transfers from the Antelope blockchains",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "homepage": "https://github.com/pinax-network/antelope-token-api",
   "license": "MIT",
   "authors": [
@@ -38,7 +38,7 @@
     "lint": "export APP_VERSION=$(git rev-parse --short HEAD) && bun run tsc --noEmit --skipLibCheck --pretty",
     "start": "export APP_VERSION=$(git rev-parse --short HEAD) && bun index.ts",
     "test": "bun test --coverage",
-    "types": "bun run tsp compile ./src/typespec --output-dir static && bun run openapi-to-graphql ./static/@typespec/openapi3/openapi.json --save static/@openapi-to-graphql/graphql/schema.graphql --simpleNames --singularNames && bun run kubb",
+    "types": "bun run tsp compile ./src/typespec --output-dir static && bun run openapi-to-graphql ./static/@typespec/openapi3/openapi.json --save static/@openapi-to-graphql/graphql/schema.graphql --simpleNames --singularNames --no-viewer -H 'X-Api-Key:changeme' && bun run kubb",
     "types:check": "bun run tsp compile ./src/typespec --no-emit --pretty --warn-as-error",
     "types:format": "bun run tsp format src/typespec/**/*.tsp",
     "types:watch": "bun run tsp compile ./src/typespec --watch --pretty --warn-as-error"

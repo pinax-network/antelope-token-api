@@ -29,4 +29,3 @@ jobs:
           HOST: ${{ vars.HOST }}
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          TABLE: ${{ secrets.TABLE }}

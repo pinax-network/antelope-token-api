@@ -26,6 +26,9 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     let filters = "";
     // Don't add `limit` and `block_range` to WHERE clause
     for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range")) {
+        if (k === 'account' && endpoint === '/transfers/account')
+            continue;
+
         const clickhouse_type = typeof query_params[k as keyof typeof query_params] === "number" ? "int" : "String";
         if (k === 'symcode') // Special case to allow case-insensitive symcode input
             filters += ` (${k} = upper({${k}: ${clickhouse_type}})) AND`;
@@ -86,8 +89,6 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
         query += ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/transfers/account") {
-        // Remove `account` from filters, only using it in the subquery
-        filters.replace('(account = {account: String})', '');
         query += 
             `SELECT * FROM`
             + ` (SELECT DISTINCT * FROM transfers_from WHERE ((from = {account: String}) OR (to = {account: String})))`

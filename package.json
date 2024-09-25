@@ -18,11 +18,11 @@
   ],
   "dependencies": {
     "@clickhouse/client-web": "latest",
-    "@hono/graphql-server": "^0.5.0",
-    "@kubb/cli": "^2.23.3",
-    "@kubb/core": "^2.23.3",
-    "@kubb/plugin-oas": "^2.23.3",
-    "@kubb/swagger-zod": "^2.23.3",
+    "@hono/graphql-server": "^0.5.1",
+    "@kubb/cli": "^2.27.0",
+    "@kubb/core": "^2.27.0",
+    "@kubb/plugin-oas": "^2.27.0",
+    "@kubb/swagger-zod": "^2.27.0",
     "commander": "latest",
     "dotenv": "latest",
     "hono": "latest",
@@ -55,5 +55,9 @@
   },
   "prettier": {
     "tabWidth": 4
-  }
+  },
+  "trustedDependencies": [
+    "es5-ext",
+    "esbuild"
+  ]
 }

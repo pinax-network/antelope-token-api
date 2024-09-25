@@ -11,7 +11,7 @@ export function APIErrorResponse(ctx: Context, status: ApiErrorSchema["status"],
     if (typeof err === "string") {
         message = err;
     } else if (err instanceof ZodError) {
-        message = err.issues.map(issue => `[${issue.code}] ${issue.path.join('/')}: ${issue.message}`).join('\n');
+        message = err.issues.map(issue => `[${issue.code}] ${issue.path.join('/')}: ${issue.message}`).join(' | ');
     } else if (err instanceof Error) {
         message = err.message;
     }

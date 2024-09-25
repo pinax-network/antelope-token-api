@@ -10,8 +10,8 @@ import { APP_VERSION } from "./src/config.js";
 import { logger } from './src/logger.js';
 import { makeUsageQuery } from "./src/usage.js";
 import { APIErrorResponse } from "./src/utils.js";
-import { usageOperationsToEndpointsMap, type EndpointReturnTypes, type UsageEndpoints, type ValidPathParams, type ValidUserParams } from "./src/types/api.js";
-import { paths } from './src/types/zod.gen.js';
+import { usageOperationsToEndpointsMap, ValidQueryParams, type EndpointReturnTypes, type UsageEndpoints, type ValidPathParams, type ValidUserParams } from "./src/types/api.js";
+import { blockRangeSchema, paths } from './src/types/zod.gen.js';
 
 async function AntelopeTokenAPI() {
     const app = new Hono();
@@ -86,7 +86,17 @@ async function AntelopeTokenAPI() {
         async (ctx: Context) => {
             // Use `unknown` for undefined schemas definitions in `zod.gen.ts`
             const path_params_schema = paths[endpoint]["get"]["parameters"]["path"] ?? z.unknown();
-            const query_params_schema = paths[endpoint]["get"]["parameters"]["query"] ?? z.unknown();
+            const query_params_schema = z.preprocess(
+                (q: any) => {
+                    // Preprocess block ranges to array so Zod can parse it
+                    if (q.block_range)
+                        q.block_range = q.block_range.split(',');
+
+                    return q;
+                },
+                paths[endpoint]["get"]["parameters"]["query"] ?? z.unknown()
+            );
+
             const path_params = path_params_schema.safeParse(ctx.req.param());
             const query_params = query_params_schema.safeParse(ctx.req.query());
             

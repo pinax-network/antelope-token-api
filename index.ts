@@ -11,7 +11,7 @@ import { logger } from './src/logger.js';
 import { makeUsageQuery } from "./src/usage.js";
 import { APIErrorResponse } from "./src/utils.js";
 import { usageOperationsToEndpointsMap, type EndpointReturnTypes, type UsageEndpoints, type ValidPathParams, type ValidUserParams } from "./src/types/api.js";
-import { paths } from './src/types/zod.gen.js';
+import { paths, usageTransfersQueryParamsSchema } from './src/types/zod.gen.js';
 
 async function AntelopeTokenAPI() {
     const app = new Hono();
@@ -110,7 +110,12 @@ async function AntelopeTokenAPI() {
                     } as ValidUserParams<typeof endpoint>
                 );
             } else {
-                return APIErrorResponse(ctx, 400, "bad_query_input", { ...path_params.error, ...query_params.error });
+                // Merge path and query params errors into one `ZodError` instance
+                const e = new z.ZodError([]);
+                e.addIssues(path_params.error?.issues);
+                e.addIssues(query_params.error?.issues);
+
+                return APIErrorResponse(ctx, 400, "bad_query_input", e);
             }
         }
     );

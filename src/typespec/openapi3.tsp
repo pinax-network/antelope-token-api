@@ -1,7 +1,6 @@
 import "@typespec/http";
 import "@typespec/openapi";
 import "./models.tsp";
-import "./config.js";
 
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
@@ -13,7 +12,7 @@ using TypeSpec.OpenAPI;
         name: "MIT",
         url: "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
     },
-    version: "6.0.0"
+    version: "6.0.1"
 }) // From @typespec/openapi
 //@server("https://eos.api.pinax.network/v1", "EOS V1 Api Endpoint")
 namespace AntelopeTokenApi;
@@ -82,6 +81,9 @@ model UsageResponse<T> {
     data: T;
     meta: ResponseMetadata;
 }
+
+@maxItems(2)
+model BlockRange is BlockInfo.block_num[];
 
 // Alias will *not* be present in the OpenAPI components.
 // This also helps preventing self-references in generated `components` for codegen to work properly.
@@ -189,7 +191,7 @@ interface Usage {
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     transfers(
-        @query({ format: "csv"}) block_range?: BlockInfo.block_num[],
+        @query(#{ explode: false }) block_range?: BlockRange,
         @query contract: TokenIdentifier.contract,
         @query symcode: TokenIdentifier.symcode,
         ...PaginationQueryParams,
@@ -205,7 +207,7 @@ interface Usage {
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     transfersAccount(
         @query account: BalanceChange.account,
-        @query({ format: "csv"}) block_range?: BlockInfo.block_num[],
+        @query(#{ explode: false }) block_range?: BlockRange,
         @query from?: Transfer.from,
         @query to?: Transfer.to,
         @query contract?: TokenIdentifier.contract,
@@ -244,7 +246,7 @@ interface Docs {
     @summary("OpenAPI JSON spec")
     @route("/openapi")
     @get
-    openapi(): ApiResponse<Record<unknown>>;
+    openapi(): ApiResponse<{}>;
 
     /**
         Api version and Git short commit hash.

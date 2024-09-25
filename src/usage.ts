@@ -43,7 +43,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     let query = "";
     let additional_query_params: AdditionalQueryParams = {};
 
-    // Parse block range for endpoints that uses it. Check for single value or two comma-separated values.
+    // Parse block range for endpoints that uses it. Check for single value or two values.
     if (endpoint == "/transfers" || endpoint == "/transfers/account") {
         const q = query_params as ValidUserParams<typeof endpoint>;
         if (q.block_range) {

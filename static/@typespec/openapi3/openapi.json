@@ -7,7 +7,7 @@
       "name": "MIT",
       "url": "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
     },
-    "version": "6.0.0"
+    "version": "6.0.1"
   },
   "tags": [
     {
@@ -23,9 +23,6 @@
   "paths": {
     "/balance": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_balance",
         "summary": "Token balances",
         "description": "Token balances of an account.",
@@ -36,7 +33,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "contract",
@@ -44,7 +42,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "symcode",
@@ -52,7 +51,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "limit",
@@ -62,7 +62,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -72,7 +73,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -112,6 +114,9 @@
             }
           }
         },
+        "tags": [
+          "Usage"
+        ],
         "security": [
           {
             "ApiKeyAuth": []
@@ -121,9 +126,6 @@
     },
     "/balance/historical": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_balanceHistorical",
         "summary": "Historical token balances",
         "description": "Historical token balances of an account.",
@@ -134,7 +136,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "block_num",
@@ -143,7 +146,8 @@
             "schema": {
               "type": "integer",
               "format": "uint64"
-            }
+            },
+            "explode": false
           },
           {
             "name": "contract",
@@ -151,7 +155,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "symcode",
@@ -159,7 +164,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "limit",
@@ -169,7 +175,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -179,7 +186,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -219,6 +227,9 @@
             }
           }
         },
+        "tags": [
+          "Usage"
+        ],
         "security": [
           {
             "ApiKeyAuth": []
@@ -228,9 +239,6 @@
     },
     "/head": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_head",
         "summary": "Head block information",
         "description": "Current head block for which data is available (can be lower than head block of the chain).",
@@ -243,7 +251,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -253,7 +262,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -305,14 +315,14 @@
               }
             }
           }
-        }
+        },
+        "tags": [
+          "Usage"
+        ]
       }
     },
     "/health": {
       "get": {
-        "tags": [
-          "Monitoring"
-        ],
         "operationId": "Monitoring_health",
         "summary": "Health check",
         "description": "Checks database connection.",
@@ -338,14 +348,14 @@
               }
             }
           }
-        }
+        },
+        "tags": [
+          "Monitoring"
+        ]
       }
     },
     "/holders": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_holders",
         "summary": "Token holders",
         "description": "List of holders of a token.",
@@ -356,7 +366,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "symcode",
@@ -364,7 +375,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "limit",
@@ -374,7 +386,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -384,7 +397,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -424,6 +438,9 @@
             }
           }
         },
+        "tags": [
+          "Usage"
+        ],
         "security": [
           {
             "ApiKeyAuth": []
@@ -433,9 +450,6 @@
     },
     "/metrics": {
       "get": {
-        "tags": [
-          "Monitoring"
-        ],
         "operationId": "Monitoring_metrics",
         "summary": "Prometheus metrics",
         "description": "Prometheus metrics.",
@@ -461,29 +475,21 @@
               }
             }
           }
-        }
+        },
+        "tags": [
+          "Monitoring"
+        ]
       }
     },
     "/openapi": {
       "get": {
-        "tags": [
-          "Docs"
-        ],
         "operationId": "Docs_openapi",
         "summary": "OpenAPI JSON spec",
         "description": "Reflection endpoint to return OpenAPI JSON spec. Also used by Swagger to generate the frontpage.",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "The OpenAPI JSON spec",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {}
-                }
-              }
-            }
+            "description": "The OpenAPI JSON spec"
           },
           "default": {
             "description": "An unexpected error response.",
@@ -495,14 +501,14 @@
               }
             }
           }
-        }
+        },
+        "tags": [
+          "Docs"
+        ]
       }
     },
     "/supply": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_supply",
         "summary": "Token supply",
         "description": "Total supply for a token.",
@@ -514,7 +520,8 @@
             "schema": {
               "type": "integer",
               "format": "uint64"
-            }
+            },
+            "explode": false
           },
           {
             "name": "issuer",
@@ -522,7 +529,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "contract",
@@ -530,7 +538,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "symcode",
@@ -538,7 +547,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "limit",
@@ -548,7 +558,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -558,7 +569,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -598,6 +610,9 @@
             }
           }
         },
+        "tags": [
+          "Usage"
+        ],
         "security": [
           {
             "ApiKeyAuth": []
@@ -607,9 +622,6 @@
     },
     "/tokens": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_tokens",
         "summary": "Tokens",
         "description": "List of available tokens.",
@@ -622,7 +634,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -632,7 +645,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -672,6 +686,9 @@
             }
           }
         },
+        "tags": [
+          "Usage"
+        ],
         "security": [
           {
             "ApiKeyAuth": []
@@ -681,9 +698,6 @@
     },
     "/transfers": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_transfers",
         "summary": "Token transfers",
         "description": "All transfers related to a token.",
@@ -693,13 +707,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "format": "uint64"
-              }
+              "$ref": "#/components/schemas/BlockRange"
             },
-            "style": "form",
             "explode": false
           },
           {
@@ -708,7 +717,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "symcode",
@@ -716,7 +726,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "limit",
@@ -726,7 +737,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -736,7 +748,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -776,6 +789,9 @@
             }
           }
         },
+        "tags": [
+          "Usage"
+        ],
         "security": [
           {
             "ApiKeyAuth": []
@@ -785,9 +801,6 @@
     },
     "/transfers/account": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_transfersAccount",
         "summary": "Token transfers from and to an account",
         "description": "All transfers related to an account.",
@@ -798,20 +811,16 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "block_range",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "format": "uint64"
-              }
+              "$ref": "#/components/schemas/BlockRange"
             },
-            "style": "form",
             "explode": false
           },
           {
@@ -820,7 +829,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "to",
@@ -828,7 +838,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "contract",
@@ -836,7 +847,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "symcode",
@@ -844,7 +856,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "limit",
@@ -854,7 +867,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -864,7 +878,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -904,6 +919,9 @@
             }
           }
         },
+        "tags": [
+          "Usage"
+        ],
         "security": [
           {
             "ApiKeyAuth": []
@@ -913,9 +931,6 @@
     },
     "/transfers/id": {
       "get": {
-        "tags": [
-          "Usage"
-        ],
         "operationId": "Usage_transferId",
         "summary": "Token transfer",
         "description": "Specific transfer related to a token.",
@@ -926,7 +941,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "explode": false
           },
           {
             "name": "limit",
@@ -936,7 +952,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 10
-            }
+            },
+            "explode": false
           },
           {
             "name": "page",
@@ -946,7 +963,8 @@
               "type": "integer",
               "format": "uint64",
               "default": 1
-            }
+            },
+            "explode": false
           }
         ],
         "responses": {
@@ -986,6 +1004,9 @@
             }
           }
         },
+        "tags": [
+          "Usage"
+        ],
         "security": [
           {
             "ApiKeyAuth": []
@@ -995,9 +1016,6 @@
     },
     "/version": {
       "get": {
-        "tags": [
-          "Docs"
-        ],
         "operationId": "Docs_version",
         "summary": "Api version",
         "description": "Api version and Git short commit hash.",
@@ -1023,7 +1041,10 @@
               }
             }
           }
-        }
+        },
+        "tags": [
+          "Docs"
+        ]
       }
     }
   },
@@ -1154,6 +1175,14 @@
             "format": "int64"
           }
         }
+      },
+      "BlockRange": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "uint64"
+        },
+        "maxItems": 2
       },
       "Holder": {
         "type": "object",

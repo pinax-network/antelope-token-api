@@ -5,12 +5,16 @@ export const apiErrorSchema = z.object({ "status": z.union([z.literal(500), z.li
 export type ApiErrorSchema = z.infer<typeof apiErrorSchema>;
 
 
-export const balanceSchema = z.object({ "last_updated_block": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "balance": z.coerce.number() });
+export const balanceSchema = z.object({ "last_updated_block": z.coerce.number().int(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "balance": z.coerce.number() });
 export type BalanceSchema = z.infer<typeof balanceSchema>;
 
 
-export const balanceChangeSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.string(), "account": z.coerce.string(), "balance": z.coerce.string(), "balance_delta": z.coerce.number() });
+export const balanceChangeSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number().int(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number().int(), "amount": z.coerce.number().int(), "value": z.coerce.number(), "block_num": z.coerce.number().int(), "timestamp": z.coerce.string(), "account": z.coerce.string(), "balance": z.coerce.string(), "balance_delta": z.coerce.number().int() });
 export type BalanceChangeSchema = z.infer<typeof balanceChangeSchema>;
+
+
+export const blockRangeSchema = z.array(z.coerce.number().int()).max(2);
+export type BlockRangeSchema = z.infer<typeof blockRangeSchema>;
 
 
 export const holderSchema = z.object({ "account": z.coerce.string(), "balance": z.coerce.number() });
@@ -21,23 +25,23 @@ export const modelsScopeSchema = z.object({ "contract": z.coerce.string(), "symc
 export type ModelsScopeSchema = z.infer<typeof modelsScopeSchema>;
 
 
-export const paginationSchema = z.object({ "next_page": z.coerce.number(), "previous_page": z.coerce.number(), "total_pages": z.coerce.number(), "total_results": z.coerce.number() });
+export const paginationSchema = z.object({ "next_page": z.coerce.number().int(), "previous_page": z.coerce.number().int(), "total_pages": z.coerce.number().int(), "total_results": z.coerce.number().int() });
 export type PaginationSchema = z.infer<typeof paginationSchema>;
 
 
-export const queryStatisticsSchema = z.object({ "elapsed": z.coerce.number(), "rows_read": z.coerce.number(), "bytes_read": z.coerce.number() });
+export const queryStatisticsSchema = z.object({ "elapsed": z.coerce.number(), "rows_read": z.coerce.number().int(), "bytes_read": z.coerce.number().int() });
 export type QueryStatisticsSchema = z.infer<typeof queryStatisticsSchema>;
 
 
-export const responseMetadataSchema = z.object({ "statistics": z.lazy(() => queryStatisticsSchema).nullable(), "next_page": z.coerce.number(), "previous_page": z.coerce.number(), "total_pages": z.coerce.number(), "total_results": z.coerce.number() });
+export const responseMetadataSchema = z.object({ "statistics": z.lazy(() => queryStatisticsSchema).nullable(), "next_page": z.coerce.number().int(), "previous_page": z.coerce.number().int(), "total_pages": z.coerce.number().int(), "total_results": z.coerce.number().int() });
 export type ResponseMetadataSchema = z.infer<typeof responseMetadataSchema>;
 
 
-export const supplySchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.string(), "issuer": z.coerce.string(), "max_supply": z.coerce.string(), "supply": z.coerce.string(), "supply_delta": z.coerce.number() });
+export const supplySchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number().int(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number().int(), "amount": z.coerce.number().int(), "value": z.coerce.number(), "block_num": z.coerce.number().int(), "timestamp": z.coerce.string(), "issuer": z.coerce.string(), "max_supply": z.coerce.string(), "supply": z.coerce.string(), "supply_delta": z.coerce.number().int() });
 export type SupplySchema = z.infer<typeof supplySchema>;
 
 
-export const transferSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number(), "amount": z.coerce.number(), "value": z.coerce.number(), "block_num": z.coerce.number(), "timestamp": z.coerce.string(), "from": z.coerce.string(), "to": z.coerce.string(), "quantity": z.coerce.string(), "memo": z.coerce.string() });
+export const transferSchema = z.object({ "trx_id": z.coerce.string(), "action_index": z.coerce.number().int(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "precision": z.coerce.number().int(), "amount": z.coerce.number().int(), "value": z.coerce.number(), "block_num": z.coerce.number().int(), "timestamp": z.coerce.string(), "from": z.coerce.string(), "to": z.coerce.string(), "quantity": z.coerce.string(), "memo": z.coerce.string() });
 export type TransferSchema = z.infer<typeof transferSchema>;
 
 
@@ -45,7 +49,7 @@ export const versionSchema = z.object({ "version": z.coerce.string().regex(new R
 export type VersionSchema = z.infer<typeof versionSchema>;
 
 
-export const usageBalanceQueryParamsSchema = z.object({ "account": z.coerce.string(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export const usageBalanceQueryParamsSchema = z.object({ "account": z.coerce.string(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() });
 export type UsageBalanceQueryParamsSchema = z.infer<typeof usageBalanceQueryParamsSchema>;
 /**
  * @description Array of balances.
@@ -64,7 +68,7 @@ export const usageBalanceQueryResponseSchema = z.object({ "data": z.array(z.lazy
 export type UsageBalanceQueryResponseSchema = z.infer<typeof usageBalanceQueryResponseSchema>;
 
 
-export const usageBalanceHistoricalQueryParamsSchema = z.object({ "account": z.coerce.string(), "block_num": z.coerce.number(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export const usageBalanceHistoricalQueryParamsSchema = z.object({ "account": z.coerce.string(), "block_num": z.coerce.number().int(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() });
 export type UsageBalanceHistoricalQueryParamsSchema = z.infer<typeof usageBalanceHistoricalQueryParamsSchema>;
 /**
  * @description Array of balances.
@@ -83,12 +87,12 @@ export const usageBalanceHistoricalQueryResponseSchema = z.object({ "data": z.ar
 export type UsageBalanceHistoricalQueryResponseSchema = z.infer<typeof usageBalanceHistoricalQueryResponseSchema>;
 
 
-export const usageHeadQueryParamsSchema = z.object({ "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() }).optional();
+export const usageHeadQueryParamsSchema = z.object({ "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() }).optional();
 export type UsageHeadQueryParamsSchema = z.infer<typeof usageHeadQueryParamsSchema>;
 /**
  * @description Head block information.
  */
-export const usageHead200Schema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
+export const usageHead200Schema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number().int(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
 export type UsageHead200Schema = z.infer<typeof usageHead200Schema>;
 /**
  * @description An unexpected error response.
@@ -98,7 +102,7 @@ export type UsageHeadErrorSchema = z.infer<typeof usageHeadErrorSchema>;
 /**
  * @description Head block information.
  */
-export const usageHeadQueryResponseSchema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
+export const usageHeadQueryResponseSchema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number().int(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
 export type UsageHeadQueryResponseSchema = z.infer<typeof usageHeadQueryResponseSchema>;
 
  /**
@@ -118,7 +122,7 @@ export const monitoringHealthQueryResponseSchema = z.coerce.string();
 export type MonitoringHealthQueryResponseSchema = z.infer<typeof monitoringHealthQueryResponseSchema>;
 
 
-export const usageHoldersQueryParamsSchema = z.object({ "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export const usageHoldersQueryParamsSchema = z.object({ "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() });
 export type UsageHoldersQueryParamsSchema = z.infer<typeof usageHoldersQueryParamsSchema>;
 /**
  * @description Array of accounts.
@@ -155,21 +159,19 @@ export type MonitoringMetricsQueryResponseSchema = z.infer<typeof monitoringMetr
  /**
  * @description The OpenAPI JSON spec
  */
-export const docsOpenapi200Schema = z.object({});
+export const docsOpenapi200Schema = z.any();
 export type DocsOpenapi200Schema = z.infer<typeof docsOpenapi200Schema>;
 /**
  * @description An unexpected error response.
  */
 export const docsOpenapiErrorSchema = z.lazy(() => apiErrorSchema);
 export type DocsOpenapiErrorSchema = z.infer<typeof docsOpenapiErrorSchema>;
-/**
- * @description The OpenAPI JSON spec
- */
-export const docsOpenapiQueryResponseSchema = z.object({});
+
+ export const docsOpenapiQueryResponseSchema = z.any();
 export type DocsOpenapiQueryResponseSchema = z.infer<typeof docsOpenapiQueryResponseSchema>;
 
 
-export const usageSupplyQueryParamsSchema = z.object({ "block_num": z.coerce.number().optional(), "issuer": z.coerce.string().optional(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export const usageSupplyQueryParamsSchema = z.object({ "block_num": z.coerce.number().int().optional(), "issuer": z.coerce.string().optional(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() });
 export type UsageSupplyQueryParamsSchema = z.infer<typeof usageSupplyQueryParamsSchema>;
 /**
  * @description Array of supplies.
@@ -188,7 +190,7 @@ export const usageSupplyQueryResponseSchema = z.object({ "data": z.array(z.lazy(
 export type UsageSupplyQueryResponseSchema = z.infer<typeof usageSupplyQueryResponseSchema>;
 
 
-export const usageTokensQueryParamsSchema = z.object({ "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() }).optional();
+export const usageTokensQueryParamsSchema = z.object({ "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() }).optional();
 export type UsageTokensQueryParamsSchema = z.infer<typeof usageTokensQueryParamsSchema>;
 /**
  * @description Array of token identifier.
@@ -207,7 +209,7 @@ export const usageTokensQueryResponseSchema = z.object({ "data": z.array(z.lazy(
 export type UsageTokensQueryResponseSchema = z.infer<typeof usageTokensQueryResponseSchema>;
 
 
-export const usageTransfersQueryParamsSchema = z.object({ "block_range": z.array(z.coerce.number()).optional(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export const usageTransfersQueryParamsSchema = z.object({ "block_range": z.lazy(() => blockRangeSchema).optional(), "contract": z.coerce.string(), "symcode": z.coerce.string(), "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() });
 export type UsageTransfersQueryParamsSchema = z.infer<typeof usageTransfersQueryParamsSchema>;
 /**
  * @description Array of transfers.
@@ -226,7 +228,7 @@ export const usageTransfersQueryResponseSchema = z.object({ "data": z.array(z.la
 export type UsageTransfersQueryResponseSchema = z.infer<typeof usageTransfersQueryResponseSchema>;
 
 
-export const usageTransfersAccountQueryParamsSchema = z.object({ "account": z.coerce.string(), "block_range": z.array(z.coerce.number()).optional(), "from": z.coerce.string().optional(), "to": z.coerce.string().optional(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export const usageTransfersAccountQueryParamsSchema = z.object({ "account": z.coerce.string(), "block_range": z.lazy(() => blockRangeSchema).optional(), "from": z.coerce.string().optional(), "to": z.coerce.string().optional(), "contract": z.coerce.string().optional(), "symcode": z.coerce.string().optional(), "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() });
 export type UsageTransfersAccountQueryParamsSchema = z.infer<typeof usageTransfersAccountQueryParamsSchema>;
 /**
  * @description Array of transfers.
@@ -245,7 +247,7 @@ export const usageTransfersAccountQueryResponseSchema = z.object({ "data": z.arr
 export type UsageTransfersAccountQueryResponseSchema = z.infer<typeof usageTransfersAccountQueryResponseSchema>;
 
 
-export const usageTransferIdQueryParamsSchema = z.object({ "trx_id": z.coerce.string(), "limit": z.coerce.number().optional(), "page": z.coerce.number().optional() });
+export const usageTransferIdQueryParamsSchema = z.object({ "trx_id": z.coerce.string(), "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() });
 export type UsageTransferIdQueryParamsSchema = z.infer<typeof usageTransferIdQueryParamsSchema>;
 /**
  * @description Array of transfers.

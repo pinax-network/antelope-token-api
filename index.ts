@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { type RootResolver, graphqlServer, getGraphQLParams } from '@hono/graphql-server';
+import { type RootResolver, graphqlServer } from '@hono/graphql-server';
 import { buildSchema } from 'graphql';
 import { SafeParseSuccess, z } from 'zod';
 
@@ -86,7 +86,17 @@ async function AntelopeTokenAPI() {
         async (ctx: Context) => {
             // Use `unknown` for undefined schemas definitions in `zod.gen.ts`
             const path_params_schema = paths[endpoint]["get"]["parameters"]["path"] ?? z.unknown();
-            const query_params_schema = paths[endpoint]["get"]["parameters"]["query"] ?? z.unknown();
+            const query_params_schema = z.preprocess(
+                (q: any) => {
+                    // Preprocess block ranges to array so Zod can parse it
+                    if (q.block_range)
+                        q.block_range = q.block_range.split(',');
+
+                    return q;
+                },
+                paths[endpoint]["get"]["parameters"]["query"] ?? z.unknown()
+            );
+
             const path_params = path_params_schema.safeParse(ctx.req.param());
             const query_params = query_params_schema.safeParse(ctx.req.query());
             

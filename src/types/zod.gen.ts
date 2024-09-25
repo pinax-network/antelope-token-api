@@ -159,17 +159,15 @@ export type MonitoringMetricsQueryResponseSchema = z.infer<typeof monitoringMetr
  /**
  * @description The OpenAPI JSON spec
  */
-export const docsOpenapi200Schema = z.object({}).catchall(z.any());
+export const docsOpenapi200Schema = z.any();
 export type DocsOpenapi200Schema = z.infer<typeof docsOpenapi200Schema>;
 /**
  * @description An unexpected error response.
  */
 export const docsOpenapiErrorSchema = z.lazy(() => apiErrorSchema);
 export type DocsOpenapiErrorSchema = z.infer<typeof docsOpenapiErrorSchema>;
-/**
- * @description The OpenAPI JSON spec
- */
-export const docsOpenapiQueryResponseSchema = z.object({}).catchall(z.any());
+
+ export const docsOpenapiQueryResponseSchema = z.any();
 export type DocsOpenapiQueryResponseSchema = z.infer<typeof docsOpenapiQueryResponseSchema>;
 
 

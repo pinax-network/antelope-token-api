@@ -246,7 +246,7 @@ interface Docs {
     @summary("OpenAPI JSON spec")
     @route("/openapi")
     @get
-    openapi(): ApiResponse<Record<unknown>>;
+    openapi(): ApiResponse<{}>;
 
     /**
         Api version and Git short commit hash.

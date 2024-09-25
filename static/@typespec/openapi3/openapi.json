@@ -489,15 +489,7 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "The OpenAPI JSON spec",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {}
-                }
-              }
-            }
+            "description": "The OpenAPI JSON spec"
           },
           "default": {
             "description": "An unexpected error response.",

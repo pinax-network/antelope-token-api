@@ -1,5 +1,5 @@
 import { Hono, type Context } from "hono";
-import { type RootResolver, graphqlServer, getGraphQLParams } from '@hono/graphql-server';
+import { type RootResolver, graphqlServer } from '@hono/graphql-server';
 import { buildSchema } from 'graphql';
 import { SafeParseSuccess, z } from 'zod';
 
@@ -10,8 +10,8 @@ import { APP_VERSION } from "./src/config.js";
 import { logger } from './src/logger.js';
 import { makeUsageQuery } from "./src/usage.js";
 import { APIErrorResponse } from "./src/utils.js";
-import { usageOperationsToEndpointsMap, ValidQueryParams, type EndpointReturnTypes, type UsageEndpoints, type ValidPathParams, type ValidUserParams } from "./src/types/api.js";
-import { blockRangeSchema, paths } from './src/types/zod.gen.js';
+import { usageOperationsToEndpointsMap, type EndpointReturnTypes, type UsageEndpoints, type ValidPathParams, type ValidUserParams } from "./src/types/api.js";
+import { paths } from './src/types/zod.gen.js';
 
 async function AntelopeTokenAPI() {
     const app = new Hono();

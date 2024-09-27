@@ -7,7 +7,7 @@
       "name": "MIT",
       "url": "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
     },
-    "version": "6.0.1"
+    "version": "6.1.0"
   },
   "tags": [
     {
@@ -21,7 +21,7 @@
     }
   ],
   "paths": {
-    "/balance": {
+    "/account/balances": {
       "get": {
         "operationId": "Usage_balance",
         "summary": "Token balances",
@@ -124,7 +124,7 @@
         ]
       }
     },
-    "/balance/historical": {
+    "/account/balances/historical": {
       "get": {
         "operationId": "Usage_balanceHistorical",
         "summary": "Historical token balances",
@@ -206,6 +206,136 @@
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/BalanceChange"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Usage"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/account/transfers": {
+      "get": {
+        "operationId": "Usage_transfersAccount",
+        "summary": "Token transfers from and to an account",
+        "description": "All transfers related to an account.",
+        "parameters": [
+          {
+            "name": "account",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "explode": false
+          },
+          {
+            "name": "block_range",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/BlockRange"
+            },
+            "explode": false
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "explode": false
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "explode": false
+          },
+          {
+            "name": "contract",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "explode": false
+          },
+          {
+            "name": "symcode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "explode": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            },
+            "explode": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            },
+            "explode": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of transfers.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Transfer"
                       }
                     },
                     "meta": {
@@ -354,7 +484,142 @@
         ]
       }
     },
-    "/holders": {
+    "/metrics": {
+      "get": {
+        "operationId": "Monitoring_metrics",
+        "summary": "Prometheus metrics",
+        "description": "Prometheus metrics.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Metrics as text.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Monitoring"
+        ]
+      }
+    },
+    "/openapi": {
+      "get": {
+        "operationId": "Docs_openapi",
+        "summary": "OpenAPI JSON spec",
+        "description": "Reflection endpoint to return OpenAPI JSON spec. Also used by Swagger to generate the frontpage.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The OpenAPI JSON spec"
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Docs"
+        ]
+      }
+    },
+    "/tokens": {
+      "get": {
+        "operationId": "Usage_tokens",
+        "summary": "Tokens",
+        "description": "List of available tokens.",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10
+            },
+            "explode": false
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1
+            },
+            "explode": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of token identifier.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data",
+                    "meta"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Models.Scope"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/ResponseMetadata"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Usage"
+        ],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/tokens/holders": {
       "get": {
         "operationId": "Usage_holders",
         "summary": "Token holders",
@@ -448,66 +713,7 @@
         ]
       }
     },
-    "/metrics": {
-      "get": {
-        "operationId": "Monitoring_metrics",
-        "summary": "Prometheus metrics",
-        "description": "Prometheus metrics.",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Metrics as text.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Monitoring"
-        ]
-      }
-    },
-    "/openapi": {
-      "get": {
-        "operationId": "Docs_openapi",
-        "summary": "OpenAPI JSON spec",
-        "description": "Reflection endpoint to return OpenAPI JSON spec. Also used by Swagger to generate the frontpage.",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "The OpenAPI JSON spec"
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Docs"
-        ]
-      }
-    },
-    "/supply": {
+    "/tokens/supplies": {
       "get": {
         "operationId": "Usage_supply",
         "summary": "Token supply",
@@ -620,82 +826,6 @@
         ]
       }
     },
-    "/tokens": {
-      "get": {
-        "operationId": "Usage_tokens",
-        "summary": "Tokens",
-        "description": "List of available tokens.",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "uint64",
-              "default": 10
-            },
-            "explode": false
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "uint64",
-              "default": 1
-            },
-            "explode": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Array of token identifier.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Models.Scope"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/ResponseMetadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Usage"
-        ],
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
     "/transfers": {
       "get": {
         "operationId": "Usage_transfers",
@@ -724,136 +854,6 @@
             "name": "symcode",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "explode": false
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "uint64",
-              "default": 10
-            },
-            "explode": false
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "uint64",
-              "default": 1
-            },
-            "explode": false
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Array of transfers.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "data",
-                    "meta"
-                  ],
-                  "properties": {
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Transfer"
-                      }
-                    },
-                    "meta": {
-                      "$ref": "#/components/schemas/ResponseMetadata"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiError"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Usage"
-        ],
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
-      }
-    },
-    "/transfers/account": {
-      "get": {
-        "operationId": "Usage_transfersAccount",
-        "summary": "Token transfers from and to an account",
-        "description": "All transfers related to an account.",
-        "parameters": [
-          {
-            "name": "account",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "explode": false
-          },
-          {
-            "name": "block_range",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/BlockRange"
-            },
-            "explode": false
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "explode": false
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "explode": false
-          },
-          {
-            "name": "contract",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            },
-            "explode": false
-          },
-          {
-            "name": "symcode",
-            "in": "query",
-            "required": false,
             "schema": {
               "type": "string"
             },
@@ -1082,7 +1082,8 @@
               "internal_server_error",
               "method_not_allowed",
               "route_not_found",
-              "unauthorized"
+              "unauthorized",
+              "not_found_data"
             ]
           },
           "message": {

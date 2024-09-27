@@ -5,14 +5,16 @@ import "./models.tsp";
 using TypeSpec.Http;
 using TypeSpec.OpenAPI;
 
-@service({ title: "Antelope Token Api" })
+@service({
+    title: "Antelope Token Api",
+})
 @info({
     summary: "Tokens information from the Antelope blockchains, powered by Substreams",
     license: {
         name: "MIT",
-        url: "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
+        url: "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE",
     },
-    version: "6.0.1"
+    version: "6.1.0",
 }) // From @typespec/openapi
 //@server("https://eos.api.pinax.network/v1", "EOS V1 Api Endpoint")
 namespace AntelopeTokenApi;
@@ -29,7 +31,8 @@ alias ApiErrorCode =
     | "internal_server_error" // an unknown error occurred on the backend
     | "method_not_allowed" // http method is not allowed on this endpoint
     | "route_not_found" // the requested route was not found
-    | "unauthorized"; // invalid authorization information given
+    | "unauthorized" // invalid authorization information given
+    | "not_found_data"; // no data found for the given query
 
 alias ErrorStatusCode = 500 | 504 | 400 | 401 | 403 | 404 | 405;
 
@@ -54,9 +57,9 @@ model Holder {
     balance: BalanceChange.value;
 }
 model Balance {
-    last_updated_block: BalanceChange.block_num,
-    ...TokenIdentifier,
-    balance: BalanceChange.value
+    last_updated_block: BalanceChange.block_num;
+    ...TokenIdentifier;
+    balance: BalanceChange.value;
 }
 
 model QueryStatistics {
@@ -100,7 +103,7 @@ interface Usage {
         @returns Array of balances.
     */
     @summary("Token balances")
-    @route("/balance")
+    @route("/account/balances")
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     balance(
@@ -115,7 +118,7 @@ interface Usage {
         @returns Array of balances.
     */
     @summary("Historical token balances")
-    @route("/balance/historical")
+    @route("/account/balances/historical")
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     balanceHistorical(
@@ -133,11 +136,9 @@ interface Usage {
     @summary("Head block information")
     @route("/head")
     @get
-    head(
-        ...PaginationQueryParams
-    ): ApiResponse<UsageResponse<{
-        block_num: BlockInfo.block_num,
-        block_id: string
+    head(...PaginationQueryParams): ApiResponse<UsageResponse<{
+        block_num: BlockInfo.block_num;
+        block_id: string;
     }[]>>;
 
     /**
@@ -145,7 +146,7 @@ interface Usage {
         @returns Array of accounts.
     */
     @summary("Token holders")
-    @route("/holders")
+    @route("/tokens/holders")
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     holders(
@@ -159,7 +160,7 @@ interface Usage {
         @returns Array of supplies.
     */
     @summary("Token supply")
-    @route("/supply")
+    @route("/tokens/supplies")
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     supply(
@@ -179,7 +180,7 @@ interface Usage {
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     tokens(
-        ...PaginationQueryParams
+        ...PaginationQueryParams,
     ): ApiResponse<UsageResponse<TokenIdentifier[]>>;
 
     /**
@@ -202,7 +203,7 @@ interface Usage {
         @returns Array of transfers.
     */
     @summary("Token transfers from and to an account")
-    @route("/transfers/account")
+    @route("/account/transfers")
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
     transfersAccount(

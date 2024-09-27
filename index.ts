@@ -78,7 +78,6 @@ async function AntelopeTokenAPI() {
     // --------------------------
     // --- REST API endpoints ---
     // --------------------------
-
     const createUsageEndpoint = (endpoint: UsageEndpoints) => app.get(
         // Hono using different syntax than OpenAPI for path parameters
         // `/{path_param}` (OpenAPI) VS `/:path_param` (Hono)
@@ -99,7 +98,7 @@ async function AntelopeTokenAPI() {
 
             const path_params = path_params_schema.safeParse(ctx.req.param());
             const query_params = query_params_schema.safeParse(ctx.req.query());
-            
+
             if (path_params.success && query_params.success) {
                 return makeUsageQuery(
                     ctx,
@@ -122,61 +121,6 @@ async function AntelopeTokenAPI() {
 
     // Create all API endpoints interacting with DB
     Object.values(usageOperationsToEndpointsMap).forEach(e => createUsageEndpoint(e));
-
-    // ------------------------
-    // --- GraphQL endpoint ---
-    // ------------------------
-
-    // TODO: Make GraphQL endpoint use the same $SERVER parameter as Swagger if set ?
-    const schema = buildSchema(await Bun.file("./static/@openapi-to-graphql/graphql/schema.graphql").text());
-    const filterFields: Array<keyof typeof usageOperationsToEndpointsMap> = ['metrics'];
-
-    // @ts-ignore Ignore private field warning for filtering out certain operations from the schema
-    filterFields.forEach(f => delete schema._queryType._fields[f]);
-
-    const rootResolver: RootResolver = async (ctx?: Context) => {
-        if (ctx) {
-            // GraphQL resolver uses the same SQL queries backend as the REST API (`makeUsageQuery`)
-            const createGraphQLUsageResolver = (endpoint: UsageEndpoints) => 
-                async (args: ValidUserParams<typeof endpoint>) => {
-                    return await (await makeUsageQuery(ctx, endpoint, { ...args })).json();
-                };
-
-            
-            return Object.keys(usageOperationsToEndpointsMap).reduce(
-                // SQL queries endpoints
-                (resolver, op) => Object.assign(
-                    resolver,
-                    {
-                        [op]: createGraphQLUsageResolver(usageOperationsToEndpointsMap[op] as UsageEndpoints)
-                    }
-                ),
-                // Other endpoints
-                {
-                    health: async () => {
-                        const response = await client.ping();
-                        return response.success ? "OK" : `[500] bad_database_response: ${response.error.message}`;
-                    },
-                    openapi: () => openapi,
-                    metrics: async () => await prometheus.registry.metrics(),
-                    version: () => APP_VERSION
-                }
-            );
-        }
-    };
-
-    // TODO: Find way to log GraphQL queries (need to workaround middleware consuming Request)
-    // See: https://github.com/honojs/middleware/issues/81
-    //app.use('/graphql', async (ctx: Context) => logger.trace(await ctx.req.json()))
-
-    app.use(
-        '/graphql',
-        graphqlServer({
-            schema,
-            rootResolver,
-            graphiql: true, // if `true`, presents GraphiQL when the GraphQL endpoint is loaded in a browser.
-        })
-    );
 
     // -------------
     // --- Miscs ---

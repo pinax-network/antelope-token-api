@@ -1082,7 +1082,8 @@
               "internal_server_error",
               "method_not_allowed",
               "route_not_found",
-              "unauthorized"
+              "unauthorized",
+              "not_found_data"
             ]
           },
           "message": {

@@ -31,7 +31,8 @@ alias ApiErrorCode =
     | "internal_server_error" // an unknown error occurred on the backend
     | "method_not_allowed" // http method is not allowed on this endpoint
     | "route_not_found" // the requested route was not found
-    | "unauthorized"; // invalid authorization information given
+    | "unauthorized" // invalid authorization information given
+    | "not_found_data"; // no data found for the given query
 
 alias ErrorStatusCode = 500 | 504 | 400 | 401 | 403 | 404 | 405;
 

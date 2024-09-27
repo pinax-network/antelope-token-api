@@ -17,6 +17,9 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
     let { page, ...query_params } = user_params;
 
+    const table_name = endpoint.split("/")[1];
+
+
     if (!query_params.limit)
         query_params.limit = 10;
 
@@ -26,7 +29,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     let filters = "";
     // Don't add `limit` and `block_range` to WHERE clause
     for (const k of Object.keys(query_params).filter(k => k !== "limit" && k !== "block_range")) {
-        if (k === 'account' && endpoint === '/transfers/account')
+        if (k === 'account' && endpoint === '/account/transfers')
             continue;
 
         const clickhouse_type = typeof query_params[k as keyof typeof query_params] === "number" ? "int" : "String";
@@ -44,18 +47,18 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     let additional_query_params: AdditionalQueryParams = {};
 
     // Parse block range for endpoints that uses it. Check for single value or two values.
-    if (endpoint == "/transfers" || endpoint == "/transfers/account") {
+    if (endpoint == "/transfers" || endpoint == "/account/transfers") {
         const q = query_params as ValidUserParams<typeof endpoint>;
         if (q.block_range) {
             if (q.block_range[0] && q.block_range[1]) {
-                filters += 
+                filters +=
                     `${filters.length ? "AND" : "WHERE"}` +
                     ` (block_num >= {min_block: int} AND block_num <= {max_block: int})`;
                 // Use Min/Max to account for any ordering of parameters
                 additional_query_params.min_block = Math.min(q.block_range[0], q.block_range[1]);
                 additional_query_params.max_block = Math.max(q.block_range[0], q.block_range[1]);
             } else if (q.block_range[0]) {
-                filters += 
+                filters +=
                     `${filters.length ? "AND" : "WHERE"}` +
                     ` (block_num >= {min_block: int})`;
                 additional_query_params.min_block = q.block_range[0];
@@ -63,21 +66,21 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
         }
     }
 
-    if (endpoint == "/balance") {
+    if (endpoint == "/account/balances") {
         query +=
             `SELECT block_num AS last_updated_block, contract, symcode, value as balance FROM token_holders FINAL`
             + ` ${filters} ORDER BY value DESC`
-    } else if (endpoint == "/balance/historical") {
+    } else if (endpoint == "/account/balances/historical") {
         query +=
             `SELECT * FROM historical_account_balances`
             + ` ${filters} ORDER BY value DESC`
-    } else if (endpoint == "/supply") {
+    } else if (endpoint == "/tokens/supplies") {
         // Need to narrow the type of `query_params` explicitly to access properties based on endpoint value
         // See https://github.com/microsoft/TypeScript/issues/33014
         const q = query_params as ValidUserParams<typeof endpoint>;
         query +=
             `SELECT * FROM ${q.block_num ? 'historical_' : ''}token_supplies`
-            +` ${filters} ORDER BY block_num DESC`;
+            + ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/transfers") {
         query += `SELECT * FROM `;
 
@@ -88,14 +91,14 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
             query += `transfers_block_num`;
 
         query += ` ${filters} ORDER BY block_num DESC`;
-    } else if (endpoint == "/transfers/account") {
-        query += 
+    } else if (endpoint == "/account/transfers") {
+        query +=
             `SELECT * FROM`
             + ` (SELECT DISTINCT * FROM transfers_from WHERE ((from = {account: String}) OR (to = {account: String})))`
             + ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/transfers/id") {
         query += `SELECT * FROM transfer_events ${filters} ORDER BY action_index`;
-    } else if (endpoint == "/holders") {
+    } else if (endpoint == "/tokens/holders") {
         query += `SELECT account, value AS balance FROM token_holders FINAL ${filters} ORDER BY value DESC`;
     } else if (endpoint == "/head") {
         query += `SELECT block_num, block_id FROM cursors FINAL`;
@@ -112,6 +115,9 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     additional_query_params.offset = query_params.limit * (page - 1);
     try {
         query_results = await makeQuery<UsageElementReturnType>(query, { ...query_params, ...additional_query_params });
+        if (query_results.data.length === 0) {
+            return APIErrorResponse(ctx, 404, "not_found_data", `No data found for ${table_name}`);
+        }
     } catch (err) {
         return APIErrorResponse(ctx, 500, "bad_database_response", err);
     }
@@ -133,7 +139,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     */
 
     return ctx.json<UsageResponse<typeof endpoint>, 200>({
-        // @ts-ignore        
+        // @ts-ignore
         data: query_results.data,
         meta: {
             statistics: query_results.statistics ?? null,

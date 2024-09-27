@@ -38,13 +38,10 @@
 | GET <br>`text/plain` | `/health` | Checks database connection |
 | GET <br>`text/plain` | `/metrics` | [Prometheus](https://prometheus.io/) metrics |
 
-## GraphQL
-
-Go to `/graphql` for a GraphIQL interface.
-
 ### `X-Api-Key`
 
 Use the `Variables` tab at the bottom to add your API key:
+
 ```json
 {
   "X-Api-Key": "changeme"
@@ -60,7 +57,7 @@ Use the `Variables` tab at the bottom to add your API key:
 ## Requirements
 
 - [ClickHouse](clickhouse.com/), databases should follow a `{chain}_tokens_{version}` naming scheme. Database tables can be setup using the [`schema.sql`](./schema.sql) definitions created by the [`create_schema.sh`](./create_schema.sh) script.
-- A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/pinax-network/substreams-sink-sql). You should use the generated [`protobuf` files](static/@typespec/protobuf) to build your substream. This Token API makes use of the [`substreams-antelope-tokens`](https://github.com/pinax-network/substreams-antelope-tokens/) substream.
+- A [Substream sink](https://substreams.streamingfast.io/reference-and-specs/glossary#sink) for loading data into ClickHouse. We recommend [Substreams Sink ClickHouse](https://github.com/pinax-network/substreams-sink-clickhouse/) or [Substreams Sink SQL](https://github.com/pinax-network/substreams-sink-sql). This Token API makes use of the [`substreams-antelope-tokens`](https://github.com/pinax-network/substreams-antelope-tokens/) substream.
 
 ### API stack architecture
 
@@ -129,7 +126,6 @@ echo "CREATE DATABASE eos_tokens_v1 ON CLUSTER <cluster>" | clickhouse client -h
 ./create_schema.sh -o /tmp/schema.sql -c <cluster>
 ```
 
-
 ## [`Bun` Binary Releases](https://github.com/pinax-network/antelope-token-api/releases)
 
 > [!WARNING]
@@ -179,21 +175,25 @@ VERBOSE=true
 - Pull from GitHub Container registry
 
 **For latest tagged release**
+
 ```bash
 docker pull ghcr.io/pinax-network/antelope-token-api:latest
 ```
 
 **For head of `main` branch**
+
 ```bash
 docker pull ghcr.io/pinax-network/antelope-token-api:develop
 ```
 
 - Build from source
+
 ```bash
 docker build -t antelope-token-api .
 ```
 
 - Run with `.env` file
+
 ```bash
 docker run -it --rm --env-file .env ghcr.io/pinax-network/antelope-token-api
 ```
@@ -207,12 +207,13 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md).
 Install [Bun](https://bun.sh/)
 
 ```console
-$ bun install
-$ bun dev
+bun install
+bun dev
 ```
 
 **Tests**
+
 ```console
-$ bun lint
-$ bun test
+bun lint
+bun test
 ```

@@ -9,11 +9,7 @@ using TypeSpec.OpenAPI;
     title: "Antelope Token Api",
 })
 @info({
-    summary: "Tokens information from the Antelope blockchains, powered by Substreams",
-    license: {
-        name: "MIT",
-        url: "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE",
-    },
+    description: "Tokens information from the Antelope blockchains, powered by Substreams",
     version: "6.1.0",
 }) // From @typespec/openapi
 //@server("https://eos.api.pinax.network/v1", "EOS V1 Api Endpoint")
@@ -96,13 +92,13 @@ alias PaginationQueryParams = {
     @query page?: uint64 = 1;
 };
 
-@tag("Usage")
 interface Usage {
     /**
         Token balances of an account.
         @returns Array of balances.
     */
-    @summary("Token balances")
+    @tag("Account")
+    @summary("Account token balances")
     @route("/account/balances")
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
@@ -117,7 +113,8 @@ interface Usage {
         Historical token balances of an account.
         @returns Array of balances.
     */
-    @summary("Historical token balances")
+    @tag("Account")
+    @summary("Account historical token balances")
     @route("/account/balances/historical")
     @get
     @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
@@ -130,21 +127,29 @@ interface Usage {
     ): ApiResponse<UsageResponse<BalanceChange[]>>;
 
     /**
-        Current head block for which data is available (can be lower than head block of the chain).
-        @returns Head block information.
+        All transfers related to an account.
+        @returns Array of transfers.
     */
-    @summary("Head block information")
-    @route("/head")
+    @tag("Account")
+    @summary("Account token transfers")
+    @route("/account/transfers")
     @get
-    head(...PaginationQueryParams): ApiResponse<UsageResponse<{
-        block_num: BlockInfo.block_num;
-        block_id: string;
-    }[]>>;
+    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
+    transfersAccount(
+        @query account: BalanceChange.account,
+        @query(#{ explode: false }) block_range?: BlockRange,
+        @query from?: Transfer.from,
+        @query to?: Transfer.to,
+        @query contract?: TokenIdentifier.contract,
+        @query symcode?: TokenIdentifier.symcode,
+        ...PaginationQueryParams,
+    ): ApiResponse<UsageResponse<Transfer[]>>;
 
     /**
         List of holders of a token.
         @returns Array of accounts.
     */
+    @tag("Tokens")
     @summary("Token holders")
     @route("/tokens/holders")
     @get
@@ -159,6 +164,7 @@ interface Usage {
         Total supply for a token.
         @returns Array of supplies.
     */
+    @tag("Tokens")
     @summary("Token supply")
     @route("/tokens/supplies")
     @get
@@ -175,6 +181,7 @@ interface Usage {
         List of available tokens.
         @returns Array of token identifier.
     */
+    @tag("Tokens")
     @summary("Tokens")
     @route("/tokens")
     @get
@@ -187,6 +194,7 @@ interface Usage {
         All transfers related to a token.
         @returns Array of transfers.
     */
+    @tag("Transfers")
     @summary("Token transfers")
     @route("/transfers")
     @get
@@ -199,27 +207,10 @@ interface Usage {
     ): ApiResponse<UsageResponse<Transfer[]>>;
 
     /**
-        All transfers related to an account.
-        @returns Array of transfers.
-    */
-    @summary("Token transfers from and to an account")
-    @route("/account/transfers")
-    @get
-    @useAuth(ApiKeyAuth<ApiKeyLocation.header, ApiKeyHeader>)
-    transfersAccount(
-        @query account: BalanceChange.account,
-        @query(#{ explode: false }) block_range?: BlockRange,
-        @query from?: Transfer.from,
-        @query to?: Transfer.to,
-        @query contract?: TokenIdentifier.contract,
-        @query symcode?: TokenIdentifier.symcode,
-        ...PaginationQueryParams,
-    ): ApiResponse<UsageResponse<Transfer[]>>;
-
-    /**
         Specific transfer related to a token.
         @returns Array of transfers.
     */
+    @tag("Transfers")
     @summary("Token transfer")
     @route("/transfers/id")
     @get
@@ -278,4 +269,16 @@ interface Monitoring {
     @route("/metrics")
     @get
     metrics(): ApiResponse<string>;
+
+    /**
+        Current head block for which data is available (can be lower than head block of the chain).
+        @returns Head block information.
+    */
+    @summary("Head block information")
+    @route("/head")
+    @get
+    head(...PaginationQueryParams): ApiResponse<UsageResponse<{
+        block_num: BlockInfo.block_num;
+        block_id: string;
+    }[]>>;
 }

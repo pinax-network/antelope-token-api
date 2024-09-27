@@ -48,7 +48,6 @@
     "@typespec/compiler": "latest",
     "@typespec/openapi": "latest",
     "@typespec/openapi3": "latest",
-    "@typespec/protobuf": "latest",
     "bun-types": "latest",
     "openapi-to-graphql-cli": "^3.0.7",
     "typescript": "latest"

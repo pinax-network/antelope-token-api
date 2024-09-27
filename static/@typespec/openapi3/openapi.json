@@ -2,16 +2,18 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Antelope Token Api",
-    "summary": "Tokens information from the Antelope blockchains, powered by Substreams",
-    "license": {
-      "name": "MIT",
-      "url": "https://github.com/pinax-network/antelope-token-api/blob/4f4bf36341b794c0ccf5b7a14fdf810be06462d2/LICENSE"
-    },
+    "description": "Tokens information from the Antelope blockchains, powered by Substreams",
     "version": "6.1.0"
   },
   "tags": [
     {
-      "name": "Usage"
+      "name": "Account"
+    },
+    {
+      "name": "Tokens"
+    },
+    {
+      "name": "Transfers"
     },
     {
       "name": "Docs"
@@ -24,7 +26,7 @@
     "/account/balances": {
       "get": {
         "operationId": "Usage_balance",
-        "summary": "Token balances",
+        "summary": "Account token balances",
         "description": "Token balances of an account.",
         "parameters": [
           {
@@ -115,7 +117,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Account"
         ],
         "security": [
           {
@@ -127,7 +129,7 @@
     "/account/balances/historical": {
       "get": {
         "operationId": "Usage_balanceHistorical",
-        "summary": "Historical token balances",
+        "summary": "Account historical token balances",
         "description": "Historical token balances of an account.",
         "parameters": [
           {
@@ -228,7 +230,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Account"
         ],
         "security": [
           {
@@ -240,7 +242,7 @@
     "/account/transfers": {
       "get": {
         "operationId": "Usage_transfersAccount",
-        "summary": "Token transfers from and to an account",
+        "summary": "Account token transfers",
         "description": "All transfers related to an account.",
         "parameters": [
           {
@@ -358,7 +360,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Account"
         ],
         "security": [
           {
@@ -369,7 +371,7 @@
     },
     "/head": {
       "get": {
-        "operationId": "Usage_head",
+        "operationId": "Monitoring_head",
         "summary": "Head block information",
         "description": "Current head block for which data is available (can be lower than head block of the chain).",
         "parameters": [
@@ -447,7 +449,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Monitoring"
         ]
       }
     },
@@ -610,7 +612,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Tokens"
         ],
         "security": [
           {
@@ -704,7 +706,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Tokens"
         ],
         "security": [
           {
@@ -817,7 +819,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Tokens"
         ],
         "security": [
           {
@@ -920,7 +922,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Transfers"
         ],
         "security": [
           {
@@ -1005,7 +1007,7 @@
           }
         },
         "tags": [
-          "Usage"
+          "Transfers"
         ],
         "security": [
           {

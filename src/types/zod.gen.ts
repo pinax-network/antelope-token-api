@@ -106,23 +106,23 @@ export const usageTransfersAccountQueryResponseSchema = z.object({ "data": z.arr
 export type UsageTransfersAccountQueryResponseSchema = z.infer<typeof usageTransfersAccountQueryResponseSchema>;
 
 
-export const usageHeadQueryParamsSchema = z.object({ "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() }).optional();
-export type UsageHeadQueryParamsSchema = z.infer<typeof usageHeadQueryParamsSchema>;
+export const monitoringHeadQueryParamsSchema = z.object({ "limit": z.coerce.number().int().default(10).optional(), "page": z.coerce.number().int().default(1).optional() }).optional();
+export type MonitoringHeadQueryParamsSchema = z.infer<typeof monitoringHeadQueryParamsSchema>;
 /**
  * @description Head block information.
  */
-export const usageHead200Schema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number().int(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageHead200Schema = z.infer<typeof usageHead200Schema>;
+export const monitoringHead200Schema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number().int(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
+export type MonitoringHead200Schema = z.infer<typeof monitoringHead200Schema>;
 /**
  * @description An unexpected error response.
  */
-export const usageHeadErrorSchema = z.lazy(() => apiErrorSchema);
-export type UsageHeadErrorSchema = z.infer<typeof usageHeadErrorSchema>;
+export const monitoringHeadErrorSchema = z.lazy(() => apiErrorSchema);
+export type MonitoringHeadErrorSchema = z.infer<typeof monitoringHeadErrorSchema>;
 /**
  * @description Head block information.
  */
-export const usageHeadQueryResponseSchema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number().int(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
-export type UsageHeadQueryResponseSchema = z.infer<typeof usageHeadQueryResponseSchema>;
+export const monitoringHeadQueryResponseSchema = z.object({ "data": z.array(z.object({ "block_num": z.coerce.number().int(), "block_id": z.coerce.string() })), "meta": z.lazy(() => responseMetadataSchema) });
+export type MonitoringHeadQueryResponseSchema = z.infer<typeof monitoringHeadQueryResponseSchema>;
 
  /**
  * @description OK or ApiError.
@@ -317,16 +317,16 @@ export type DocsVersionQueryResponseSchema = z.infer<typeof docsVersionQueryResp
             default: usageTransfersAccountQueryResponseSchema
         },
         errors: {}
-    }, "Usage_head": {
+    }, "Monitoring_head": {
         request: undefined,
         parameters: {
             path: undefined,
-            query: usageHeadQueryParamsSchema,
+            query: monitoringHeadQueryParamsSchema,
             header: undefined
         },
         responses: {
-            200: usageHeadQueryResponseSchema,
-            default: usageHeadQueryResponseSchema
+            200: monitoringHeadQueryResponseSchema,
+            default: monitoringHeadQueryResponseSchema
         },
         errors: {}
     }, "Monitoring_health": {
@@ -445,7 +445,7 @@ export const paths = { "/account/balances": {
     }, "/account/transfers": {
         get: operations["Usage_transfersAccount"]
     }, "/head": {
-        get: operations["Usage_head"]
+        get: operations["Monitoring_head"]
     }, "/health": {
         get: operations["Monitoring_health"]
     }, "/metrics": {

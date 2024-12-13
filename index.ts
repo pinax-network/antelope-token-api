@@ -6,7 +6,7 @@ import { SafeParseSuccess, z } from 'zod';
 import client from './src/clickhouse/client.js';
 import openapi from "./static/@typespec/openapi3/openapi.json";
 import * as prometheus from './src/prometheus.js';
-import { APP_VERSION } from "./src/config.js";
+import { APP_VERSION, config } from "./src/config.js";
 import { logger } from './src/logger.js';
 import { makeUsageQuery } from "./src/usage.js";
 import { APIErrorResponse } from "./src/utils.js";
@@ -131,4 +131,7 @@ async function AntelopeTokenAPI() {
     return app;
 }
 
-export default await AntelopeTokenAPI();
+export default {
+    ...await AntelopeTokenAPI(),
+    idleTimeout: config.requestIdleTimeout
+}

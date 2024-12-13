@@ -11,6 +11,7 @@ export const DEFAULT_DATABASE = "default";
 export const DEFAULT_USERNAME = "default";
 export const DEFAULT_PASSWORD = "";
 export const DEFAULT_MAX_LIMIT = 10000;
+export const DEFAULT_IDLE_TIMEOUT = 60;
 export const DEFAULT_VERBOSE = false;
 export const DEFAULT_SORT_BY = "DESC";
 export const APP_NAME = pkg.name;
@@ -32,6 +33,7 @@ const opts = program
     .addOption(new Option("--username <string>", "Database user").env("USERNAME").default(DEFAULT_USERNAME))
     .addOption(new Option("--password <string>", "Password associated with the specified username").env("PASSWORD").default(DEFAULT_PASSWORD))
     .addOption(new Option("--max-limit <number>", "Maximum LIMIT queries").env("MAX_LIMIT").default(DEFAULT_MAX_LIMIT))
+    .addOption(new Option("--request-idle-timeout <number>", "Bun server request idle timeout (seconds)").env("BUN_IDLE_REQUEST_TIMEOUT").default(DEFAULT_IDLE_TIMEOUT))
     .addOption(new Option("-v, --verbose <boolean>", "Enable verbose logging").choices(["true", "false"]).env("VERBOSE").default(DEFAULT_VERBOSE))
     .parse()
     .opts();
@@ -44,6 +46,7 @@ export const config = z.object({
     username: z.string(),
     password: z.string(),
     maxLimit: z.coerce.number(),
+    requestIdleTimeout: z.coerce.number(),
     // `z.coerce.boolean` doesn't parse boolean string values as expected (see https://github.com/colinhacks/zod/issues/1630)
     verbose: z.coerce.string().transform((val) => val.toLowerCase() === "true"),
 }).parse(opts);

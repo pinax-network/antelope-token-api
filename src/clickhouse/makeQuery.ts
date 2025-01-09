@@ -14,9 +14,9 @@ export async function makeQuery<T = unknown>(query: string, query_params: ValidQ
 
     prometheus.query.inc();
     if ( data.statistics ) {
-        prometheus.bytes_read.inc(data.statistics.bytes_read);
-        prometheus.rows_read.inc(data.statistics.rows_read);
-        prometheus.elapsed.inc(data.statistics.elapsed);
+        prometheus.bytes_read.observe(data.statistics.bytes_read);
+        prometheus.rows_read.observe(data.statistics.rows_read);
+        prometheus.elapsed.observe(data.statistics.elapsed);
     }
 
     logger.trace({ statistics: data.statistics, rows: data.rows, rows_before_limit_at_least: data.rows_before_limit_at_least });

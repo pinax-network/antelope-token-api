@@ -67,6 +67,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     }
 
     if (endpoint == "/account/balances") {
+        filters += ` AND has_null_balance = 0`;
         query +=
             `SELECT block_num AS last_updated_block, contract, symcode, value as balance FROM token_holders FINAL`
             + ` ${filters} ORDER BY value DESC`
@@ -103,6 +104,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
     } else if (endpoint == "/transfers/id") {
         query += `SELECT * FROM transfer_events ${filters} ORDER BY action_index`;
     } else if (endpoint == "/tokens/holders") {
+        filters += ` AND has_null_balance = 0`;
         query += `SELECT account, value AS balance FROM token_holders FINAL ${filters} ORDER BY value DESC`;
     } else if (endpoint == "/head") {
         query += `SELECT block_num, block_id FROM cursors FINAL`;

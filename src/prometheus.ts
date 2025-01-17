@@ -5,7 +5,7 @@ import { logger } from "./logger.js";
 export const registry = new client.Registry();
 
 // Metrics
-export function registerCounter(name: string, help = "help", labelNames: string[] = [], config?: CounterConfiguration<string>) {
+export function registerCounter(name: string, help = "help", labelNames: string[] = [], config?: Partial<CounterConfiguration<string>>) {
     try {
         registry.registerMetric(new Counter({ name, help, labelNames, ...config }));
         logger.debug(`Registered new counter metric: ${name}`);
@@ -16,7 +16,7 @@ export function registerCounter(name: string, help = "help", labelNames: string[
     }
 }
 
-export function registerGauge(name: string, help = "help", labelNames: string[] = [], config?: GaugeConfiguration<string>) {
+export function registerGauge(name: string, help = "help", labelNames: string[] = [], config?: Partial<GaugeConfiguration<string>>) {
     try {
         registry.registerMetric(new Gauge({ name, help, labelNames, ...config }));
         logger.debug(`Registered new gauge metric: ${name}`);
@@ -27,7 +27,7 @@ export function registerGauge(name: string, help = "help", labelNames: string[] 
     }
 }
 
-export function registerHistogram(name: string, help = "help", labelNames: string[] = [], config?: HistogramConfiguration<string>) {
+export function registerHistogram(name: string, help = "help", labelNames: string[] = [], config?: Partial<HistogramConfiguration<string>>) {
     try {
         registry.registerMetric(new Histogram({ name, help, labelNames, ...config }));
         logger.debug(`Registered new histogram metric: ${name}`);
@@ -44,22 +44,40 @@ export async function getSingleMetric(name: string) {
     return get?.values[0]?.value;
 }
 
+function createBucket(lowExponentBound: number, highExponentBound: number): number[] {
+    if (lowExponentBound > highExponentBound)
+        return createBucket(highExponentBound, lowExponentBound);
+
+    // Returns 1*10^k, 2*10^k, ..., 9*10^k for successive powers of 10 between low and high bounds.
+    return Array.from(
+        { length: 9 * (highExponentBound - lowExponentBound) },
+        (_, i) => Number(
+            (
+                (i % 9 + 1) * 10 ** (lowExponentBound + Math.floor(i / 9))
+            ).toFixed(
+                // Fixes floating point arithmetic imprecisions for negative exponents
+                Math.max(Math.abs(lowExponentBound) - Math.floor(i / 9), 1)
+            )
+        )
+    );
+}
+
 // REST API metrics
 export const request_error = registerCounter('request_error', 'Total Requests errors', ['pathname', 'status']);
 export const request = registerCounter('request', 'Total Requests', ['pathname']);
 export const query = registerCounter('query', 'Clickhouse DB queries made');
 export const bytes_read = registerHistogram('bytes_read', 'Clickhouse DB Statistics bytes read', [],
     { 
-        buckets: Array.from({ length: 63 }, (_, i) => (i % 9 + 1) * 10 ** (6 + Math.floor(i / 9))) // 1Mb to 10Tb buckets, each divided by 10
+        buckets: createBucket(3, 9) // 1Kb to 1Gb buckets, each divided by 10
     }
 );
 export const rows_read = registerHistogram('rows_read', 'Clickhouse DB Statistics rows read', [],
     { 
-        buckets: Array.from({ length: 54 }, (_, i) => (i % 9 + 1) * 10 ** (3 + Math.floor(i / 9))) // 1k to 100M, each divided by 10
+        buckets: createBucket(2, 7) // 100 to 10M, each divided by 10
     }
 );
 export const elapsed = registerHistogram('elapsed', 'Clickhouse DB Statistics query elapsed time (seconds)', [],
     { 
-        buckets: [0.001, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30] // In seconds
+        buckets: createBucket(-4, 1) // 0.1ms to 10s, each divided by 10
     }
 );

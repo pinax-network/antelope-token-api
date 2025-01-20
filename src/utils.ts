@@ -23,7 +23,7 @@ export function APIErrorResponse(ctx: Context, status: ApiErrorSchema["status"],
     };
 
     logger.error(api_error);
-    prometheus.request_error.inc({ pathname: ctx.req.path, status });
+    prometheus.requests_errors.inc({ pathname: ctx.req.path, status });
 
     return ctx.json<ApiErrorSchema, typeof status>(api_error, status);
 }

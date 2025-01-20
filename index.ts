@@ -5,8 +5,8 @@ import { SafeParseSuccess, z } from 'zod';
 
 import client from './src/clickhouse/client.js';
 import openapi from "./static/@typespec/openapi3/openapi.json";
-import * as prometheus from './src/prometheus.js';
 import { APP_VERSION, config } from "./src/config.js";
+import * as prometheus from './src/prometheus.js';
 import { logger } from './src/logger.js';
 import { makeUsageQuery } from "./src/usage.js";
 import { APIErrorResponse } from "./src/utils.js";
@@ -20,7 +20,7 @@ async function AntelopeTokenAPI() {
     app.use(async (ctx: Context, next) => {
         const pathname = ctx.req.path;
         logger.trace(`Incoming request: [${pathname}]`);
-        prometheus.request.inc({ pathname });
+        prometheus.requests.inc({ pathname });
 
         await next();
     });

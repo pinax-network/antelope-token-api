@@ -11,6 +11,8 @@ export const DEFAULT_DATABASE = "default";
 export const DEFAULT_USERNAME = "default";
 export const DEFAULT_PASSWORD = "";
 export const DEFAULT_MAX_LIMIT = 10000;
+export const DEFAULT_LARGE_QUERIES_ROWS_TRIGGER = 10_000_000; // 10M rows
+export const DEFAULT_LARGE_QUERIES_BYTES_TRIGGER = 1_000_000_000; // 1Gb
 export const DEFAULT_IDLE_TIMEOUT = 60;
 export const DEFAULT_VERBOSE = false;
 export const DEFAULT_SORT_BY = "DESC";
@@ -33,6 +35,8 @@ const opts = program
     .addOption(new Option("--username <string>", "Database user").env("USERNAME").default(DEFAULT_USERNAME))
     .addOption(new Option("--password <string>", "Password associated with the specified username").env("PASSWORD").default(DEFAULT_PASSWORD))
     .addOption(new Option("--max-limit <number>", "Maximum LIMIT queries").env("MAX_LIMIT").default(DEFAULT_MAX_LIMIT))
+    .addOption(new Option("--max-rows-trigger <number>", "Queries returning rows above this treshold will be considered large queries for metrics").env("LARGE_QUERIES_ROWS_TRIGGER").default(DEFAULT_LARGE_QUERIES_ROWS_TRIGGER))
+    .addOption(new Option("--max-bytes-trigger <number>", "Queries processing bytes above this treshold will be considered large queries for metrics").env("LARGE_QUERIES_BYTES_TRIGGER").default(DEFAULT_LARGE_QUERIES_BYTES_TRIGGER))
     .addOption(new Option("--request-idle-timeout <number>", "Bun server request idle timeout (seconds)").env("BUN_IDLE_REQUEST_TIMEOUT").default(DEFAULT_IDLE_TIMEOUT))
     .addOption(new Option("-v, --verbose <boolean>", "Enable verbose logging").choices(["true", "false"]).env("VERBOSE").default(DEFAULT_VERBOSE))
     .parse()
@@ -46,6 +50,8 @@ export const config = z.object({
     username: z.string(),
     password: z.string(),
     maxLimit: z.coerce.number(),
+    maxRowsTrigger: z.coerce.number(),
+    maxBytesTrigger: z.coerce.number(),
     requestIdleTimeout: z.coerce.number(),
     // `z.coerce.boolean` doesn't parse boolean string values as expected (see https://github.com/colinhacks/zod/issues/1630)
     verbose: z.coerce.string().transform((val) => val.toLowerCase() === "true"),

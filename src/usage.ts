@@ -93,13 +93,10 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
 
         query += ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/account/transfers") {
-        let table = "transfers_from";
-        if (filters.includes("to") && !filters.includes("from"))
-            table = "transfers_to"
-
         query +=
             `SELECT * FROM`
-            + ` (SELECT DISTINCT * FROM ${table} ${/from|to/.test(filters) ? "" : "WHERE ((from = {account: String}) OR (to = {account: String}))"})`
+            + ` ((SELECT DISTINCT * FROM transfers_from WHERE (from = {account: String}))`
+            + ` UNION ALL (SELECT DISTINCT * FROM transfers_to WHERE (to = {account: String})))`
             + ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/transfers/id") {
         query += `SELECT * FROM transfer_events ${filters} ORDER BY action_index`;

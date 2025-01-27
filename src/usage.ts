@@ -97,7 +97,7 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
             `SELECT * FROM`
             + ` ((SELECT DISTINCT * FROM transfers_from WHERE (from = {account: String}))`
             + ` UNION ALL (SELECT DISTINCT * FROM transfers_to WHERE (to = {account: String})))`
-            + ` ${filters}`;
+            + ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/transfers/id") {
         query += `SELECT * FROM transfer_events ${filters} ORDER BY action_index`;
     } else if (endpoint == "/tokens/holders") {

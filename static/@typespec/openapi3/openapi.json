@@ -3,7 +3,7 @@
   "info": {
     "title": "Antelope Token Api",
     "description": "Tokens information from the Antelope blockchains, powered by Substreams",
-    "version": "6.2.0"
+    "version": "6.2.2"
   },
   "tags": [
     {

@@ -96,8 +96,8 @@ export async function makeUsageQuery(ctx: Context, endpoint: UsageEndpoints, use
         const q = query_params as ValidUserParams<typeof endpoint>;
         query +=
             `SELECT * FROM`
-            + ` ((SELECT DISTINCT * FROM ${q.block_range ? 'historical_' : ''}transfers_from WHERE (from = {account: String}))`
-            + ` UNION ALL (SELECT DISTINCT * FROM ${q.block_range ? 'historical_' : ''}transfers_to WHERE (to = {account: String})))`
+            + ` ((SELECT * FROM ${q.block_range ? 'historical_' : ''}transfers_from FINAL WHERE (from = {account: String}))`
+            + ` UNION ALL (SELECT * FROM ${q.block_range ? 'historical_' : ''}transfers_to FINAL WHERE (to = {account: String})))`
             + ` ${filters} ORDER BY block_num DESC`;
     } else if (endpoint == "/transfers/id") {
         query += `SELECT * FROM transfer_events ${filters} ORDER BY action_index`;

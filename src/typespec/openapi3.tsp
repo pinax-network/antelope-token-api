@@ -10,7 +10,7 @@ using TypeSpec.OpenAPI;
 })
 @info({
     description: "Tokens information from the Antelope blockchains, powered by Substreams",
-    version: "6.2.2",
+    version: "6.2.3",
 }) // From @typespec/openapi
 //@server("https://eos.api.pinax.network/v1", "EOS V1 Api Endpoint")
 namespace AntelopeTokenApi;
